@@ -8,6 +8,7 @@
 </head>
 <body>
     <div class="topnav">
+        <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
   <a href="#about"><</a>
 </div>
 <div class="Office" style="color: #ddd">
@@ -53,5 +54,21 @@
             <button href="http://localhost/tyron/menu.php#"type="submit">SUBMIT</button><br><br>
         </form>
     </div>
+    <div id="mySidenav" class="sidenav">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><</a><br><br>
+  <a href="#" class="menu-item">PROFILE</a>
+  <a href="#" class="menu-item">CONTACT US</a>
+  <a href="#" class="menu-item">PAYMENT METHOD</a><br><br><br>
+  <button class="logout-button">LOG OUT</button>
+</div>
+<script>
+function openNav() {
+  document.getElementById("mySidenav").style.width = "500px";
+}
+
+function closeNav() {
+  document.getElementById("mySidenav").style.width = "0";
+}
+</script>
 </body>
 </html>
