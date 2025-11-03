@@ -1,0 +1,263 @@
+/* ---------- GENERAL ---------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #fff;
+    color: #222;
+}
+
+/* ---------- HEADER ---------- */
+header {
+    width: 100%;
+    background-color: #0d1b3f;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.logo img {
+    height: 40px;
+}
+
+.nav-menu ul {
+    display: flex;
+    list-style: none;
+    gap: 30px;
+}
+
+.nav-menu ul li a {
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.nav-menu ul li a:hover {
+    color: #00aaff;
+}
+
+/* Hamburger icon triggers sidenav */
+.menu-toggle {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+}
+.menu-toggle span {
+    height: 3px;
+    width: 25px;
+    background: #fff;
+    margin-bottom: 5px;
+    border-radius: 2px;
+}
+
+/* ---------- HERO ---------- */
+.hero {
+    margin-top: 80px;
+    background: linear-gradient(rgba(10, 20, 60, 0.7), rgba(10, 20, 60, 0.7)), 
+        url('images/hero-bg.jpg') center/cover no-repeat;
+    color: #fff;
+    text-align: center;
+    padding: 150px 20px;
+}
+
+.hero h1 {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 15px;
+}
+
+.hero p {
+    font-size: 18px;
+    color: #e0e0e0;
+}
+
+/* ---------- RENTALS ---------- */
+.rentals {
+    text-align: center;
+    padding: 80px 20px;
+}
+
+.rentals h2 {
+    font-size: 26px;
+    color: #0d1b3f;
+    font-weight: 700;
+    max-width: 700px;
+    margin: 0 auto 50px;
+}
+
+.rental-equipment {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+}
+
+.equipment-item {
+    width: 300px;
+    background-color: #f9fbff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: 0.3s;
+}
+
+.equipment-item:hover {
+    transform: translateY(-5px);
+}
+
+.equipment-item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.equipment-item h3 {
+    padding: 15px;
+    color: #0d1b3f;
+}
+
+/* ---------- RESERVE BUTTON ---------- */
+.reserve {
+    background: linear-gradient(90deg, #0077ff, #00c6ff);
+    text-align: center;
+    padding: 70px 20px;
+}
+
+.reserve-button {
+    background-color: #fff;
+    color: #0077ff;
+    font-size: 20px;
+    font-weight: 600;
+    padding: 15px 35px;
+    border-radius: 50px;
+    text-decoration: none;
+    border: 2px solid #fff;
+    transition: all 0.3s;
+}
+
+.reserve-button:hover {
+    background: transparent;
+    color: #fff;
+}
+
+/* ---------- FOOTER ---------- */
+footer {
+    background-color: #0d1b3f;
+    color: #fff;
+    padding: 40px 20px;
+}
+
+.footer-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+}
+
+.footer-left {
+    flex: 1;
+    min-width: 280px;
+}
+
+.footer-left p {
+    margin: 8px 0;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.footer-right img {
+    height: 50px;
+}
+
+/* ---------- SIDENAV (from ContactUs) ---------- */
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    right: 0;
+    background-color: #174378;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 0;
+}
+
+.sidenav a {
+    padding: 15px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #ddd;
+    display: block;
+    border-bottom: 3px solid #ffffff;
+    letter-spacing: 3px;
+    transition: 0.3s;
+}
+
+.sidenav a:hover {
+    color: #174378;
+    background: #fff;
+}
+
+.sidenav .logout-button {
+    position: absolute;
+    left: 30%;
+    color: #f1f1f1;
+    background-color: #174378;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 10px 40px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.6);
+}
+
+.sidenav .closebtn {
+    background-color: #011D40;
+    color: #fff;
+    font-size: 36px;
+    padding: 10px 20px;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+    .nav-menu {
+        display: none;
+    }
+
+    .menu-toggle {
+        display: flex;
+    }
+
+    .footer-container {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-right {
+        margin-top: 20px;
+    }
+}
