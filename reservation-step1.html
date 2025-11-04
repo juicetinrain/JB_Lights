@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Reserve — Step 1: Package | JB Lights & Sound</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="reservation.js" defer></script>
+</head>
+<body>
+  <nav class="jb-navbar">
+    <div class="container">
+      <a class="brand" href="index.html"><img src="jb-logo.png" alt=""><span>JB Lights & Sound</span></a>
+    </div>
+  </nav>
+
+  <main class="jb-page">
+    <div class="jb-progress jb-card">
+      <div style="flex:1">
+        <div class="step"><div class="bar" style="width:25%"></div></div>
+        <div class="labels"><span>Package</span><span>Details</span></div>
+      </div>
+    </div>
+
+    <section class="jb-card">
+      <div class="jb-title">Choose a package</div>
+      <div class="jb-sub">Tap a package to select. You can change it later.</div>
+
+      <div class="pack-grid">
+        <div class="pack-card" data-pack="basic" onclick="selectPack(this,'basic','Basic Package (Small Event) - ₱3,000')">
+          <h4>Basic Package</h4>
+          <p>Small gatherings — 1 speaker set, basic lights & mic</p>
+          <div class="price">₱3,000</div>
+        </div>
+
+        <div class="pack-card" data-pack="premium" onclick="selectPack(this,'premium','Premium Package (Weddings / Corporate) - ₱8,000')">
+          <h4>Premium Package</h4>
+          <p>Wedding/corporate — 2 powered speakers, LED lights, mic system</p>
+          <div class="price">₱8,000</div>
+        </div>
+
+        <div class="pack-card" data-pack="ultimate" onclick="selectPack(this,'ultimate','Ultimate Package (Concert / Large) - ₱20,000')">
+          <h4>Ultimate Package</h4>
+          <p>Concert/large — Multiple speakers, truss, advanced lighting</p>
+          <div class="price">₱20,000</div>
+        </div>
+      </div>
+
+      <div class="jb-foot-fixed">
+        <div class="hint">Selected: <span id="selLabel">—</span></div>
+        <div style="display:flex;gap:12px">
+          <a class="btn btn-secondary-jb btn-large" href="index.html">Back</a>
+          <button class="btn btn-primary-jb btn-large" id="next1">Next: Date & Time</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // choose pack and save to localStorage
+    function selectPack(el, value, label){
+      document.querySelectorAll('.pack-card').forEach(c=>c.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById('selLabel').textContent = label;
+      const data = window.jbRes.read() || {};
+      data.package = value;
+      data.packageLabel = label;
+      window.jbRes.write(data);
+    }
+
+    document.getElementById('next1').addEventListener('click', ()=>{
+      const data = window.jbRes.read() || {};
+      if(!data.package){
+        alert('Please select a package to continue.');
+        return;
+      }
+      window.location.href = 'reservation-step2.html';
+    });
+
+    // restore label on load
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const data = window.jbRes.read() || {};
+      if(data.packageLabel) document.getElementById('selLabel').textContent = data.packageLabel;
+    });
+  </script>
+</body>
+</html>

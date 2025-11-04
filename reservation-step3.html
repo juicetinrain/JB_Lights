@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Reserve — Step 3: Address | JB Lights & Sound</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="reservation.js" defer></script>
+</head>
+<body>
+  <nav class="jb-navbar">
+    <div class="container">
+      <a class="brand" href="index.html"><img src="jb-logo.png" alt=""><span>JB Lights & Sound</span></a>
+    </div>
+  </nav>
+
+  <main class="jb-page">
+    <div class="jb-progress jb-card">
+      <div style="flex:1">
+        <div class="step"><div class="bar" style="width:75%"></div></div>
+        <div class="labels"><span>Package</span><span>Address</span></div>
+      </div>
+    </div>
+
+    <section class="jb-card">
+      <div class="jb-title">Event address & contact</div>
+      <div class="jb-sub">Provide the full event address and a contact person for coordination.</div>
+
+      <div style="display:grid;gap:12px">
+        <div>
+          <label class="form-label fw-semibold">Full Event Address</label>
+          <textarea id="eventAddress" class="input-lg" placeholder="House no., Street, Barangay, City, Province"></textarea>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <label class="form-label fw-semibold">Contact Name</label>
+            <input id="contactName" class="input-lg" placeholder="Full name" />
+          </div>
+          <div>
+            <label class="form-label fw-semibold">Contact Phone</label>
+            <input id="contactPhone" class="input-lg" placeholder="09xx-xxx-xxxx" />
+          </div>
+        </div>
+      </div>
+
+      <div class="jb-foot-fixed">
+        <div class="hint">We'll use these details to coordinate delivery & set up.</div>
+        <div style="display:flex;gap:12px">
+          <a class="btn btn-secondary-jb btn-large" href="reservation-step2.html">Back</a>
+          <button class="btn btn-primary-jb btn-large" id="next3">Next: Payment</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // restore inputs
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const data = window.jbRes.read() || {};
+      if(data.address) document.getElementById('eventAddress').value = data.address;
+      if(data.name) document.getElementById('contactName').value = data.name;
+      if(data.phone) document.getElementById('contactPhone').value = data.phone;
+    });
+
+    // save on change
+    ['eventAddress','contactName','contactPhone'].forEach(id=>{
+      const el = document.getElementById(id);
+      el.addEventListener('input', ()=>{
+        const data = window.jbRes.read() || {};
+        data.address = document.getElementById('eventAddress').value;
+        data.name = document.getElementById('contactName').value;
+        data.phone = document.getElementById('contactPhone').value;
+        window.jbRes.write(data);
+      });
+    });
+
+    document.getElementById('next3').addEventListener('click', ()=>{
+      const data = window.jbRes.read() || {};
+      if(!data.address || !data.name || !data.phone){
+        alert('Please fill address and contact details.');
+        return;
+      }
+      window.location.href = 'reservation-step4.html';
+    });
+  </script>
+</body>
+</html>
