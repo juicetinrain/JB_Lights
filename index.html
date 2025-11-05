@@ -1,9 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>JB Lights & Sound Rental</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JB Lights & Sound | User Profile</title>
+  <style>
+    /* Global */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #e6f7ff; /* light blue page background */
+      color: #ffffff; /* all text white */
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Top header (made light blue) */
+    header {
+      background-color: #cfefff; /* light blue header */
+      color: #ffffff; /* header text white */
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+      color: #ffffff; /* ensure header title is white */
+    }
+
+    /* Card (adjusted to keep white text readable) */
+    .profile-container {
+      width: 90%;
+      max-width: 900px;
+      background: #0b6bd8; /* darker blue card so white text is readable */
+      margin: 40px auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+      overflow: hidden;
+    }
+
+    /* Profile header inside card */
+    .profile-header {
+      text-align: center;
+      background: linear-gradient(135deg, #0ea5ff, #0b6bd8); /* blue gradient */
+      color: #ffffff;
+      padding: 25px 10px;
+    }
+
+    .profile-header img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.12);
+      margin-bottom: 10px;
+      object-fit: cover;
+      display: block;
+      background: #fff2;
+    }
+
+    .profile-header h2 {
+      margin: 5px 0;
+      color: #ffffff;
+    }
+
+    .profile-header p {
+      margin: 0;
+      font-weight: 500;
+      color: #ffffff;
+    }
+
+    .profile-body {
+      padding: 30px;
+    }
+
+    .info-section {
+      margin-bottom: 25px;
+    }
+
+    .info-section h3 {
+      border-bottom: 2px solid rgba(255,255,255,0.12);
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+      color: #ffffff;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .info-item {
+      background: rgba(255,255,255,0.06); /* subtle translucent so white text is visible */
+      padding: 12px 15px;
+      border-radius: 6px;
+    }
+
+    .info-item label {
+      display: block;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .info-item span {
+      color: #ffffff;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #ffcc00;
+      color: #ffffff; /* button text white as requested */
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: 0.3s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #ffaa00;
+    }
+
+    .logout {
+      text-align: right;
+      padding: 15px 30px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* small adjustments for elements that were previously dark */
+    a { color: #ffffff; }
+    dt, dd, label, p, span, h1, h2, h3, h4 { color: #ffffff; }
+
+    @media (max-width: 768px) {
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+      header h1 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="background"> <img src="img/login_bg.jpg" style="width: 1533px; margin: -20px; min-height: 100px;"></div>
+
+  <header>
+    <h1>JB Lights & Sound Booking Management System</h1>
+  </header>
+
+  <div class="profile-container">
+    <div class="profile-header">
+      <!-- Save the attached image into this folder as "user-profile.jpg" -->
+      <img src="user-profile.jpg" alt="User Profile Picture">
+      <h2>Alex Martinez</h2>
+      <p>Customer | alex.martinez@example.com</p>
+      <a href="#" class="btn">Edit Profile</a>
+    </div>
+
+    <div class="profile-body">
+      <!-- Personal Info -->
+      <div class="info-section">
+        <h3>Personal Information</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Full Name:</label>
+            <span>JOhn Doe</span>
+          </div>
+          <div class="info-item">
+            <label>Phone Number:</label>
+            <span>09000000000</span>
+          </div>
+          <div class="info-item">
+            <label>Address:</label>
+            <span>Dau, Mabalacat City Pamp.</span>
+          </div>
+          <div class="info-item">
+            <label>Member Since:</label>
+            <span>March 2025</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Booking Summary -->
+      <div class="info-section">
+        <h3>Booking Summary</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Total Bookings:</label>
+            <span>8</span>
+          </div>
+          <div class="info-item">
+            <label>Upcoming Bookings:</label>
+            <span>2</span>
+          </div>
+          <div class="info-item">
+            <label>Last Booking:</label>
+            <span>Oct 20, 2025 – Wedding Event (Premium Sound Package)</span>
+          </div>
+          <div class="info-item">
+            <label>Preferred Service:</label>
+            <span>Concert Lighting & Stage Sound</span>
+          </div>
+        </div>
+      </div>
+      <!-- Account Settings -->
+      <div class="info-section">
+        <h3>Account Settings</h3>
+        <a href="#" class="btn">Change Password</a>
+        <a href="#" class="btn">Notification Preferences</a>
+      </div>
+    </div>
+
+    <div class="logout">
+      <a href="#" class="btn">Logout</a>
+    </div>
+  </div>
+
 </body>
 </html>
