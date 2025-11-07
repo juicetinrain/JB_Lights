@@ -1,0 +1,85 @@
+/* reservation.css - simple JB Lights style */
+:root{
+  --navy:#002b5c;
+  --gold:#ffd700;
+  --bg:#f4f7fc;
+  --muted:#6b7280;
+  --card:#ffffff;
+}
+
+*{box-sizing:border-box}
+body{margin:0;font-family:"Poppins",Helvetica,Arial,sans-serif;background:var(--bg);color:#0b1730}
+.container{max-width:1100px;margin:0 auto;padding:0 18px}
+
+/* Header */
+.site-header{background:linear-gradient(180deg, rgba(0,0,0,0.03), rgba(0,0,0,0.02));box-shadow:0 2px 6px rgba(2,10,40,0.06)}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
+.brand{display:flex;align-items:center;text-decoration:none}
+.brand-logo{width:48px;height:auto;margin-right:10px}
+.brand-text{color:#fff;font-weight:700;background:var(--navy);padding:6px 10px;border-radius:6px}
+
+/* Progress */
+.progress-shell{margin:26px auto 10px;max-width:900px;padding:8px 14px}
+.progress-track{height:10px;background:#e9eef6;border-radius:999px;overflow:hidden;box-shadow:0 1px 6px rgba(2,10,40,0.04)}
+.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--navy) 0%, #27576f 35%, #9c7a29 70%, var(--gold) 100%);transition:width .45s cubic-bezier(.2,.9,.2,1);border-radius:999px}
+.progress-labels{display:flex;justify-content:space-between;margin-top:10px;font-size:.95rem;color:var(--muted)}
+
+/* Step card */
+.step-card{background:var(--card);border-radius:12px;padding:22px 26px;margin:18px auto;max-width:900px;box-shadow:0 18px 40px rgba(12,24,48,0.06)}
+.title{font-size:1.25rem;color:var(--navy);font-weight:700;margin-bottom:6px}
+.desc{color:var(--muted);margin-bottom:14px}
+
+/* Package cards */
+.row.gx-3{--bs-gutter-x:1rem}
+.pkg-card{background:linear-gradient(180deg,#fff,#fbfdff);border-radius:10px;padding:12px;border:1px solid rgba(2,6,23,0.04);cursor:pointer;transition:transform .18s ease,box-shadow .18s ease;border-left:6px solid transparent;min-height:140px;display:flex;flex-direction:column;justify-content:space-between}
+.pkg-card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(2,10,40,0.06)}
+.pkg-selected{border-left-color:var(--gold);box-shadow:0 18px 40px rgba(2,10,40,0.12)}
+.pkg-head{display:flex;justify-content:space-between;align-items:center;font-weight:800;color:var(--navy);font-size:0.98rem}
+.pkg-price{background:var(--navy);color:white;padding:6px 8px;border-radius:8px;font-weight:700;font-size:0.85rem}
+.pkg-body{margin-top:8px;color:var(--muted);font-size:0.92rem}
+.pkg-action{text-align:right}
+
+/* inputs */
+.input-lg, .form-control-lg, .form-select.form-select-lg {border-radius:10px;padding:12px 14px;font-size:1rem;border:1px solid #e6e9f0}
+.input-lg:focus, .form-control:focus {box-shadow:0 6px 20px rgba(2,10,40,0.06);border-color:var(--navy)}
+
+/* step show/hide with animation */
+.step{display:none;opacity:0;transform:translateY(8px);transition:opacity .35s ease, transform .35s ease}
+.step.active{display:block;opacity:1;transform:translateY(0)}
+
+/* actions */
+.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}
+.btn-back{background:#fff;border:1px solid #e6e9f0;color:var(--navy);padding:10px 18px;border-radius:10px}
+.jb-btn{background:var(--navy);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-weight:700}
+.jb-btn:hover{background:var(--gold);color:var(--navy)}
+
+/* review & payment */
+.review-card{background:#fbfdff;border-radius:10px;padding:12px;border:1px solid #eef3fb}
+.review-row{display:flex;justify-content:space-between;padding:10px 6px;border-bottom:1px dashed #eef3fb}
+.review-row:last-child{border-bottom:none}
+.r-label{color:var(--muted);font-weight:600}
+.payment-box{display:flex;flex-direction:column;gap:8px}
+.payment-row{padding:12px;border-radius:10px;border:1px solid #eef3fb;background:#fff}
+
+/* modal */
+.gcash-qr img{max-width:100%;height:auto}
+
+/* hint text */
+.hint{color:var(--muted);font-size:0.95rem;margin-top:6px}
+
+/* success */
+.success-card{text-align:center;padding:26px}
+.success-card .title{color:#1b7a2f}
+
+/* footer */
+.site-footer{background:var(--navy);color:#fff;padding:18px 0;margin-top:26px}
+.footer-inner{display:flex;justify-content:space-between;align-items:center}
+.footer-left div{margin-bottom:6px}
+.footer-logo img{width:86px;height:auto}
+
+/* responsive */
+@media (max-width:768px){
+  .actions{flex-direction:column;align-items:stretch}
+  .progress-labels{font-size:.82rem}
+  .footer-inner{flex-direction:column;gap:10px;align-items:center}
+}

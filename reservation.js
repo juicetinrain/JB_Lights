@@ -1,102 +1,170 @@
-/* reservation.js
-  Handles storing & restoring reservation data across steps using localStorage.
-  Key: 'jbReservation'
-*/
-(function(){
-  const KEY = 'jbReservation';
+// reservation.js - simple stepper, validation and modal preview
 
-  function read(){
-    try{
-      return JSON.parse(localStorage.getItem(KEY) || '{}');
-    }catch(e){ return {} }
-  }
-  function write(data){
-    localStorage.setItem(KEY, JSON.stringify(data || {}));
-  }
-  function clear(){
-    localStorage.removeItem(KEY);
+document.addEventListener('DOMContentLoaded', () => {
+  const steps = [1,2,3,4];
+  let current = 1;
+  const progressFill = document.getElementById('progressFill');
+  const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
+
+  // set min date to tomorrow
+  const dateEl = document.getElementById('inputDate');
+  if (dateEl) {
+    const t = new Date(); t.setDate(t.getDate() + 1);
+    dateEl.min = t.toISOString().split('T')[0];
   }
 
-  // Expose helper functions to window for pages to call
-  window.jbRes = {
-    read, write, clear
-  };
-
-  // Utility: format date YYYY-MM-DD -> readable
-  window.jbFormatDate = function(iso){
-    if(!iso) return '';
-    const d = new Date(iso);
-    if(isNaN(d)) return iso;
-    return d.toLocaleDateString(undefined, {weekday:'short',month:'short',day:'numeric',year:'numeric'});
-  };
-
-  // Simple availability checker:
-  // - if selected date is within 3 days from today -> "Limited (confirm)"
-  // - otherwise "Available"
-  window.jbCheckAvailability = function(dateIso){
-    if(!dateIso) return {ok:false,msg:'No date'};
-    const sel = new Date(dateIso); sel.setHours(0,0,0,0);
-    const today = new Date(); today.setHours(0,0,0,0);
-    const diff = Math.round((sel - today) / (1000*60*60*24));
-    if(diff < 0) return {ok:false,msg:'Selected date is in the past'};
-    if(diff <= 3) return {ok:false,msg:'Limited availability — confirm with us'};
-    return {ok:true,msg:'Available'};
-  };
-
-  // When loaded on any reservation page, populate inputs if elements exist
-  document.addEventListener('DOMContentLoaded', ()=>{
-    const data = read();
-
-    // populate package selection (cards)
-    const packVal = data.package;
-    if(packVal){
-      const el = document.querySelector(`[data-pack="${packVal}"]`);
-      if(el) el.classList.add('selected');
-    }
-
-    // date field
-    const dateInput = document.querySelector('#eventDate');
-    if(dateInput && data.date) dateInput.value = data.date;
-
-    // time
-    const timeInput = document.querySelector('#eventTime');
-    if(timeInput && data.time) timeInput.value = data.time;
-
-    // address and contact
-    const addr = document.querySelector('#eventAddress');
-    if(addr && data.address) addr.value = data.address;
-    const contact = document.querySelector('#contactName');
-    if(contact && data.name) contact.value = data.name;
-    const phone = document.querySelector('#contactPhone');
-    if(phone && data.phone) phone.value = data.phone;
-
-    // payment
-    const pay = data.payment;
-    if(pay){
-      const pm = document.querySelector(`input[name="payment"][value="${pay}"]`);
-      if(pm) pm.checked = true;
-      const pmCard = document.querySelector(`.payment-method[data-pay="${pay}"]`);
-      if(pmCard) pmCard.classList.add('selected');
-    }
-
-    // show review fields if present
-    const reviewPack = document.querySelector('#reviewPackage');
-    if(reviewPack && data.packageLabel) reviewPack.textContent = data.packageLabel;
-    const reviewDate = document.querySelector('#reviewDate');
-    if(reviewDate) reviewDate.textContent = jbFormatDate(data.date || '');
-    const reviewAddr = document.querySelector('#reviewAddress');
-    if(reviewAddr) reviewAddr.textContent = data.address || '-';
-    const reviewPayment = document.querySelector('#reviewPayment');
-    if(reviewPayment) reviewPayment.textContent = (data.payment === 'gcash') ? 'GCash (Downpayment)' : 'Cash on Arrival';
-
-    // availability helper display (if exists)
-    const availBox = document.querySelector('#availabilityBox');
-    if(availBox && dateInput){
-      const check = jbCheckAvailability(dateInput.value);
-      availBox.textContent = check.msg;
-      availBox.className = check.ok ? 'badge-available' : 'badge-check';
-    }
-
+  // package selection
+  document.querySelectorAll('.pkg-card').forEach(card => {
+    card.addEventListener('click', () => selectPackage(card));
   });
 
-})();
+  window.selectPackage = function(el) {
+    document.querySelectorAll('.pkg-card').forEach(c => c.classList.remove('pkg-selected'));
+    el.classList.add('pkg-selected');
+    const val = el.getAttribute('data-value');
+    const input = document.getElementById('inputPackage');
+    if (input) input.value = val;
+  };
+
+  // show step
+  function showStep(step) {
+    steps.forEach(s => {
+      const el = document.getElementById('step-' + s);
+      if (!el) return;
+      if (s === step) el.classList.add('active'); else el.classList.remove('active');
+    });
+    const pct = ((step - 1) / (steps.length - 1)) * 100;
+    if (progressFill) progressFill.style.width = pct + '%';
+    window.scrollTo({ top: document.querySelector('.step-card').offsetTop - 20, behavior: 'smooth' });
+  }
+
+  window.goStep = function(step) {
+    // if going forward validate current
+    if (step > current) {
+      if (!validateStep(current)) return;
+    }
+    current = step;
+    showStep(step);
+    if (step === 4) populateReview();
+  };
+
+  function validateStep(step) {
+    if (step === 1) {
+      const pkg = document.getElementById('inputPackage').value;
+      if (!pkg) { alert('Please select a package'); return false; }
+    }
+    if (step === 2) {
+      const d = document.getElementById('inputDate').value;
+      if (!d) { alert('Please pick an event date'); return false; }
+      const sel = new Date(d); sel.setHours(0,0,0,0);
+      const today = new Date(); today.setHours(0,0,0,0);
+      if (sel <= today) { alert('Please choose a date after today'); return false; }
+    }
+    if (step === 3) {
+      const a = document.getElementById('inputAddress').value.trim();
+      const n = document.getElementById('inputName').value.trim();
+      const p = document.getElementById('inputPhone').value.trim();
+      if (!a || !n || !p) { alert('Please fill address, contact name and phone'); return false; }
+    }
+    return true;
+  }
+
+  function populateReview() {
+    const pkg = document.getElementById('inputPackage').value || '—';
+    const evType = document.getElementById('inputEventType').value || '-';
+    const date = document.getElementById('inputDate').value || '-';
+    const time = document.getElementById('inputTime').value || '';
+    const address = document.getElementById('inputAddress').value || '-';
+    const name = document.getElementById('inputName').value || '-';
+    const phone = document.getElementById('inputPhone').value || '-';
+    const paymentEl = document.querySelector('input[name="payment"]:checked');
+    const payment = paymentEl ? paymentEl.value : '-';
+
+    document.getElementById('reviewPackage').textContent = pkg;
+    document.getElementById('reviewEvent').textContent = `${evType} • ${date} ${time}`;
+    document.getElementById('reviewAddress').textContent = address;
+    document.getElementById('reviewContact').textContent = `${name} • ${phone}`;
+    document.getElementById('reviewPayment').textContent = payment;
+
+    // downpayment calc for GCash (30% if price parsed)
+    const downEl = document.getElementById('reviewDown');
+    if (payment === 'GCash') {
+      const down = calcDownpayment(pkg);
+      downEl.textContent = down;
+    } else {
+      downEl.textContent = '₱0';
+    }
+  }
+
+  function calcDownpayment(pkgLabel) {
+    // try extract numeric amount e.g. "₱5,000" or "(₱5000)" or numbers in string
+    let amount = 0;
+    const m = pkgLabel.match(/₱?([\d,]+)/);
+    if (m) amount = parseInt(m[1].replace(/,/g,''),10);
+    if (!amount) {
+      const mm = pkgLabel.match(/(\d{3,})/);
+      if (mm) amount = parseInt(mm[1],10);
+    }
+    if (!amount) return 'Contact';
+    const down = Math.round(amount * 0.30);
+    return '₱' + down.toLocaleString();
+  }
+
+  // open preview modal
+  window.openPreviewModal = function() {
+    if (!validateStep(4)) return;
+    populateReview();
+    const pay = document.querySelector('input[name="payment"]:checked');
+    const gcashBox = document.getElementById('gcashBox');
+    const modalDown = document.getElementById('modalDown');
+    const paymentVal = pay ? pay.value : '';
+    if (paymentVal === 'GCash') {
+      gcashBox.style.display = 'flex';
+      modalDown.textContent = calcDownpayment(document.getElementById('inputPackage').value || '');
+    } else {
+      gcashBox.style.display = 'none';
+    }
+    // fill modal text
+    const pkg = document.getElementById('inputPackage').value || '—';
+    const evType = document.getElementById('inputEventType').value || '-';
+    const date = document.getElementById('inputDate').value || '-';
+    const time = document.getElementById('inputTime').value || '';
+    const address = document.getElementById('inputAddress').value || '-';
+    const name = document.getElementById('inputName').value || '-';
+    const phone = document.getElementById('inputPhone').value || '-';
+    const payment = paymentVal || '-';
+    const notes = document.getElementById('inputNotes').value || '-';
+    const html = `
+      <div><strong>Package:</strong> ${pkg}</div>
+      <div class="mt-2"><strong>Event:</strong> ${evType} • ${date} ${time}</div>
+      <div class="mt-2"><strong>Address:</strong> ${address}</div>
+      <div class="mt-2"><strong>Contact:</strong> ${name} • ${phone}</div>
+      <div class="mt-2"><strong>Payment:</strong> ${payment}</div>
+      <div class="mt-2"><strong>Notes:</strong> ${notes}</div>
+    `;
+    document.getElementById('modalReview').innerHTML = html;
+    previewModal.show();
+  };
+
+  // modal confirm -> submit form
+  const modalConfirmBtn = document.getElementById('modalConfirm');
+  if (modalConfirmBtn) {
+    modalConfirmBtn.addEventListener('click', () => {
+      modalConfirmBtn.disabled = true;
+      document.getElementById('reservationForm').submit();
+    });
+  }
+
+  // init
+  showStep(current);
+
+  function showStep(step) {
+    steps.forEach(s => {
+      const el = document.getElementById('step-' + s);
+      if (!el) return;
+      el.classList.toggle('active', s === step);
+    });
+    const pct = ((step - 1) / (steps.length - 1)) * 100;
+    if (progressFill) progressFill.style.width = pct + '%';
+  }
+});
