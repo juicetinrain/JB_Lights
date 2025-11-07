@@ -1,10 +1,9 @@
-// reservation.js - JB Lights & Sound Reservation System
+// reservation.js - JB Lights & Sound Reservation System - FIXED MAP
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize variables
     const steps = [1, 2, 3, 4];
     let currentStep = 1;
     const progressFill = document.getElementById('progressFill');
-    const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
     
     // Set minimum date to tomorrow
     const dateInput = document.getElementById('inputDate');
@@ -195,7 +194,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function showAlert(message) {
-        alert(message);
+        // Use Bootstrap alert or simple alert
+        if (typeof bootstrap !== 'undefined') {
+            // Create Bootstrap alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-warning alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.container').prepend(alertDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        } else {
+            alert(message);
+        }
     }
 
     // Review section population
@@ -277,6 +295,8 @@ document.addEventListener('DOMContentLoaded', function() {
             gcashBox.style.display = 'none';
         }
 
+        // Show modal using Bootstrap
+        const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
         previewModal.show();
     };
 
@@ -341,7 +361,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Leaflet Map Integration
+    // Leaflet Map Integration - FIXED VERSION
     let map = null;
     let marker = null;
 
@@ -364,21 +384,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }).addTo(map);
 
         // Create draggable marker
-        marker = L.marker(defaultCenter, { draggable: true }).addTo(map);
+        marker = L.marker(defaultCenter, { 
+            draggable: true,
+            title: 'Drag me to set exact location'
+        }).addTo(map);
 
-        // Marker drag event
+        // Add popup to marker
+        marker.bindPopup('Event Location<br>Drag me or click map to set location').openPopup();
+
+        // Marker drag event - get address when dragged
         marker.on('dragend', function(e) {
             const position = marker.getLatLng();
-            reverseGeocode(position.lat, position.lng);
+            getAddressFromCoordinates(position.lat, position.lng);
         });
 
-        // Map click event
+        // Map click event - move marker and get address
         map.on('click', function(e) {
             marker.setLatLng(e.latlng);
-            reverseGeocode(e.latlng.lat, e.latlng.lng);
+            getAddressFromCoordinates(e.latlng.lat, e.latlng.lng);
+            
+            // Update popup
+            marker.bindPopup('Location Set!<br>Address updated in form').openPopup();
         });
 
-        // Address input search
+        // Address input search - when user types and presses Enter
         const addressInput = document.getElementById('inputAddress');
         if (addressInput) {
             addressInput.addEventListener('keypress', function(e) {
@@ -386,30 +415,60 @@ document.addEventListener('DOMContentLoaded', function() {
                     e.preventDefault();
                     const query = this.value.trim();
                     if (query.length > 2) {
-                        forwardGeocode(query);
+                        searchAddress(query);
+                    } else {
+                        showAlert('Please enter a more specific address (at least 3 characters)');
                     }
                 }
             });
         }
+
+        // Show help message
+        showAlert('Click anywhere on the map to set your event location. The address will automatically update.');
     };
 
-    function reverseGeocode(lat, lng) {
+    // Function to get address from coordinates
+    function getAddressFromCoordinates(lat, lng) {
+        const addressInput = document.getElementById('inputAddress');
+        
+        // Show loading state
+        addressInput.placeholder = 'Getting address...';
+        addressInput.disabled = true;
+
         const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`;
         
         fetch(url)
             .then(response => response.json())
             .then(data => {
                 if (data && data.display_name) {
-                    document.getElementById('inputAddress').value = data.display_name;
+                    addressInput.value = data.display_name;
+                    addressInput.placeholder = 'Event address will appear here when you click the map';
+                    
+                    // Show success message
+                    const mapHelp = document.querySelector('.map-help');
+                    if (mapHelp) {
+                        mapHelp.innerHTML = '<i class="bi bi-check-circle"></i> Address updated from map location';
+                        mapHelp.style.color = 'var(--blue)';
+                    }
+                } else {
+                    addressInput.value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                    showAlert('Exact address not found. Coordinates have been set instead.');
                 }
             })
             .catch(error => {
-                console.log('Reverse geocoding error:', error);
+                console.log('Geocoding error:', error);
+                addressInput.value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                showAlert('Unable to get address. Using coordinates instead.');
+            })
+            .finally(() => {
+                addressInput.disabled = false;
+                addressInput.placeholder = 'House number, street, barangay, city, province';
             });
     }
 
-    function forwardGeocode(query) {
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
+    // Function to search address and move marker
+    function searchAddress(query) {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=ph`;
         
         fetch(url)
             .then(response => response.json())
@@ -419,16 +478,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     const lat = parseFloat(result.lat);
                     const lon = parseFloat(result.lon);
                     
+                    // Move marker to found location
                     marker.setLatLng([lat, lon]);
                     map.setView([lat, lon], 15);
+                    
+                    // Update address input
                     document.getElementById('inputAddress').value = result.display_name;
+                    
+                    // Update popup
+                    marker.bindPopup('Location Found!<br>Address updated from search').openPopup();
+                    
+                    // Show success message
+                    const mapHelp = document.querySelector('.map-help');
+                    if (mapHelp) {
+                        mapHelp.innerHTML = '<i class="bi bi-check-circle"></i> Location found and marker moved';
+                        mapHelp.style.color = 'var(--blue)';
+                    }
                 } else {
-                    showAlert('Address not found. Please try a different search term.');
+                    showAlert('Address not found. Please try a different search term or click on the map directly.');
                 }
             })
             .catch(error => {
                 console.log('Forward geocoding error:', error);
-                showAlert('Geocoding service unavailable. Please try again later.');
+                showAlert('Search service unavailable. Please click on the map to set your location.');
             });
     }
 });

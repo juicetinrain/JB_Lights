@@ -77,28 +77,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['final_submit'])) {
     <link rel="stylesheet" href="home.css">
 </head>
 <body>
-    <!-- Header -->
+        <!-- Header - MATCHES INDEX.PHP -->
     <header class="main-header">
         <div class="header-container">
-            <div class="logo">
-                <div class="logo-icon">JB</div>
-                <div class="logo-text">
-                    <span class="logo-main">JB Lights & Sound</span>
-                    <span class="logo-sub">Professional Event Services</span>
+            <a href="index.php" class="logo">
+                <div class="logo-icon">
+                    <span class="j-letter">J</span>
+                    <span class="b-letter">B</span>
                 </div>
-            </div>
+                <div class="logo-text">
+                    <span class="logo-main">JB LIGHTS & SOUND</span>
+                    <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
+                </div>
+            </a>
             
             <nav class="main-nav">
-                <ul class="nav-list">
-                    <li><a href="index.php" class="nav-link">HOME</a></li>
-                    <li><a href="index.php#services" class="nav-link">SERVICES</a></li>
-                    <li><a href="index.php#featured" class="nav-link">GALLERY</a></li>
-                    <li><a href="reservation.php" class="nav-link active btn-reserve">BOOK NOW</a></li>
-                    <li><a href="ContactUs.php" class="nav-link">CONTACT</a></li>
-                </ul>
-                <div class="menu-toggle" onclick="openNav()">
-                    <i class="bi bi-list"></i>
-                </div>
+                <button class="menu-toggle">
+                    <div class="hamburger">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </button>
             </nav>
         </div>
     </header>
@@ -273,55 +273,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['final_submit'])) {
                             </div>
                         </section>
 
-                        <!-- Step 3: Location & Contact -->
-                        <section id="step-3" class="step">
-                            <h2>Location & Contact Details</h2>
-                            <p class="step-description">Where and how can we reach you?</p>
+                                                  <!-- Step 3: Location & Contact -->
+                          <section id="step-3" class="step">
+                              <h2>Location & Contact Details</h2>
+                              <p class="step-description">Where and how can we reach you?</p>
 
-                            <div class="form-group">
-                                <label for="inputAddress">Event Address *</label>
-                                <input type="text" id="inputAddress" name="address" class="form-control" 
-                                       placeholder="House number, street, barangay, city, province" required>
-                            </div>
+                              <div class="form-group">
+                                  <label for="inputAddress">Event Address *</label>
+                                  <input type="text" id="inputAddress" name="address" class="form-control" 
+                                        placeholder="Click on the map or type address and press Enter" required>
+                              </div>
 
-                            <div class="map-container">
-                                <div id="map"></div>
-                                <div class="map-help">
-                                    <i class="bi bi-info-circle"></i>
-                                    Click on the map or drag the marker to set your exact location
-                                </div>
-                            </div>
+                              <div class="map-container">
+                                  <div class="map-instructions">
+                                      <i class="bi bi-info-circle"></i> Click anywhere on the map to set your event location
+                                  </div>
+                                  <div id="map"></div>
+                                  <div class="map-help">
+                                      <i class="bi bi-lightbulb"></i>
+                                      Click on the map or drag the marker to set your exact location. The address will update automatically.
+                                  </div>
+                              </div>
 
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label for="inputName">Contact Person Name *</label>
-                                    <input type="text" id="inputName" name="contact_name" class="form-control" required>
-                                </div>
+                              <div class="form-grid">
+                                  <div class="form-group">
+                                      <label for="inputName">Contact Person Name *</label>
+                                      <input type="text" id="inputName" name="contact_name" class="form-control" required>
+                                  </div>
 
-                                <div class="form-group">
-                                    <label for="inputPhone">Contact Number *</label>
-                                    <input type="tel" id="inputPhone" name="contact_phone" class="form-control" 
-                                           placeholder="09XX-XXX-XXXX" required>
-                                </div>
+                                  <div class="form-group">
+                                      <label for="inputPhone">Contact Number *</label>
+                                      <input type="tel" id="inputPhone" name="contact_phone" class="form-control" 
+                                            placeholder="09XX-XXX-XXXX" required>
+                                  </div>
 
-                                <div class="form-group">
-                                    <label for="facebook_account">Facebook Account (Optional)</label>
-                                    <input type="text" id="facebook_account" name="facebook_account" class="form-control"
-                                           placeholder="For easier communication">
-                                </div>
-                            </div>
+                                  <div class="form-group">
+                                      <label for="facebook_account">Facebook Account (Optional)</label>
+                                      <input type="text" id="facebook_account" name="facebook_account" class="form-control"
+                                            placeholder="For easier communication">
+                                  </div>
+                              </div>
 
-                            <div class="form-group">
-                                <label for="inputNotes">Additional Notes</label>
-                                <textarea id="inputNotes" name="notes" class="form-control" rows="3" 
-                                          placeholder="Any special requests or instructions..."></textarea>
-                            </div>
+                              <div class="form-group">
+                                  <label for="inputNotes">Additional Notes</label>
+                                  <textarea id="inputNotes" name="notes" class="form-control" rows="3" 
+                                            placeholder="Any special requests or instructions..."></textarea>
+                              </div>
 
-                            <div class="form-actions">
-                                <button type="button" class="btn btn-outline" onclick="goStep(2)">Back</button>
-                                <button type="button" class="btn btn-primary" onclick="goStep(4)">Next: Review & Pay</button>
-                            </div>
-                        </section>
+                              <div class="form-actions">
+                                  <button type="button" class="btn btn-outline" onclick="goStep(2)">Back</button>
+                                  <button type="button" class="btn btn-primary" onclick="goStep(4)">Next: Review & Pay</button>
+                              </div>
+                          </section>
 
                         <!-- Step 4: Payment & Review -->
                         <section id="step-4" class="step">
