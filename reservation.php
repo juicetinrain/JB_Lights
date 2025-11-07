@@ -74,34 +74,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['final_submit'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="home.css">
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
         <!-- Header - MATCHES INDEX.PHP -->
+    <!-- Header - CLEAN & SIMPLE -->
     <header class="main-header">
-        <div class="header-container">
-            <a href="index.php" class="logo">
-                <div class="logo-icon">
-                    <span class="j-letter">J</span>
-                    <span class="b-letter">B</span>
+    <div class="header-container">
+        <a href="index.php" class="logo">
+    <img src="img/JB_logo.jpg" alt="JB Lights & Sound" class="logo-image">
+    <div class="logo-text">
+        <span class="logo-main">JB LIGHTS & SOUND</span>
+        <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
+    </div>
+</a>
+        <nav class="main-nav">
+            <button class="menu-toggle">
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
                 </div>
-                <div class="logo-text">
-                    <span class="logo-main">JB LIGHTS & SOUND</span>
-                    <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
-                </div>
-            </a>
-            
-            <nav class="main-nav">
-                <button class="menu-toggle">
-                    <div class="hamburger">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                </button>
-            </nav>
-        </div>
-    </header>
+            </button>
+        </nav>
+    </div>
+</header>
 
     <main class="main-content">
         <div class="container">
@@ -498,7 +495,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['final_submit'])) {
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; 2024 JB Lights & Sound. All rights reserved.</p>
+                <p>&copy; 2025 JB Lights & Sound. All rights reserved.</p>
             </div>
         </div>
     </footer>

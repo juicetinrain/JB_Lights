@@ -15,23 +15,19 @@ $conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
     <title>JB Lights & Sound - Professional Event Services</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="home.css">
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body class="dark-mode">
         <!-- Header - CLEAN & SIMPLE -->
     <header class="main-header">
-        <div class="header-container">
-            <a href="index.php" class="logo">
-                <div class="logo-icon">
-                    <span class="j-letter">J</span>
-                    <span class="b-letter">B</span>
-                </div>
-                <div class="logo-text">
-                    <span class="logo-main">JB LIGHTS & SOUND</span>
-                    <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
-                </div>
-            </a>
-            
+    <div class="header-container">
+        <a href="index.php" class="logo">
+    <img src="img/JB_logo.jpg" alt="JB Lights & Sound" class="logo-image">
+    <div class="logo-text">
+        <span class="logo-main">JB LIGHTS & SOUND</span>
+        <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
+    </div>
+</a>
             <nav class="main-nav">
                 <button class="menu-toggle">
                     <div class="hamburger">
@@ -459,7 +455,7 @@ $conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; 2024 JB Lights & Sound. All rights reserved.</p>
+                <p>&copy; 2025 JB Lights & Sound. All rights reserved.</p>
             </div>
         </div>
     </footer>

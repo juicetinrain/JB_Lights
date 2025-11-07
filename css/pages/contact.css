@@ -1,0 +1,191 @@
+/* pages/contact.css */
+/* Contact Page Specific Styles */
+.contact-hero {
+    position: relative;
+    height: 60vh;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-top: 80px;
+    overflow: hidden;
+}
+
+/* Blurred background - ONLY this layer gets blurred */
+.contact-hero::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    background-image: url('img/login_bg4.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: blur(5px);
+    z-index: 1;
+}
+
+/* Dark overlay for text readability */
+.contact-hero::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 2;
+}
+
+.contact-hero-content {
+    position: relative;
+    z-index: 3;
+    max-width: 800px;
+    padding: 0 20px;
+}
+
+.contact-hero .hero-title {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--white);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.contact-hero .hero-subtitle {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.contact-info-side {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.contact-card h2 {
+    color: var(--blue);
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.contact-detail {
+    margin-bottom: 1.5rem;
+}
+
+.contact-detail:last-child {
+    margin-bottom: 0;
+}
+
+.contact-detail p {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.contact-highlight {
+    color: var(--blue) !important;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.response-time {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--blue);
+    margin-top: 1rem;
+}
+
+.contact-form-side {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.map-section, .form-section {
+    background: var(--dark-gray);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+}
+
+.map-section h3, .form-section h3 {
+    color: var(--blue);
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.map-container {
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.map-note {
+    background: var(--dark);
+    border: 1px solid var(--blue);
+    border-radius: 6px;
+    padding: 1rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.contact-form {
+    margin-top: 1rem;
+}
+
+.faq-item h4 {
+    color: var(--blue);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.faq-item p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.emergency-icon {
+    font-size: 4rem;
+    color: var(--white);
+}
+
+.emergency-content {
+    flex: 1;
+    color: var(--white);
+}
+
+.emergency-content h3 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.emergency-content p {
+    margin-bottom: 1.5rem;
+    opacity: 0.9;
+}
+
+.emergency-contact {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.emergency-action .btn {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}

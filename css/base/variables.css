@@ -1,0 +1,20 @@
+/* base/variables.css */
+:root {
+    --black: #000000;
+    --dark: #0a0a0a;
+    --dark-gray: #1a1a1a;
+    --medium-gray: #2a2a2a;
+    --light-gray: #3a3a3a;
+    --blue: #0066ff;
+    --blue-dark: #0052cc;
+    --blue-light: #3385ff;
+    --white: #ffffff;
+    --text-primary: #ffffff;
+    --text-secondary: #b0b0b0;
+    --text-muted: #666666;
+    --accent: #0066ff;
+    --border: #333333;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.4);
+    --gradient: linear-gradient(135deg, #0066ff 0%, #0047b3 100%);
+}

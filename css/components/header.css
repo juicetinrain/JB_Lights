@@ -1,0 +1,110 @@
+/* components/header.css */
+/* Header - SIMPLIFIED VERSION */
+.main-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.4) 0%,
+        rgba(0, 0, 0, 0.1) 70%,
+        transparent 100%
+    );
+    backdrop-filter: none;
+    border-bottom: 1px solid transparent;
+    z-index: 1000;
+    padding: 1.5rem 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-header.scrolled {
+    background: rgba(0, 0, 0, 0.98);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 0;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Logo visibility on transparent background */
+.main-header:not(.scrolled) .logo-image {
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+    transform: scale(1.05); /* Slightly larger when transparent */
+    transition: all 0.3s ease;
+}
+
+.main-header.scrolled .logo-image {
+    transform: scale(1);
+}
+
+/* Menu toggle visibility */
+.main-header:not(.scrolled) .menu-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.main-header:not(.scrolled) .hamburger span {
+    background: var(--white);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Logo Styles */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+}
+
+.logo-image {
+    height: 45px;
+    width: auto;
+}
+
+.logo-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.logo-main {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: 1px;
+}
+
+.logo-sub {
+    font-size: 0.65rem;
+    color: var(--blue);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* Header Logo */
+.main-header .logo-image {
+    height: 50px;
+}
+
+.main-header.scrolled .logo-image {
+    height: 40px; /* Slightly smaller when scrolled */
+}
+
+/* Footer Logo */
+.main-footer .logo-image {
+    height: 40px;
+}
+
+/* Side Navigation Logo */
+.sidenav .logo-image {
+    height: 40px;
+}
