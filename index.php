@@ -1,11 +1,10 @@
 <?php
-// index.php - JB Lights & Sound Homepage
+// index.php - JB Lights & Sound Homepage (Dark Mode) - FIXED VERSION
 $DB_HOST = 'localhost';
 $DB_USER = 'root';
 $DB_PASS = '';
 $DB_NAME = 'jb_lights';
 
-// Database connection for featured events (optional)
 $conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
 ?>
 <!DOCTYPE html>
@@ -18,29 +17,29 @@ $conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="home.css">
 </head>
-<body>
-    <!-- Header -->
+<body class="dark-mode">
+        <!-- Header - CLEAN & SIMPLE -->
     <header class="main-header">
         <div class="header-container">
-            <div class="logo">
-                <div class="logo-icon">JB</div>
-                <div class="logo-text">
-                    <span class="logo-main">JB Lights & Sound</span>
-                    <span class="logo-sub">Professional Event Services</span>
+            <a href="index.php" class="logo">
+                <div class="logo-icon">
+                    <span class="j-letter">J</span>
+                    <span class="b-letter">B</span>
                 </div>
-            </div>
+                <div class="logo-text">
+                    <span class="logo-main">JB LIGHTS & SOUND</span>
+                    <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
+                </div>
+            </a>
             
             <nav class="main-nav">
-                <ul class="nav-list">
-                    <li><a href="index.php" class="nav-link active">HOME</a></li>
-                    <li><a href="#services" class="nav-link">SERVICES</a></li>
-                    <li><a href="#featured" class="nav-link">GALLERY</a></li>
-                    <li><a href="reservation.php" class="nav-link btn-reserve">BOOK NOW</a></li>
-                    <li><a href="ContactUs.php" class="nav-link">CONTACT</a></li>
-                </ul>
-                <div class="menu-toggle" onclick="openNav()">
-                    <i class="bi bi-list"></i>
-                </div>
+                <button class="menu-toggle">
+                    <div class="hamburger">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </button>
             </nav>
         </div>
     </header>
@@ -48,48 +47,54 @@ $conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
     <!-- Hero Section -->
     <section class="hero-section">
         <div class="hero-background">
-            <img src="img/cover.jpg" alt="JB Lights and Sounds Event Setup" class="hero-image">
             <div class="hero-overlay"></div>
-        </div>
-
-        <!-- Hero Content -->
-        <div class="hero-content">
-            <h1 class="hero-title">ALL YOUR LIGHTS AND SOUNDS<br>SERVICE NEEDS</h1>
-            <p class="hero-subtitle">Professional lights and sounds service for all scales</p>
-            <div class="hero-buttons">
-                <a href="reservation.php" class="btn btn-primary">Book Your Event</a>
-                <a href="ContactUs.php" class="btn btn-secondary">Get In Touch</a>
+            <div class="hero-particles">
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
             </div>
         </div>
-    </section>
-
-    <!-- Introduction Section -->
-    <section class="intro-section">
-        <div class="container">
-            <h2 class="section-title">Are you looking for affordable and exceptional lights and sound rental in Pampanga? Then you are in the right place!</h2>
-            <p class="section-text">
-                Here at JB Lights & Sounds, we work hard to guarantee your satisfaction and attend to your needs for events such as birthdays, seminars, wedding, debuts, corporate meetings; you name it! May it be light rental, chairs, tables, LED wall, sounds rental (powered speakers, etc), projector, stage and trusses rental.
-            </p>
-            <div class="stats-grid">
-                <div class="stat-item">
+        
+        <div class="hero-content">
+            <div class="hero-badge">PREMIUM EVENT SERVICES</div>
+            <h1 class="hero-title">
+                <span class="title-line">ELEVATE YOUR</span>
+                <span class="title-line highlight">EVENT EXPERIENCE</span>
+            </h1>
+            <p class="hero-subtitle">Professional sound, lighting, and stage production for unforgettable moments</p>
+            <div class="hero-buttons">
+                <a href="reservation.php" class="btn btn-primary">
+                    <i class="bi bi-calendar-check"></i>
+                    BOOK YOUR EVENT
+                </a>
+                <a href="#services" class="btn btn-secondary">
+                    <i class="bi bi-play-circle"></i>
+                    VIEW SERVICES
+                </a>
+            </div>
+            
+            <div class="hero-stats">
+                <div class="stat">
                     <div class="stat-number">500+</div>
                     <div class="stat-label">Events Served</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat">
                     <div class="stat-number">50+</div>
                     <div class="stat-label">Equipment Types</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat">
                     <div class="stat-number">24/7</div>
                     <div class="stat-label">Support</div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-number">100%</div>
-                    <div class="stat-label">Satisfaction</div>
-                </div>
             </div>
-            <div class="cta-section">
-                <a href="reservation.php" class="btn btn-large">Reserve Now</a>
+        </div>
+        
+        <div class="hero-scroll">
+            <div class="scroll-indicator">
+                <span>Scroll to explore</span>
+                <div class="scroll-arrow"></div>
             </div>
         </div>
     </section>
@@ -97,85 +102,155 @@ $conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
     <!-- Services Section -->
     <section class="services-section" id="services">
         <div class="container">
-            <h2 class="section-title">Our Rental Equipment</h2>
-            <p class="section-subtitle">Professional equipment for all your event needs</p>
+            <div class="section-header">
+                <h2 class="section-title">OUR SERVICES</h2>
+                <p class="section-subtitle">Complete event production solutions</p>
+                <div class="section-divider"></div>
+            </div>
             
             <div class="services-grid">
                 <div class="service-card">
-                    <div class="service-image">
-                        <img src="img/stage.jpg" alt="Stage and Trusses">
+                    <div class="service-icon">
+                        <i class="bi bi-speaker"></i>
                     </div>
-                    <h3 class="service-title">STAGE AND TRUSSES</h3>
-                    <p class="service-desc">Professional staging solutions for any event size</p>
-                    <div class="service-features">
-                        <span>Various Sizes</span>
-                        <span>Quick Setup</span>
-                        <span>Safety Certified</span>
-                    </div>
+                    <h3>SOUND SYSTEMS</h3>
+                    <p>Professional audio equipment for crystal clear sound quality at any event size</p>
+                    <ul class="service-features">
+                        <li>Line Array Systems</li>
+                        <li>Mixing Consoles</li>
+                        <li>Wireless Microphones</li>
+                        <li>Monitor Systems</li>
+                    </ul>
                 </div>
                 
                 <div class="service-card">
-                    <div class="service-image">
-                        <img src="img/sound.jpg" alt="Sound System">
+                    <div class="service-icon">
+                        <i class="bi bi-lightbulb"></i>
                     </div>
-                    <h3 class="service-title">SOUND SYSTEM</h3>
-                    <p class="service-desc">Crystal clear audio for perfect event experience</p>
-                    <div class="service-features">
-                        <span>Professional Speakers</span>
-                        <span>Mixing Boards</span>
-                        <span>Wireless Mics</span>
-                    </div>
+                    <h3>LIGHTING</h3>
+                    <p>Dynamic lighting setups to create the perfect atmosphere and mood</p>
+                    <ul class="service-features">
+                        <li>LED Moving Heads</li>
+                        <li>Laser Systems</li>
+                        <li>DMX Control</li>
+                        <li>Effect Lighting</li>
+                    </ul>
                 </div>
                 
                 <div class="service-card">
-                    <div class="service-image">
-                        <img src="img/led.jpg" alt="LED Lights">
+                    <div class="service-icon">
+                        <i class="bi bi-grid-3x3"></i>
                     </div>
-                    <h3 class="service-title">LED LIGHTS</h3>
-                    <p class="service-desc">Dynamic lighting to set the perfect mood</p>
-                    <div class="service-features">
-                        <span>RGB Lighting</span>
-                        <span>DMX Control</span>
-                        <span>Various Effects</span>
-                    </div>
+                    <h3>STAGE & TRUSSES</h3>
+                    <p>Professional staging solutions with aluminum truss systems</p>
+                    <ul class="service-features">
+                        <li>Aluminum Trussing</li>
+                        <li>Stage Platforms</li>
+                        <li>Safety Certified</li>
+                        <li>Quick Setup</li>
+                    </ul>
                 </div>
                 
                 <div class="service-card">
-                    <div class="service-image">
-                        <img src="img/c&t.jpg" alt="Chairs and Tables">
+                    <div class="service-icon">
+                        <i class="bi bi-display"></i>
                     </div>
-                    <h3 class="service-title">CHAIRS AND TABLES</h3>
-                    <p class="service-desc">Comfortable seating and table arrangements</p>
-                    <div class="service-features">
-                        <span>Monoblock Chairs</span>
-                        <span>Round Tables</span>
-                        <span>Long Tables</span>
-                    </div>
+                    <h3>VISUAL DISPLAYS</h3>
+                    <p>High-impact visual solutions including LED walls and projection</p>
+                    <ul class="service-features">
+                        <li>LED Video Walls</li>
+                        <li>HD Projectors</li>
+                        <li>Video Mapping</li>
+                        <li>Content Management</li>
+                    </ul>
                 </div>
                 
                 <div class="service-card">
-                    <div class="service-image">
-                        <img src="img/LW.jpg" alt="LED Wall">
+                    <div class="service-icon">
+                        <i class="bi bi-mic"></i>
                     </div>
-                    <h3 class="service-title">LED WALL</h3>
-                    <p class="service-desc">High-resolution displays for impactful visuals</p>
-                    <div class="service-features">
-                        <span>HD Resolution</span>
-                        <span>Various Sizes</span>
-                        <span>Easy Setup</span>
-                    </div>
+                    <h3>PRODUCTION</h3>
+                    <p>Complete event production services from planning to execution</p>
+                    <ul class="service-features">
+                        <li>Event Planning</li>
+                        <li>Technical Direction</li>
+                        <li>Operator Services</li>
+                        <li>Equipment Transport</li>
+                    </ul>
                 </div>
                 
                 <div class="service-card">
-                    <div class="service-image">
-                        <img src="img/projector.jpg" alt="Projectors">
+                    <div class="service-icon">
+                        <i class="bi bi-gear"></i>
                     </div>
-                    <h3 class="service-title">PROJECTORS</h3>
-                    <p class="service-desc">Clear projection for presentations and media</p>
-                    <div class="service-features">
-                        <span>HD Projectors</span>
-                        <span>Screens Included</span>
-                        <span>All Cables</span>
+                    <h3>SUPPORT</h3>
+                    <p>Comprehensive technical support and equipment rental services</p>
+                    <ul class="service-features">
+                        <li>24/7 Support</li>
+                        <li>Equipment Rental</li>
+                        <li>Setup & Teardown</li>
+                        <li>Maintenance</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="gallery-section" id="gallery">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">OUR WORK</h2>
+                <p class="section-subtitle">Featured events and productions</p>
+                <div class="section-divider"></div>
+            </div>
+            
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <div class="gallery-image">
+                        <img src="img/wedding-event.jpg" alt="Wedding Event" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIyNSIgdmlld0JveD0iMCAwIDMwMCAyMjUiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjI1IiBmaWxsPSIjMUEyQTMzIi8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTEyLjUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI0ZGRkZGRiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+R2FsbGVyeSBJbWFnZTwvdGV4dD4KPC9zdmc+'">
+                        <div class="gallery-overlay">
+                            <div class="gallery-content">
+                                <h4>WEDDING CELEBRATION</h4>
+                                <p>Complete sound and lighting for romantic ceremonies</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="gallery-item">
+                    <div class="gallery-image">
+                        <img src="img/corporate-event.jpg" alt="Corporate Event" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIyNSIgdmlld0JveD0iMCAwIDMwMCAyMjUiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjI1IiBmaWxsPSIjMUEyQTMzIi8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTEyLjUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI0ZGRkZGRiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+R2FsbGVyeSBJbWFnZTwvdGV4dD4KPC9zdmc+'">
+                        <div class="gallery-overlay">
+                            <div class="gallery-content">
+                                <h4>CORPORATE EVENT</h4>
+                                <p>Professional AV solutions for business conferences</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="gallery-item">
+                    <div class="gallery-image">
+                        <img src="img/concert-event.jpg" alt="Concert Event" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIyNSIgdmlld0JveD0iMCAwIDMwMCAyMjUiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjI1IiBmaWxsPSIjMUEyQTMzIi8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTEyLjUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI0ZGRkZGRiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+R2FsbGVyeSBJbWFnZTwvdGV4dD4KPC9zdmc+'">
+                        <div class="gallery-overlay">
+                            <div class="gallery-content">
+                                <h4>LIVE CONCERT</h4>
+                                <p>Full production for musical performances</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="gallery-item">
+                    <div class="gallery-image">
+                        <img src="img/pageant-event.jpg" alt="Pageant Event" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIyNSIgdmlld0JveD0iMCAwIDMwMCAyMjUiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjI1IiBmaWxsPSIjMUEyQTMzIi8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTEyLjUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI0ZGRkZGRiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+R2FsbGVyeSBJbWFnZTwvdGV4dD4KPC9zdmc+'">
+                        <div class="gallery-overlay">
+                            <div class="gallery-content">
+                                <h4>BEAUTY PAGEANT</h4>
+                                <p>Stage production for competitions</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -183,198 +258,113 @@ $conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
     </section>
 
     <!-- Packages Section -->
-    <section class="packages-section">
+    <section class="packages-section" id="packages">
         <div class="container">
-            <h2 class="section-title">Event Packages</h2>
-            <p class="section-subtitle">Complete solutions for different event types</p>
+            <div class="section-header">
+                <h2 class="section-title">EVENT PACKAGES</h2>
+                <p class="section-subtitle">Tailored solutions for every occasion</p>
+                <div class="section-divider"></div>
+            </div>
             
             <div class="packages-grid">
-                <div class="package-card featured">
-                    <div class="package-badge">Most Popular</div>
+                <div class="package-card">
                     <div class="package-header">
-                        <h3>BASIC PACKAGE</h3>
-                        <div class="package-price">₱5,000</div>
+                        <h3>BASIC</h3>
+                        <div class="package-price">
+                            <span class="currency">₱</span>
+                            <span class="amount">5,000</span>
+                        </div>
                     </div>
                     <div class="package-features">
                         <div class="feature">
-                            <i class="bi bi-check-circle"></i>
+                            <i class="bi bi-check"></i>
                             <span>Basic Sound System</span>
                         </div>
                         <div class="feature">
-                            <i class="bi bi-check-circle"></i>
+                            <i class="bi bi-check"></i>
                             <span>Basic Lighting Setup</span>
                         </div>
                         <div class="feature">
-                            <i class="bi bi-check-circle"></i>
+                            <i class="bi bi-check"></i>
                             <span>4 Hours Service</span>
                         </div>
                         <div class="feature">
-                            <i class="bi bi-check-circle"></i>
+                            <i class="bi bi-check"></i>
                             <span>1 Technician</span>
                         </div>
                     </div>
-                    <a href="reservation.php" class="btn btn-primary">Select Package</a>
+                    <a href="reservation.php" class="btn btn-outline">SELECT PACKAGE</a>
                 </div>
-
-                <div class="package-card">
+                
+                <div class="package-card featured">
+                    <div class="package-badge">MOST POPULAR</div>
                     <div class="package-header">
-                        <h3>UPGRADED PACKAGE</h3>
-                        <div class="package-price">₱6,000</div>
+                        <h3>PROFESSIONAL</h3>
+                        <div class="package-price">
+                            <span class="currency">₱</span>
+                            <span class="amount">7,000</span>
+                        </div>
                     </div>
                     <div class="package-features">
                         <div class="feature">
-                            <i class="bi bi-check-circle"></i>
-                            <span>Enhanced Sound System</span>
-                        </div>
-                        <div class="feature">
-                            <i class="bi bi-check-circle"></i>
-                            <span>Basic + Effects Lighting</span>
-                        </div>
-                        <div class="feature">
-                            <i class="bi bi-check-circle"></i>
-                            <span>5 Hours Service</span>
-                        </div>
-                        <div class="feature">
-                            <i class="bi bi-check-circle"></i>
-                            <span>1 Technician</span>
-                        </div>
-                    </div>
-                    <a href="reservation.php" class="btn btn-outline">Select Package</a>
-                </div>
-
-                <div class="package-card">
-                    <div class="package-header">
-                        <h3>PROFESSIONAL PACKAGE</h3>
-                        <div class="package-price">₱7,000</div>
-                    </div>
-                    <div class="package-features">
-                        <div class="feature">
-                            <i class="bi bi-check-circle"></i>
+                            <i class="bi bi-check"></i>
                             <span>Professional Sound System</span>
                         </div>
                         <div class="feature">
-                            <i class="bi bi-check-circle"></i>
+                            <i class="bi bi-check"></i>
                             <span>Full Lighting Effects</span>
                         </div>
                         <div class="feature">
-                            <i class="bi bi-check-circle"></i>
+                            <i class="bi bi-check"></i>
                             <span>6 Hours Service</span>
                         </div>
                         <div class="feature">
-                            <i class="bi bi-check-circle"></i>
+                            <i class="bi bi-check"></i>
                             <span>2 Technicians</span>
                         </div>
-                    </div>
-                    <a href="reservation.php" class="btn btn-outline">Select Package</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Featured Events Section -->
-    <section class="featured-section" id="featured">
-        <div class="container">
-            <h2 class="section-title">Featured Events</h2>
-            <p class="section-subtitle">See how we bring events to life</p>
-            
-            <div class="featured-events">
-                <div class="featured-event">
-                    <div class="event-image">
-                        <img src="img/pageant.jpg" alt="Pageant Event">
-                    </div>
-                    <div class="event-content">
-                        <h3>Beauty Pageant Production</h3>
-                        <p>Complete sound, lighting, and stage setup for unforgettable pageant experiences. From local competitions to major events, we provide the technical excellence that makes every moment shine.</p>
-                        <div class="event-features">
-                            <div class="feature">
-                                <i class="bi bi-check-circle"></i>
-                                <span>Full Sound System</span>
-                            </div>
-                            <div class="feature">
-                                <i class="bi bi-check-circle"></i>
-                                <span>Stage Lighting</span>
-                            </div>
-                            <div class="feature">
-                                <i class="bi bi-check-circle"></i>
-                                <span>LED Wall Display</span>
-                            </div>
-                            <div class="feature">
-                                <i class="bi bi-check-circle"></i>
-                                <span>Professional Audio</span>
-                            </div>
+                        <div class="feature">
+                            <i class="bi bi-check"></i>
+                            <span>Wireless Microphones</span>
                         </div>
                     </div>
+                    <a href="reservation.php" class="btn btn-primary">SELECT PACKAGE</a>
                 </div>
-
-                <div class="featured-event reverse">
-                    <div class="event-content">
-                        <h3>Wedding Celebrations</h3>
-                        <p>Make your special day unforgettable with our complete wedding audio-visual solutions. From ceremony to reception, we ensure perfect sound and lighting for every moment.</p>
-                        <div class="event-features">
-                            <div class="feature">
-                                <i class="bi bi-check-circle"></i>
-                                <span>Ceremony Sound</span>
-                            </div>
-                            <div class="feature">
-                                <i class="bi bi-check-circle"></i>
-                                <span>Reception Lighting</span>
-                            </div>
-                            <div class="feature">
-                                <i class="bi bi-check-circle"></i>
-                                <span>Background Music</span>
-                            </div>
-                            <div class="feature">
-                                <i class="bi bi-check-circle"></i>
-                                <span>Microphone Setup</span>
-                            </div>
+                
+                <div class="package-card">
+                    <div class="package-header">
+                        <h3>PREMIUM</h3>
+                        <div class="package-price">
+                            <span class="currency">₱</span>
+                            <span class="amount">10,000</span>
                         </div>
                     </div>
-                    <div class="event-image">
-                        <img src="img/wedding.jpg" alt="Wedding Event">
+                    <div class="package-features">
+                        <div class="feature">
+                            <i class="bi bi-check"></i>
+                            <span>Premium Sound System</span>
+                        </div>
+                        <div class="feature">
+                            <i class="bi bi-check"></i>
+                            <span>Advanced Lighting Rig</span>
+                        </div>
+                        <div class="feature">
+                            <i class="bi bi-check"></i>
+                            <span>8 Hours Service</span>
+                        </div>
+                        <div class="feature">
+                            <i class="bi bi-check"></i>
+                            <span>2 Technicians</span>
+                        </div>
+                        <div class="feature">
+                            <i class="bi bi-check"></i>
+                            <span>LED Video Wall</span>
+                        </div>
+                        <div class="feature">
+                            <i class="bi bi-check"></i>
+                            <span>DJ Support</span>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section class="testimonials-section">
-        <div class="container">
-            <h2 class="section-title">What Our Clients Say</h2>
-            <p class="section-subtitle">Don't just take our word for it</p>
-            
-            <div class="testimonials-grid">
-                <div class="testimonial-card">
-                    <div class="testimonial-content">
-                        <i class="bi bi-quote"></i>
-                        <p>"JB Lights & Sound made our wedding absolutely magical! The sound was crystal clear and the lighting created the perfect atmosphere."</p>
-                    </div>
-                    <div class="testimonial-author">
-                        <strong>Maria Santos</strong>
-                        <span>Wedding Client</span>
-                    </div>
-                </div>
-                
-                <div class="testimonial-card">
-                    <div class="testimonial-content">
-                        <i class="bi bi-quote"></i>
-                        <p>"Professional service from start to finish. Their equipment is top-notch and the technicians are very knowledgeable."</p>
-                    </div>
-                    <div class="testimonial-author">
-                        <strong>John Reyes</strong>
-                        <span>Corporate Event</span>
-                    </div>
-                </div>
-                
-                <div class="testimonial-card">
-                    <div class="testimonial-content">
-                        <i class="bi bi-quote"></i>
-                        <p>"We've used JB Lights for multiple events and they never disappoint. Reliable, affordable, and excellent quality!"</p>
-                    </div>
-                    <div class="testimonial-author">
-                        <strong>Sarah Tan</strong>
-                        <span>Birthday Party</span>
-                    </div>
+                    <a href="reservation.php" class="btn btn-outline">SELECT PACKAGE</a>
                 </div>
             </div>
         </div>
@@ -383,14 +373,19 @@ $conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
     <!-- CTA Section -->
     <section class="cta-section">
         <div class="container">
-            <h2>Ready to Make Your Event Unforgettable?</h2>
-            <p>Contact us today for a free consultation and quote</p>
-            <div class="cta-buttons">
-                <a href="reservation.php" class="btn btn-primary">Book Your Event</a>
-                <a href="ContactUs.php" class="btn btn-secondary">
-                    <i class="bi bi-telephone"></i>
-                    Contact Us
-                </a>
+            <div class="cta-content">
+                <h2>READY TO CREATE SOMETHING AMAZING?</h2>
+                <p>Let's discuss your event and bring your vision to life with professional sound and lighting solutions</p>
+                <div class="cta-buttons">
+                    <a href="reservation.php" class="btn btn-primary">
+                        <i class="bi bi-calendar-event"></i>
+                        BOOK YOUR EVENT
+                    </a>
+                    <a href="tel:+639656396053" class="btn btn-secondary">
+                        <i class="bi bi-telephone"></i>
+                        CALL US NOW
+                    </a>
+                </div>
             </div>
         </div>
     </section>
@@ -401,56 +396,64 @@ $conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
             <div class="footer-content">
                 <div class="footer-brand">
                     <div class="logo">
-                        <div class="logo-icon">JB</div>
+                        <div class="logo-icon">
+                            <span class="j-letter">J</span>
+                            <span class="b-letter">B</span>
+                        </div>
                         <div class="logo-text">
-                            <span class="logo-main">JB Lights & Sound</span>
-                            <span class="logo-sub">Professional Event Services</span>
+                            <span class="logo-main">JB LIGHTS & SOUND</span>
+                            <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
                         </div>
                     </div>
-                    <p class="footer-desc">Your trusted partner for professional lights and sound rental services in Pampanga and surrounding areas.</p>
+                    <p class="footer-desc">Your premier partner for professional event production services in Pampanga and surrounding areas.</p>
                     <div class="social-links">
                         <a href="#" class="social-link"><i class="bi bi-facebook"></i></a>
                         <a href="#" class="social-link"><i class="bi bi-messenger"></i></a>
-                        <a href="#" class="social-link"><i class="bi bi-telephone"></i></a>
+                        <a href="#" class="social-link"><i class="bi bi-instagram"></i></a>
+                        <a href="tel:+639656396053" class="social-link"><i class="bi bi-telephone"></i></a>
                     </div>
                 </div>
                 
                 <div class="footer-links">
-                    <h4>Quick Links</h4>
+                    <h4>QUICK LINKS</h4>
                     <ul>
                         <li><a href="index.php">Home</a></li>
                         <li><a href="#services">Services</a></li>
-                        <li><a href="#featured">Gallery</a></li>
+                        <li><a href="#gallery">Gallery</a></li>
+                        <li><a href="#packages">Packages</a></li>
                         <li><a href="reservation.php">Book Event</a></li>
-                        <li><a href="ContactUs.php">Contact</a></li>
                     </ul>
                 </div>
                 
                 <div class="footer-services">
-                    <h4>Our Services</h4>
+                    <h4>OUR SERVICES</h4>
                     <ul>
-                        <li>Sound System Rental</li>
+                        <li>Sound Systems</li>
                         <li>Lighting Equipment</li>
                         <li>Stage & Trusses</li>
-                        <li>LED Walls & Projectors</li>
-                        <li>Chairs & Tables</li>
+                        <li>LED Video Walls</li>
                         <li>Event Production</li>
+                        <li>Technical Support</li>
                     </ul>
                 </div>
                 
                 <div class="footer-contact">
-                    <h4>Contact Us</h4>
+                    <h4>CONTACT INFO</h4>
                     <div class="contact-item">
-                        <i class="bi bi-telephone-fill"></i>
+                        <i class="bi bi-geo-alt"></i>
+                        <span>235, Purok 2, Bical, Mabalacat City, Pampanga</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="bi bi-telephone"></i>
                         <span>0965-639-6053</span>
                     </div>
                     <div class="contact-item">
-                        <i class="bi bi-envelope-fill"></i>
+                        <i class="bi bi-envelope"></i>
                         <span>jblightsandsoundrental@gmail.com</span>
                     </div>
                     <div class="contact-item">
-                        <i class="bi bi-geo-alt-fill"></i>
-                        <span>235, Purok 2, Bical, Mabalacat City, Pampanga</span>
+                        <i class="bi bi-clock"></i>
+                        <span>24/7 Emergency Support</span>
                     </div>
                 </div>
             </div>
@@ -461,14 +464,26 @@ $conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
         </div>
     </footer>
 
-    <!-- Side Navigation -->
+        <!-- Side Navigation -->
     <div id="mySidenav" class="sidenav">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">
-            <i class="bi bi-x-lg"></i>
-        </a>
+        <div class="sidenav-header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <span class="j-letter">J</span>
+                    <span class="b-letter">B</span>
+                </div>
+                <div class="logo-text">
+                    <span class="logo-main">JB LIGHTS & SOUND</span>
+                </div>
+            </div>
+            <button class="closebtn" onclick="closeNav()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
         
         <div class="sidenav-content">
-            <div class="user-profile">
+            <!-- Clickable Profile Section -->
+            <div class="user-profile" onclick="closeNav()">
                 <div class="user-avatar">
                     <i class="bi bi-person-circle"></i>
                 </div>
@@ -479,49 +494,40 @@ $conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
             </div>
 
             <nav class="sidenav-menu">
-                <a href="index.php" class="menu-item">
-                    <i class="bi bi-house"></i>
-                    HOME
-                </a>
-                <a href="index.php#services" class="menu-item">
+                <a href="#services" class="menu-item" onclick="closeNav()">
                     <i class="bi bi-speaker"></i>
                     SERVICES
                 </a>
-                <a href="index.php#featured" class="menu-item">
+                <a href="#gallery" class="menu-item" onclick="closeNav()">
                     <i class="bi bi-images"></i>
                     GALLERY
                 </a>
-                <a href="reservation.php" class="menu-item">
+                <a href="#packages" class="menu-item" onclick="closeNav()">
+                    <i class="bi bi-star"></i>
+                    PACKAGES
+                </a>
+                <a href="reservation.php" class="menu-item" onclick="closeNav()">
                     <i class="bi bi-calendar-check"></i>
                     BOOK EVENT
                 </a>
-                <a href="ContactUs.php" class="menu-item">
+                <a href="ContactUs.php" class="menu-item" onclick="closeNav()">
                     <i class="bi bi-telephone"></i>
-                    CONTACT US
-                </a>
-                <a href="#" class="menu-item">
-                    <i class="bi bi-credit-card"></i>
-                    PAYMENT METHODS
-                </a>
-                <a href="#" class="menu-item">
-                    <i class="bi bi-question-circle"></i>
-                    FAQ
+                    CONTACT
                 </a>
             </nav>
 
             <div class="sidenav-footer">
-                <div class="contact-info-sidebar">
+                <div class="contact-info">
                     <div class="contact-item">
-                        <i class="bi bi-telephone-fill"></i>
+                        <i class="bi bi-telephone"></i>
                         <span>0965-639-6053</span>
                     </div>
                     <div class="contact-item">
-                        <i class="bi bi-clock-fill"></i>
-                        <span>8:00 AM - 10:00 PM</span>
+                        <i class="bi bi-clock"></i>
+                        <span>24/7 Support</span>
                     </div>
                 </div>
-                <button class="logout-button" onclick="closeNav()">
-                    <i class="bi bi-x-circle"></i>
+                <button class="close-menu-btn" onclick="closeNav()">
                     CLOSE MENU
                 </button>
             </div>
