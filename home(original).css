@@ -1,0 +1,251 @@
+.blurred-image{
+    filter: blur(3px);
+}
+body{
+    font-family: sans-serif;
+    margin: 0;   
+    color: white;
+}
+.header{
+    position: absolute;
+    top: 8px;
+    left: 16px;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.logo{
+    position: absolute;
+    top: 8px;
+    left: 16px;
+    display: flex;
+    position: relative;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+.j-letter{
+    position: absolute;
+    top: -8px;
+    left: 10px;
+    font-size: 45px;
+    font-weight: bold;
+    color: white;
+    position: relative;
+    z-index: 1;
+}
+.b-letter{
+    position: absolute;
+    top: -8px;
+    left: 45px;
+    font-size: 45px;
+    font-weight: bold;
+    color: #4169e1;
+    margin-left: -20px;
+}
+.lights-sound{
+    position: absolute;
+    top: -50px;
+    left: 12.30px;
+    font-size: 7px;
+    color: white;
+    letter-spacing: 2px;
+    margin-top: 90px;
+}
+.navigation{
+    position: absolute;
+    top: 30px;
+    right: 75px;
+}
+.nav ul{
+    list-style: none;
+    padding: 0%;
+    margin: 0%;
+    display: flex;
+}
+.nav li{
+    margin-left: 20px;
+}
+.nav a{
+    color: white;
+    text-decoration: none;
+}
+.nav a:hover,
+.nav a.active{
+    color: #4169e1;
+    border-bottom: 3px solid #4169e1;
+}
+.menu-icon{
+    position: absolute;
+    top: -8px;
+    right: -39px;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+.menu-icon:hover,
+.menu-icon.active{
+    color: #4169e1;
+    border-bottom: 3px solid #4169e1;
+}
+.header1{
+    position: absolute;
+    top: 30%;
+    left: 52%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-shadow: 2px 2px black;
+    font-size: 20px;
+}
+.p1{
+    position: absolute;
+    top: 42%;
+    left: 52%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-shadow: 2px 2px black;
+}
+.p2{
+    color: #3D5D8E;
+    font-family: Acme;
+    font-size: 40px;
+    height: 15rem;
+}
+.p3{
+    color: #464646;
+    font-size: 25px;
+    font-family: Alata;
+    height: 12rem;
+    text-align: center;
+    padding: 10px 30px;
+}
+.button{
+   text-align: center;
+   height: 3.7cm;
+}
+.hr{
+    height: 1.45cm;
+    margin: 55px;
+}
+.pageant{
+    text-align: center;
+    padding-bottom: 67px;
+    padding-top: 57px;
+}
+.hr1{
+    margin: 55px;
+}
+* {
+    box-sizing: border-box;
+    border-radius: 16px;
+}
+.column{
+    float: left;
+    width: 33.33%;
+    padding: 5px;
+    text-shadow: 2px 2px black;
+    padding: 10px 45px;
+    
+}
+.row::after{
+    content: "";
+    display: table;
+    clear: both;
+}
+.txt1{
+    position: absolute;
+    top: 2130px;
+    left: 93px;
+    color: white;
+    font-family: Afacad;
+    font-size: 25px;
+}
+.txt2{
+    position: absolute;
+    top: 2130px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: Afacad;
+    font-size: 25px;
+}
+.txt3{
+    position: absolute;
+    top: 2130px;
+    right: 11%;
+    font-family: Afacad;
+    font-size: 25px;
+}
+.txt4{
+    position: absolute;
+    bottom: -1797px;
+    left: 93px;
+    font-family: Afacad;
+    font-size: 25px;
+}
+.txt5{
+    position: absolute;
+    bottom: -1805px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: Afacad;
+    font-size: 25px;
+}
+.txt6{
+    position: absolute;
+    bottom: -1805px;
+    right: 11%;
+    font-family: Afacad;
+    font-size: 25px;
+}
+.footer{
+   padding-top: 390px;
+}
+.header1{
+    position: absolute;
+    bottom: -10px;
+    right: 20px;
+    padding: 10px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.logo1{
+    position: absolute;
+    bottom: -687%;
+    left: 129%;
+    display: flex;
+    position: relative;
+    font-size: 1.5em;
+    font-weight: bold;
+    
+}
+.j-letter1{
+    position: absolute;
+    top: -8px;
+    left: 10px;
+    font-size: 45px;
+    font-weight: bold;
+    color: white;
+    position: relative;
+    z-index: 1;
+}
+.b-letter1{
+    position: absolute;
+    bottom: 8px;
+    left: 45px;
+    font-size: 45px;
+    font-weight: bold;
+    color: #4169e1;
+    margin-left: -20px;
+}
+.lights-sound1{
+    position: absolute;
+    top: -50px;
+    left: 12.37px;
+    font-size: 7px;
+    color: white;
+    letter-spacing: 2px;
+    margin-top: 90px;
+}
+
+
+

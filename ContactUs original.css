@@ -1,0 +1,207 @@
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #174378;
+}
+/* top navigation */
+.topnav {
+  overflow: hidden;
+  background-color: #011D40;
+}
+
+.topnav a {
+  float: left;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 20px 30px;
+  text-decoration: none;
+  font-size: 35px;
+}
+
+.topnav a:hover {
+  background-color: #ddd;
+  color: black;
+}
+/* office font replacement */
+.Office {
+position: absolute;
+width: 200px;
+height: 44px;
+left: 149px;
+top: 204px;
+line-height: 17px;
+}
+/* office font replacement */
+.Contact {
+position: absolute;
+width: 400px;
+height: 18px;
+left: 149px;
+top: 772px;
+line-height: 17px;
+}
+/* Maps */
+.map{
+  position: absolute;
+  left: 975px;
+  top: 120px;
+}
+/* feedback */
+.contact-form-container {
+    position: absolute;
+    width: 100%;
+    max-width: 600px;
+    left: 975px;
+    top: 530px;
+    box-sizing: border-box;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background-color: #cfd8dc; /* Light gray for input fields */
+    color: #333;
+    font-size: 16px;
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+
+.name-fields {
+    display: flex;
+    gap: 10px;
+}
+
+.name-fields input {
+    flex: 1;
+}
+
+.name-fields input::placeholder {
+    color: #666;
+}
+
+button[type="submit"] {
+    width: 150px;
+    padding: 12px;
+    background-color: #011D40; /* Darker button color */
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+button[type="submit"]:hover {
+    background-color:#d2d4d400;
+}
+body {
+  font-family: "Lato", sans-serif;
+}
+
+
+.topnav span {
+  float: right;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 20px 30px;
+  text-decoration: none;
+  font-size: 35px;
+}
+
+.topnav span a:hover {
+  background-color: #ddd;
+  color: #f1f1f1;
+}
+.sidenav {
+  height: 100%;
+  width: 0;
+  position:fixed;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  background-color: #174378;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 0px;
+}
+
+.sidenav a {
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 25px;
+  display: block;
+  transition: 0.3s;
+}
+
+.sidenav a:hover {
+  color: #174378;
+}
+
+.sidenav .logout-button{
+    position: absolute;
+    left: 31%;
+    color: #f1f1f1;
+    background-color: #174378;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 10px 40px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.6);
+}
+.sidenav .closebtn {
+  background-color: #011D40;
+  position:left;
+  margin-top: 0;
+  right: 25px;
+  font-size: 36px;
+  margin-left: 50px;
+  padding: 10px 10px;
+  margin: 0;
+}
+.sidenav .closebtn:link {
+  color: #f1f1f1;
+}
+
+/* mouse over link */
+.sidenav .closebtn:hover {
+  color: #174378;
+}
+
+.menu-item {
+    display: block;
+    text-decoration: none;
+    padding: 15px 0;
+    border-bottom: 3px solid #ffffff;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    color: #ddd;
+}
+.menu-item:link {
+  color: #f1f1f1;
+}
+
+/* mouse over link */
+.menu-item:hover {
+  color: #174378;
+}
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
