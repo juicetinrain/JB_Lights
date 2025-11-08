@@ -439,13 +439,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['final_submit'])) {
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <div class="logo">
-                        <div class="logo-icon">JB</div>
-                        <div class="logo-text">
-                            <span class="logo-main">JB Lights & Sound</span>
-                            <span class="logo-sub">Professional Event Services</span>
-                        </div>
+                        <div class="logo">
+                        <img src="img/jb_logo.jpg" alt="JB Lights & Sound" class="logo-image">
                     </div>
+                        <div class="logo-text">
+                            <span class="logo-main">JB LIGHTS & SOUND</span>
+                            <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
+                        </div>
                     <p class="footer-desc">Your trusted partner for professional lights and sound rental services in Pampanga and surrounding areas.</p>
                     <div class="social-links">
                         <a href="#" class="social-link"><i class="bi bi-facebook"></i></a>

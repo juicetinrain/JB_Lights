@@ -56,8 +56,8 @@ $conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
         <div class="hero-content">
             <div class="hero-badge">PREMIUM EVENT SERVICES</div>
             <h1 class="hero-title">
-                <span class="title-line">ELEVATE YOUR</span>
-                <span class="title-line highlight">EVENT EXPERIENCE</span>
+                <span class="title-line">ALL YOUR LIGHTS AND SOUNDS</span>
+                <span class="title-line highlight">SERVICE NEEDS</span>
             </h1>
             <p class="hero-subtitle">Professional sound, lighting, and stage production for unforgettable moments</p>
             <div class="hero-buttons">
@@ -391,16 +391,13 @@ $conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <div class="logo">
-                        <div class="logo-icon">
-                            <span class="j-letter">J</span>
-                            <span class="b-letter">B</span>
-                        </div>
+                        <div class="logo">
+                        <img src="img/jb_logo.jpg" alt="JB Lights & Sound" class="logo-image">
+                    </div>
                         <div class="logo-text">
                             <span class="logo-main">JB LIGHTS & SOUND</span>
                             <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
                         </div>
-                    </div>
                     <p class="footer-desc">Your premier partner for professional event production services in Pampanga and surrounding areas.</p>
                     <div class="social-links">
                         <a href="#" class="social-link"><i class="bi bi-facebook"></i></a>
