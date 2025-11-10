@@ -5,6 +5,19 @@
     align-items: center;
 }
 
+/* Book Now button in header */
+.main-nav .btn-primary {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    margin-right: 1rem;
+}
+
+/* Responsive design for book now button */
+@media (max-width: 768px) {
+    .main-nav .btn-primary {
+        display: none !important;
+    }
+}
 /* Menu Toggle - Only element in nav now */
 .menu-toggle {
     display: flex;

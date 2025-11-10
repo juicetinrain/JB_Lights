@@ -1,153 +1,92 @@
-// admin.js - Updated for dark theme
-document.addEventListener('DOMContentLoaded', function () {
-  // Handle status changes
-  document.querySelectorAll('.change-status').forEach(select => {
-    select.addEventListener('change', function () {
-      const id = this.dataset.id;
-      const status = this.value;
-      if (!id || !status) return;
-      
-      if (!confirm('Change status to "' + status + '" for booking #' + id + '?')) {
-        this.value = ''; // reset
-        return;
-      }
+// admin.js - Fixed Tab Navigation
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Admin JS loaded'); // Debug log
+    
+    // Tab navigation - FIXED
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Tab clicked:', this.dataset.tab); // Debug log
+            
+            if (this.classList.contains('logout')) {
+                if (confirm('Are you sure you want to logout?')) {
+                    window.location.href = 'login_register.php';
+                }
+                return;
+            }
 
-      // AJAX POST to admin.php
-      const data = new FormData();
-      data.append('action', 'update_status');
-      data.append('id', id);
-      data.append('status', status);
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            this.classList.add('active');
 
-      fetch(window.location.href, {
-        method: 'POST',
-        body: data
-      }).then(r => r.json()).then(resp => {
-        if (resp.ok) {
-          // Update UI pill
-          const row = document.querySelector('select[data-id="' + id + '"]').closest('tr');
-          const pill = row.querySelector('.status-pill');
-          if (pill) {
-            pill.textContent = status;
-            pill.className = 'status-pill status-' + status.toLowerCase();
-          }
-          // Reset select
-          document.querySelector('select[data-id="' + id + '"]').value = '';
-          
-          // Show success message
-          showNotification('Status updated successfully!', 'success');
-        } else {
-          showNotification('Failed to update: ' + (resp.msg || 'Unknown error'), 'error');
-        }
-      }).catch(err => {
-        console.error(err);
-        showNotification('Network error occurred', 'error');
-      });
+            // Show corresponding tab
+            const tabName = this.dataset.tab;
+            if (tabName) {
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                const targetTab = document.getElementById(tabName + '-tab');
+                if (targetTab) {
+                    targetTab.classList.add('active');
+                }
+            }
+        });
     });
-  });
 
-  // Add notification function
-  function showNotification(message, type) {
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = `admin-notification admin-notification-${type}`;
-    notification.innerHTML = `
-      <div class="notification-content">
-        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-        <span>${message}</span>
-      </div>
-      <button class="notification-close" onclick="this.parentElement.remove()">
-        <i class="fas fa-times"></i>
-      </button>
-    `;
-    
-    // Add styles if not already added
-    if (!document.querySelector('#admin-notification-styles')) {
-      const styles = document.createElement('style');
-      styles.id = 'admin-notification-styles';
-      styles.textContent = `
-        .admin-notification {
-          position: fixed;
-          top: 20px;
-          right: 20px;
-          background: var(--dark-gray);
-          border: 1px solid var(--border);
-          border-left: 4px solid var(--blue);
-          border-radius: 8px;
-          padding: 1rem 1.5rem;
-          color: var(--text-primary);
-          box-shadow: var(--shadow-lg);
-          z-index: 10000;
-          max-width: 400px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 1rem;
-          animation: slideIn 0.3s ease;
-        }
-        
-        .admin-notification-success {
-          border-left-color: #0a8a36;
-        }
-        
-        .admin-notification-error {
-          border-left-color: #c92a2a;
-        }
-        
-        .notification-content {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          flex: 1;
-        }
-        
-        .notification-content i {
-          font-size: 1.2rem;
-        }
-        
-        .admin-notification-success .notification-content i {
-          color: #0a8a36;
-        }
-        
-        .admin-notification-error .notification-content i {
-          color: #c92a2a;
-        }
-        
-        .notification-close {
-          background: none;
-          border: none;
-          color: var(--text-secondary);
-          cursor: pointer;
-          padding: 0.25rem;
-          border-radius: 4px;
-          transition: all 0.3s ease;
-        }
-        
-        .notification-close:hover {
-          background: var(--medium-gray);
-          color: var(--text-primary);
-        }
-        
-        @keyframes slideIn {
-          from {
-            transform: translateX(100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
-        }
-      `;
-      document.head.appendChild(styles);
+    // Status change handler
+    document.querySelectorAll('.change-status').forEach(select => {
+        select.addEventListener('change', function() {
+            const id = this.dataset.id;
+            const status = this.value;
+            if (!id || !status) return;
+            
+            if (confirm('Change status to "' + status + '" for booking #' + id + '?')) {
+                const formData = new FormData();
+                formData.append('action', 'update_status');
+                formData.append('id', id);
+                formData.append('status', status);
+
+                fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                }).then(() => {
+                    location.reload();
+                });
+            }
+        });
+    });
+
+    // Search functionality
+    const searchInput = document.getElementById('globalSearch');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
     }
-    
-    document.body.appendChild(notification);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-      if (notification.parentElement) {
-        notification.remove();
-      }
-    }, 5000);
-  }
 });
+
+// Delete booking
+function deleteBooking(id) {
+    if (confirm('Are you sure you want to delete booking #' + id + '?')) {
+        // For now, just reload - you can add actual delete functionality later
+        alert('Delete functionality would remove booking #' + id);
+        // window.location.href = 'admin.php?delete=' + id;
+    }
+}
+
+// Search function
+function performSearch() {
+    const searchTerm = document.getElementById('globalSearch').value;
+    const activeTab = document.querySelector('.nav-item.active').dataset.tab;
+    alert('Searching for "' + searchTerm + '" in ' + activeTab + ' tab');
+    // You can implement actual search here based on active tab
+}
+
+// Filter bookings
+function filterBookings() {
+    const filter = document.getElementById('statusFilter').value;
+    alert('Filtering bookings by: ' + filter);
+    // You can implement actual filter here
+}

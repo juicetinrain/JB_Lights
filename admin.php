@@ -1,61 +1,42 @@
 <?php
-// admin.php - Complete Admin Panel
-$DB_HOST = 'localhost';
-$DB_USER = 'root';
-$DB_PASS = '';
-$DB_NAME = 'jb_lights';
-
-$conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
-if ($conn->connect_error) {
-    die("DB Connection failed: " . $conn->connect_error);
+// config.php - Now using db_connect.php
+require_once 'db/db_connect.php';
+// Check if user is logged in and is admin
+if (!isLoggedIn() || !isAdmin()) {
+    header('Location: login_register.php');
+    exit();
 }
-
-// Handle actions
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['action'])) {
-        if ($_POST['action'] === 'update_status') {
-            $id = intval($_POST['id']);
-            $status = trim($_POST['status']);
-            $allowed = ['Pending','Confirmed','Cancelled'];
-            if ($id > 0 && in_array($status, $allowed)) {
-                $stmt = $conn->prepare("UPDATE reservations SET status = ? WHERE id = ?");
-                $stmt->bind_param("si", $status, $id);
-                $stmt->execute();
-                $stmt->close();
-            }
-        } elseif ($_POST['action'] === 'delete_booking') {
-            $id = intval($_POST['id']);
-            if ($id > 0) {
-                $stmt = $conn->prepare("DELETE FROM reservations WHERE id = ?");
-                $stmt->bind_param("i", $id);
-                $stmt->execute();
-                $stmt->close();
-            }
-        }
+// Handle status updates
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_status') {
+    $id = intval($_POST['id']);
+    $status = trim($_POST['status']);
+    $allowed = ['Pending','Confirmed','Cancelled'];
+    if ($id > 0 && in_array($status, $allowed)) {
+        $stmt = $conn->prepare("UPDATE reservations SET status = ? WHERE id = ?");
+        $stmt->bind_param("si", $status, $id);
+        $stmt->execute();
+        $stmt->close();
     }
 }
 
-// Get filter values
-$search = $_GET['search'] ?? '';
-$filter = $_GET['filter'] ?? '';
-
-// Build query
-$query = "SELECT * FROM reservations WHERE 1=1";
-if ($search) {
-    $query .= " AND (contact_name LIKE '%$search%' OR contact_email LIKE '%$search%' OR contact_phone LIKE '%$search%')";
-}
-if ($filter && $filter !== 'all') {
-    $query .= " AND status = '$filter'";
-}
-$query .= " ORDER BY created_at DESC";
-
-$result = $conn->query($query);
+// Get all bookings
+$result = $conn->query("SELECT * FROM reservations ORDER BY created_at DESC");
 $bookings = [];
 if ($result) {
     while ($row = $result->fetch_assoc()) {
         $bookings[] = $row;
     }
     $result->free();
+}
+
+// Get recent bookings for dashboard
+$recent_result = $conn->query("SELECT * FROM reservations ORDER BY created_at DESC LIMIT 5");
+$recent_bookings = [];
+if ($recent_result) {
+    while ($row = $recent_result->fetch_assoc()) {
+        $recent_bookings[] = $row;
+    }
+    $recent_result->free();
 }
 
 // Get users
@@ -84,9 +65,12 @@ if ($inventory_result) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - JB Lights & Sound</title>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/pages/admin.css">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Custom Admin CSS -->
+    <link rel="stylesheet" href="css/pages/admin.css">
 </head>
 <body>
     <div class="admin-shell">
@@ -162,6 +146,45 @@ if ($inventory_result) {
                                 </div>
                                 <div class="stat-label">Confirmed Bookings</div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Bookings -->
+                    <div class="content-card">
+                        <h3 class="content-title">Recent Bookings</h3>
+                        <div class="table-responsive">
+                            <table class="bookings-table">
+                                <thead>
+                                    <tr>
+                                        <th>Booking ID</th>
+                                        <th>Customer Name</th>
+                                        <th>Package</th>
+                                        <th>Event Date</th>
+                                        <th>Phone No.</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if (count($recent_bookings) === 0): ?>
+                                        <tr><td colspan="6" class="text-center">No recent bookings.</td></tr>
+                                    <?php else: ?>
+                                        <?php foreach ($recent_bookings as $booking): ?>
+                                            <tr>
+                                                <td>#<?php echo $booking['id']; ?></td>
+                                                <td><?php echo htmlspecialchars($booking['contact_name']); ?></td>
+                                                <td><?php echo htmlspecialchars($booking['package']); ?></td>
+                                                <td><?php echo date('m-d-Y', strtotime($booking['event_date'])); ?></td>
+                                                <td><?php echo htmlspecialchars($booking['contact_phone']); ?></td>
+                                                <td>
+                                                    <span class="status-pill status-<?php echo strtolower($booking['status']); ?>">
+                                                        <?php echo $booking['status']; ?>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -297,8 +320,8 @@ if ($inventory_result) {
                                                 <td><?php echo $item['quantity']; ?></td>
                                                 <td><?php echo $item['available_quantity']; ?></td>
                                                 <td>
-                                                    <span class="status-pill status-<?php echo strtolower($item['condition']); ?>">
-                                                        <?php echo $item['condition']; ?>
+                                                    <span class="status-pill status-<?php echo strtolower($item['item_condition']); ?>">
+                                                        <?php echo $item['item_condition']; ?>
                                                     </span>
                                                 </td>
                                             </tr>
@@ -311,81 +334,82 @@ if ($inventory_result) {
                 </div>
             </section>
 
-            <footer class="main-footer">
-                <div>&copy; <?php echo date('Y'); ?> JB Lights & Sound - Admin Dashboard</div>
-            </footer>
+            <<!-- Footer -->
+<footer class="main-footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <a href="index.php" class="logo">
+                    <img src="https://i.imgur.com/wOkfD9T.jpeg" alt="JB Lights & Sound" class="logo-image">
+                    <div class="logo-text">
+                        <span class="logo-main">JB LIGHTS & SOUND</span>
+                        <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
+                    </div>
+                </a>
+                <p class="footer-desc">Your premier partner for professional event production services in Pampanga and surrounding areas.</p>
+                <div class="social-links">
+                    <a href="#" class="social-link"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="social-link"><i class="bi bi-messenger"></i></a>
+                    <a href="#" class="social-link"><i class="bi bi-instagram"></i></a>
+                    <a href="tel:+639656396053" class="social-link"><i class="bi bi-telephone"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-links">
+                <h4>QUICK LINKS</h4>
+                <ul>
+                    <li><a href="index.php">HOME</a></li>
+                    <li><a href="about_us.php">ABOUT US</a></li>
+                    <li><a href="index.php#services">SERVICES</a></li>
+                    <li><a href="index.php#packages">PACKAGES</a></li>
+                    <li><a href="ContactUs.php">CONTACT</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-services">
+                <h4>OUR SERVICES</h4>
+                <ul>
+                    <li>SOUND SYSTEMS</li>
+                    <li>LIGHTING EQUIPMENT</li>
+                    <li>STAGE & TRUSSES</li>
+                    <li>LED VIDEO WALLS</li>
+                    <li>EVENT PRODUCTION</li>
+                    <li>TECHNICAL SUPPORT</li>
+                </ul>
+            </div>
+            
+            <div class="footer-contact">
+                <h4>CONTACT INFO</h4>
+                <div class="contact-item">
+                    <i class="bi bi-geo-alt"></i>
+                    <span>235, PUROK 2, BICAL, MABALACAT CITY, PAMPANGA</span>
+                </div>
+                <div class="contact-item">
+                    <i class="bi bi-telephone"></i>
+                    <span>0965-639-6053</span>
+                </div>
+                <div class="contact-item">
+                    <i class="bi bi-envelope"></i>
+                    <span>JBLIGHTSANDSOUNDRENTAL@GMAIL.COM</span>
+                </div>
+                <div class="contact-item">
+                    <i class="bi bi-clock"></i>
+                    <span>24/7 EMERGENCY SUPPORT</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 JB LIGHTS & SOUND. ALL RIGHTS RESERVED.</p>
+        </div>
+    </div>
+</footer>
         </main>
     </div>
 
-    <script src="js/admin.js"></script>
-    <script>
-        // Tab navigation
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                if (this.classList.contains('logout')) {
-                    if (confirm('Are you sure you want to logout?')) {
-                        window.location.href = 'login_register.php';
-                    }
-                    return;
-                }
-
-                // Update active nav item
-                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-                this.classList.add('active');
-
-                // Show corresponding tab
-                const tabName = this.dataset.tab;
-                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-                document.getElementById(tabName + '-tab').classList.add('active');
-            });
-        });
-
-        // Search function
-        function performSearch() {
-            const searchTerm = document.getElementById('globalSearch').value;
-            const url = new URL(window.location);
-            url.searchParams.set('search', searchTerm);
-            window.location.href = url.toString();
-        }
-
-        // Filter bookings
-        function filterBookings() {
-            const filter = document.getElementById('statusFilter').value;
-            const url = new URL(window.location);
-            url.searchParams.set('filter', filter);
-            window.location.href = url.toString();
-        }
-
-        // Delete booking
-        function deleteBooking(id) {
-            if (confirm('Are you sure you want to delete booking #' + id + '?')) {
-                const formData = new FormData();
-                formData.append('action', 'delete_booking');
-                formData.append('id', id);
-
-                fetch(window.location.href, {
-                    method: 'POST',
-                    body: formData
-                }).then(() => {
-                    location.reload();
-                });
-            }
-        }
-
-        // Apply existing filters on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const search = urlParams.get('search');
-            const filter = urlParams.get('filter');
-
-            if (search) {
-                document.getElementById('globalSearch').value = search;
-            }
-            if (filter) {
-                document.getElementById('statusFilter').value = filter;
-            }
-        });
-    </script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom Admin JS -->
+    <script src="admin.js"></script>
 </body>
 </html>

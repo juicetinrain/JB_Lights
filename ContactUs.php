@@ -53,17 +53,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_contact'])) {
     <<link rel="stylesheet" href="css/main.css">
 </head>
 <body class="dark-mode">
-    <!-- Header - CLEAN & SIMPLE -->
-    <header class="main-header">
+    <!-- Header -->
+<header class="main-header">
     <div class="header-container">
         <a href="index.php" class="logo">
-    <img src="img/JB_logo.jpg" alt="JB Lights & Sound" class="logo-image">
-    <div class="logo-text">
-        <span class="logo-main">JB LIGHTS & SOUND</span>
-        <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
-    </div>
-</a>
+            <img src="https://i.imgur.com/wOkfD9T.jpeg" alt="JB Lights & Sound" class="logo-image">
+            <div class="logo-text">
+                <span class="logo-main">JB LIGHTS & SOUND</span>
+                <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
+            </div>
+        </a>
         <nav class="main-nav">
+            <a href="reservation.php" class="btn btn-primary me-2 d-none d-md-inline-block">
+                <i class="bi bi-calendar-check"></i> BOOK NOW
+            </a>
             <button class="menu-toggle">
                 <div class="hamburger">
                     <span></span>
@@ -287,144 +290,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_contact'])) {
     </section>
 
     <!-- Footer -->
-    <footer class="main-footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                        <div class="logo">
-                        <img src="img/jb_logo.jpg" alt="JB Lights & Sound" class="logo-image">
+<footer class="main-footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <a href="index.php" class="logo">
+                    <img src="https://i.imgur.com/wOkfD9T.jpeg" alt="JB Lights & Sound" class="logo-image">
+                    <div class="logo-text">
+                        <span class="logo-main">JB LIGHTS & SOUND</span>
+                        <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
                     </div>
-                        <div class="logo-text">
-                            <span class="logo-main">JB LIGHTS & SOUND</span>
-                            <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
-                        </div>
-                    <p class="footer-desc">Your trusted partner for professional lights and sound rental services in Pampanga and surrounding areas.</p>
-                    <div class="social-links">
-                        <a href="#" class="social-link"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="social-link"><i class="bi bi-messenger"></i></a>
-                        <a href="tel:+639656396053" class="social-link"><i class="bi bi-telephone"></i></a>
-                    </div>
-                </div>
-                
-                <div class="footer-links">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="index.php">Home</a></li>
-                        <li><a href="index.php#services">Services</a></li>
-                        <li><a href="index.php#gallery">Gallery</a></li>
-                        <li><a href="reservation.php">Book Event</a></li>
-                        <li><a href="ContactUs.php">Contact</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-services">
-                    <h4>Our Services</h4>
-                    <ul>
-                        <li>Sound System Rental</li>
-                        <li>Lighting Equipment</li>
-                        <li>Stage & Trusses</li>
-                        <li>LED Walls & Projectors</li>
-                        <li>Chairs & Tables</li>
-                        <li>Event Production</li>
-                    </ul>
-                </div>
-                
-                <div class="footer-contact">
-                    <h4>Contact Info</h4>
-                    <div class="contact-item">
-                        <i class="bi bi-telephone-fill"></i>
-                        <span>0965-639-6053</span>
-                    </div>
-                    <div class="contact-item">
-                        <i class="bi bi-envelope-fill"></i>
-                        <span>jblightsandsoundrental@gmail.com</span>
-                    </div>
-                    <div class="contact-item">
-                        <i class="bi bi-geo-alt-fill"></i>
-                        <span>235, Purok 2, Bical, Mabalacat City, Pampanga</span>
-                    </div>
+                </a>
+                <p class="footer-desc">Your premier partner for professional event production services in Pampanga and surrounding areas.</p>
+                <div class="social-links">
+                    <a href="#" class="social-link"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="social-link"><i class="bi bi-messenger"></i></a>
+                    <a href="#" class="social-link"><i class="bi bi-instagram"></i></a>
+                    <a href="tel:+639656396053" class="social-link"><i class="bi bi-telephone"></i></a>
                 </div>
             </div>
             
-            <div class="footer-bottom">
-                <p>&copy; 2025 JB Lights & Sound. All rights reserved.</p>
+            <div class="footer-links">
+                <h4>QUICK LINKS</h4>
+                <ul>
+                    <li><a href="index.php">HOME</a></li>
+                    <li><a href="about_us.php">ABOUT US</a></li>
+                    <li><a href="index.php#services">SERVICES</a></li>
+                    <li><a href="index.php#packages">PACKAGES</a></li>
+                    <li><a href="ContactUs.php">CONTACT</a></li>
+                </ul>
             </div>
-        </div>
-    </footer>
-
-    <!-- Side Navigation -->
-    <div id="mySidenav" class="sidenav">
-        <div class="sidenav-header">
-            <div class="logo">
-                <div class="logo-icon">
-                    <span class="j-letter">J</span>
-                    <span class="b-letter">B</span>
+            
+            <div class="footer-services">
+                <h4>OUR SERVICES</h4>
+                <ul>
+                    <li>SOUND SYSTEMS</li>
+                    <li>LIGHTING EQUIPMENT</li>
+                    <li>STAGE & TRUSSES</li>
+                    <li>LED VIDEO WALLS</li>
+                    <li>EVENT PRODUCTION</li>
+                    <li>TECHNICAL SUPPORT</li>
+                </ul>
+            </div>
+            
+            <div class="footer-contact">
+                <h4>CONTACT INFO</h4>
+                <div class="contact-item">
+                    <i class="bi bi-geo-alt"></i>
+                    <span>235, PUROK 2, BICAL, MABALACAT CITY, PAMPANGA</span>
                 </div>
-                <div class="logo-text">
-                    <span class="logo-main">JB LIGHTS & SOUND</span>
+                <div class="contact-item">
+                    <i class="bi bi-telephone"></i>
+                    <span>0965-639-6053</span>
+                </div>
+                <div class="contact-item">
+                    <i class="bi bi-envelope"></i>
+                    <span>JBLIGHTSANDSOUNDRENTAL@GMAIL.COM</span>
+                </div>
+                <div class="contact-item">
+                    <i class="bi bi-clock"></i>
+                    <span>24/7 EMERGENCY SUPPORT</span>
                 </div>
             </div>
-            <button class="closebtn" onclick="closeNav()">
-                <i class="bi bi-x-lg"></i>
-            </button>
         </div>
         
-        <div class="sidenav-content">
-            <!-- Clickable Profile Section -->
-            <div class="user-profile" onclick="closeNav()">
-                <div class="user-avatar">
-                    <i class="bi bi-person-circle"></i>
-                </div>
-                <div class="user-info">
-                    <p class="user-name">Welcome to JB Lights</p>
-                    <p class="user-email">Event Services</p>
-                </div>
-            </div>
-
-            <nav class="sidenav-menu">
-                <a href="index.php" class="menu-item" onclick="closeNav()">
-                    <i class="bi bi-house"></i>
-                    HOME
-                </a>
-                <a href="index.php#services" class="menu-item" onclick="closeNav()">
-                    <i class="bi bi-speaker"></i>
-                    SERVICES
-                </a>
-                <a href="index.php#gallery" class="menu-item" onclick="closeNav()">
-                    <i class="bi bi-images"></i>
-                    GALLERY
-                </a>
-                <a href="index.php#packages" class="menu-item" onclick="closeNav()">
-                    <i class="bi bi-star"></i>
-                    PACKAGES
-                </a>
-                <a href="reservation.php" class="menu-item" onclick="closeNav()">
-                    <i class="bi bi-calendar-check"></i>
-                    BOOK EVENT
-                </a>
-                <a href="ContactUs.php" class="menu-item active" onclick="closeNav()">
-                    <i class="bi bi-telephone"></i>
-                    CONTACT US
-                </a>
-            </nav>
-
-            <div class="sidenav-footer">
-                <div class="contact-info">
-                    <div class="contact-item">
-                        <i class="bi bi-telephone"></i>
-                        <span>0965-639-6053</span>
-                    </div>
-                    <div class="contact-item">
-                        <i class="bi bi-clock"></i>
-                        <span>24/7 Support</span>
-                    </div>
-                </div>
-                <button class="close-menu-btn" onclick="closeNav()">
-                    CLOSE MENU
-                </button>
-            </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 JB LIGHTS & SOUND. ALL RIGHTS RESERVED.</p>
         </div>
     </div>
+</footer>
+
+    <!-- Side Navigation -->
+    <?php include 'side_nav.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="home.js"></script>

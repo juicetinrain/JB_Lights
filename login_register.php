@@ -1,21 +1,88 @@
+<?php
+// login_register.php
+require_once 'db/db_connect.php';
+
+// Handle login
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
+    $email = $_POST['email'] ?? '';
+    $password = $_POST['password'] ?? '';
+    
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
+    $stmt->bind_param("ss", $email, $password);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['user_name'] = $user['name'];
+        $_SESSION['user_email'] = $user['email'];
+        $_SESSION['user_type'] = $user['user_type'];
+        
+        // Redirect based on user type
+        if ($user['user_type'] === 'admin') {
+            header('Location: admin.php');
+        } else {
+            header('Location: index.php');
+        }
+        exit();
+    } else {
+        $login_error = "Invalid email or password!";
+    }
+}
+
+// Handle registration
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
+    $name = $_POST['name'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $password = $_POST['password'] ?? '';
+    
+    // Check if email exists
+    $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $check = $stmt->get_result();
+    
+    if ($check->num_rows > 0) {
+        $register_error = "Email already exists!";
+    } else {
+        // Insert new user as regular user
+        $user_type = 'user';
+        $stmt = $conn->prepare("INSERT INTO users (name, email, password, user_type) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("ssss", $name, $email, $password, $user_type);
+        
+        if ($stmt->execute()) {
+            $user_id = $conn->insert_id;
+            $_SESSION['user_id'] = $user_id;
+            $_SESSION['user_name'] = $name;
+            $_SESSION['user_email'] = $email;
+            $_SESSION['user_type'] = $user_type;
+            
+            header('Location: index.php');
+            exit();
+        } else {
+            $register_error = "Registration failed. Please try again.";
+        }
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JB Lights & Sound Rental</title>
+    <title>Login/Register - JB Lights & Sound</title>
     <link rel="stylesheet" href="css/pages/login_register.css">
 </head>
 <body>
+    
     <div class="background"></div>
-    <div class="stage-decorations">
-        <div class="flowers"></div>
-    </div>
-
+    
     <div class="container">
         <div class="form-wrapper">
             <div class="logo-section">
-                <img src="img/jb_logo.jpg" class="jbl">
+                <img src="https://i.imgur.com/wOkfD9T.jpeg" class="jbl">
             </div>
 
             <div class="tabs">
@@ -25,17 +92,20 @@
 
             <div class="form-container">
                 <!-- Login Form -->
-                <form id="loginForm" class="form" onsubmit="handleLogin(event)">
+                <form id="loginForm" class="form" method="POST">
+                    <input type="hidden" name="login" value="1">
+                    <?php if (isset($login_error)): ?>
+                        <div class="error-message show"><?php echo $login_error; ?></div>
+                    <?php endif; ?>
+                    
                     <div class="form-group">
                         <label for="loginEmail">Email</label>
-                        <input type="email" id="loginEmail" placeholder="Enter your email" required>
-                        <div class="error-message" id="loginEmailError">Please enter a valid email</div>
+                        <input type="email" id="loginEmail" name="email" placeholder="Enter your email" required>
                     </div>
 
                     <div class="form-group">
                         <label for="loginPassword">Password</label>
-                        <input type="password" id="loginPassword" placeholder="Enter your password" required>
-                        <div class="error-message" id="loginPasswordError">Password is required</div>
+                        <input type="password" id="loginPassword" name="password" placeholder="Enter your password" required>
                     </div>
 
                     <div class="form-options">
@@ -43,36 +113,37 @@
                             <input type="checkbox" id="showPassword" onchange="togglePassword('login')">
                             <label for="showPassword">Show password</label>
                         </div>
-                        <a href="#" class="forgot-password" onclick="forgotPassword(event)">Forgot password?</a>
+                        <a href="#" class="forgot-password">Forgot password?</a>
                     </div>
 
                     <button type="submit" class="submit-btn">Login</button>
                 </form>
 
                 <!-- Register Form -->
-                <form id="registerForm" class="form hidden" onsubmit="handleRegister(event)">
+                <form id="registerForm" class="form hidden" method="POST">
+                    <input type="hidden" name="register" value="1">
+                    <?php if (isset($register_error)): ?>
+                        <div class="error-message show"><?php echo $register_error; ?></div>
+                    <?php endif; ?>
+                    
                     <div class="form-group">
                         <label for="registerName">Name</label>
-                        <input type="text" id="registerName" placeholder="Enter your full name" required>
-                        <div class="error-message" id="registerNameError">Name is required</div>
+                        <input type="text" id="registerName" name="name" placeholder="Enter your full name" required>
                     </div>
 
                     <div class="form-group">
                         <label for="registerEmail">Email</label>
-                        <input type="email" id="registerEmail" placeholder="Enter your email" required>
-                        <div class="error-message" id="registerEmailError">Please enter a valid email</div>
+                        <input type="email" id="registerEmail" name="email" placeholder="Enter your email" required>
                     </div>
 
                     <div class="form-group">
                         <label for="registerPassword">Password</label>
-                        <input type="password" id="registerPassword" placeholder="Create a password" required>
-                        <div class="error-message" id="registerPasswordError">Password must be at least 6 characters</div>
+                        <input type="password" id="registerPassword" name="password" placeholder="Create a password" required>
                     </div>
 
                     <div class="form-group">
                         <label for="confirmPassword">Confirm Password</label>
                         <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
-                        <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
                     </div>
 
                     <div class="form-options">
@@ -100,12 +171,10 @@
                 tabs[0].classList.add('active');
                 loginForm.classList.remove('hidden');
                 registerForm.classList.add('hidden');
-                clearErrors();
             } else {
                 tabs[1].classList.add('active');
                 registerForm.classList.remove('hidden');
                 loginForm.classList.add('hidden');
-                clearErrors();
             }
         }
 
@@ -124,130 +193,27 @@
             }
         }
 
-        function validateEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
-        }
-
-        function showError(inputId, errorId, message) {
-            const input = document.getElementById(inputId);
-            const error = document.getElementById(errorId);
-            input.classList.add('error');
-            error.textContent = message;
-            error.classList.add('show');
-        }
-
-        function clearError(inputId, errorId) {
-            const input = document.getElementById(inputId);
-            const error = document.getElementById(errorId);
-            input.classList.remove('error');
-            error.classList.remove('show');
-        }
-
-        function clearErrors() {
-            const inputs = document.querySelectorAll('input');
-            const errors = document.querySelectorAll('.error-message');
-            inputs.forEach(input => input.classList.remove('error'));
-            errors.forEach(error => error.classList.remove('show'));
-        }
-
-        function handleLogin(event) {
-            event.preventDefault();
-            clearErrors();
-
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            let isValid = true;
-
-            if (!validateEmail(email)) {
-                showError('loginEmail', 'loginEmailError', 'Please enter a valid email');
-                isValid = false;
-            }
-
-            if (password.length < 1) {
-                showError('loginPassword', 'loginPasswordError', 'Password is required');
-                isValid = false;
-            }
-
-            if (isValid) {
-                alert(`Login successful!\nEmail: ${email}`);
-                // Here you would typically send the data to your server
-                console.log('Login data:', { email, password });
-            }
-        }
-
-        function handleRegister(event) {
-            event.preventDefault();
-            clearErrors();
-
-            const name = document.getElementById('registerName').value;
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            let isValid = true;
-
-            if (name.trim().length < 2) {
-                showError('registerName', 'registerNameError', 'Name must be at least 2 characters');
-                isValid = false;
-            }
-
-            if (!validateEmail(email)) {
-                showError('registerEmail', 'registerEmailError', 'Please enter a valid email');
-                isValid = false;
-            }
-
-            if (password.length < 6) {
-                showError('registerPassword', 'registerPasswordError', 'Password must be at least 6 characters');
-                isValid = false;
-            }
-
-            if (password !== confirmPassword) {
-                showError('confirmPassword', 'confirmPasswordError', 'Passwords do not match');
-                isValid = false;
-            }
-
-            if (isValid) {
-                alert(`Registration successful!\nName: ${name}\nEmail: ${email}`);
-                // Here you would typically send the data to your server
-                console.log('Registration data:', { name, email, password });
-            }
-        }
-
-        function forgotPassword(event) {
-            event.preventDefault();
-            alert('Password reset link will be sent to your email address.');
-            // Here you would typically implement password reset functionality
-        }
-
-        function socialLogin(provider) {
-            alert(`${provider.charAt(0).toUpperCase() + provider.slice(1)} login clicked!\nThis would connect to ${provider} OAuth.`);
-            // Here you would typically implement OAuth integration
-            console.log(`Social login with: ${provider}`);
-        }
-
-        // Add real-time validation
-        document.getElementById('loginEmail')?.addEventListener('blur', function() {
-            if (this.value && !validateEmail(this.value)) {
-                showError('loginEmail', 'loginEmailError', 'Please enter a valid email');
-            } else {
-                clearError('loginEmail', 'loginEmailError');
-            }
-        });
-
-        document.getElementById('registerEmail')?.addEventListener('blur', function() {
-            if (this.value && !validateEmail(this.value)) {
-                showError('registerEmail', 'registerEmailError', 'Please enter a valid email');
-            } else {
-                clearError('registerEmail', 'registerEmailError');
-            }
-        });
-
+        // Password confirmation validation
         document.getElementById('confirmPassword')?.addEventListener('input', function() {
             const password = document.getElementById('registerPassword').value;
-            if (this.value && this.value !== password) {
-                showError('confirmPassword', 'confirmPasswordError', 'Passwords do not match');
+            const confirm = this.value;
+            
+            if (confirm && password !== confirm) {
+                this.style.borderColor = '#ef4444';
             } else {
-                clearError('confirmPassword', 'confirmPasswordError');
+                this.style.borderColor = '#e5e7eb';
+            }
+        });
+
+        // Real-time email validation
+        document.getElementById('registerEmail')?.addEventListener('blur', function() {
+            const email = this.value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (email && !emailRegex.test(email)) {
+                this.style.borderColor = '#ef4444';
+            } else {
+                this.style.borderColor = '#e5e7eb';
             }
         });
     </script>

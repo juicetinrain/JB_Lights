@@ -27,6 +27,36 @@
     flex: 1;
 }
 
+/* Side Navigation ALL CAPS */
+.sidenav-menu .menu-item {
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.user-profile .user-name {
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.user-profile .user-email {
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+.sidenav-footer .logout-button {
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.contact-info .contact-item {
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
 .closebtn {
     color: var(--text-secondary);
     font-size: 1.5rem;

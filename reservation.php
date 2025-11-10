@@ -1,94 +1,156 @@
 <?php
-// reservation.php - JB Lights & Sound Reservation System
-$DB_HOST = 'localhost';
-$DB_USER = 'root';
-$DB_PASS = '';
-$DB_NAME = 'jb_lights';
+// reservation.php
+require_once 'db/db_connect.php';
 
-$conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
-if ($conn->connect_error) {
-    die("Database connection failed: " . $conn->connect_error);
+// Check if user is logged in
+if (!isLoggedIn()) {
+    header('Location: login_register.php');
+    exit();
 }
 
-$inserted = false;
-$error = '';
-$submission = [];
+$user = getCurrentUser();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['final_submit'])) {
-    // Sanitize inputs
-    $package = trim($_POST['package'] ?? '');
-    $event_type = trim($_POST['event_type'] ?? '');
-    $event_date = trim($_POST['event_date'] ?? '');
-    $event_time = trim($_POST['event_time'] ?? '');
-    $address = trim($_POST['address'] ?? '');
-    $contact_name = trim($_POST['contact_name'] ?? '');
-    $facebook_account = trim($_POST['facebook_account'] ?? '');
-    $contact_phone = trim($_POST['contact_phone'] ?? '');
-    $payment = trim($_POST['payment'] ?? '');
-    $notes = trim($_POST['notes'] ?? '');
+// Define packages
+$packages = [
+    'basic_setup' => [
+        'name' => 'BASIC SETUP',
+        'price' => 5000,
+        'sound_system' => [
+            '2pcs Powered Speaker w/stand',
+            '1pc Mixer (16channel)',
+            '2pcs Wireless Microphone',
+            '1pc Laptop (Music Only)',
+            '1 Mic Stand',
+            '1 Lyrics Stand'
+        ],
+        'lights_setup' => [
+            '6pcs Frontal LED Lights',
+            '6pcs Backdrop LED Lights',
+            '1pc T-Bar & Stand',
+            '1pc DMX Light Controller',
+            '1 Box Wire & XLR'
+        ]
+    ],
+    'upgraded_setup_6000' => [
+        'name' => 'UPGRADED SETUP',
+        'price' => 6000,
+        'sound_system' => [
+            '2pcs Powered Speaker w/stand',
+            '1pc Mixer (16channel)',
+            '2pcs Wireless Microphone',
+            '1pc Laptop (Music Only)',
+            '1 Mic Stand',
+            '1 Lyrics Stand'
+        ],
+        'lights_setup' => [
+            '12pcs Frontal LED Lights',
+            '6pcs Backdrop LED Lights',
+            '1pc T-Bar & Stand',
+            '2pcs Moving Head',
+            '1pc Smoke Machine',
+            '1pc Light Controller',
+            '1 Box Wire & XLR'
+        ]
+    ],
+    'upgraded_setup_7000' => [
+        'name' => 'UPGRADED SETUP',
+        'price' => 7000,
+        'sound_system' => [
+            '2pcs Powered Speaker w/stand',
+            '1pc Mixer (16channel)',
+            '2pcs Wireless Microphone',
+            '1pc Laptop (Music Only)',
+            '1 Mic Stand',
+            '1 Lyrics Stand'
+        ],
+        'lights_setup' => [
+            '12pcs Frontal LED Lights',
+            '6pcs Backdrop LED Lights',
+            '1pc T-Bar & Stand',
+            '4pcs Moving Head',
+            '1pc Smoke Machine',
+            '1pc Light Controller',
+            '1 Box Wire & XLR'
+        ]
+    ],
+    'mid_setup' => [
+        'name' => 'MID SETUP',
+        'price' => 10000,
+        'sound_system' => [
+            '4pcs Powered Speaker w/stand',
+            '2pcs Powered Monitor',
+            '2pcs Powered Sub Woofer',
+            '1pc Mixer (16channel)',
+            '4pcs Wireless Microphone',
+            '1pc Laptop (Music Only)',
+            '2pcs Mic Stand',
+            '1 Lyrics Stand'
+        ],
+        'lights_setup' => [
+            '12pcs Frontal LED Lights',
+            '12pcs Backdrop LED Lights',
+            '2pcs T-Bar & Stand',
+            '6pcs Moving Head',
+            '1pc Smoke Machine',
+            '1pc Light Controller',
+            '1 Box Wire & XLR'
+        ]
+    ]
+];
 
-    // Validate required fields
-    if (!$package || !$event_date || !$address || !$contact_name || !$contact_phone || !$payment) {
-        $error = "Please complete all required fields.";
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])) {
+    $contact_name = $_POST['contact_name'];
+    $contact_email = $_POST['contact_email'];
+    $contact_phone = $_POST['contact_phone'];
+    $event_type = $_POST['event_type'];
+    $event_date = $_POST['event_date'];
+    $event_address = $_POST['event_address'];
+    $package_key = $_POST['package'];
+    $total_amount = $packages[$package_key]['price'];
+    
+    // Insert reservation
+    $stmt = $conn->prepare("INSERT INTO reservations (contact_name, contact_email, contact_phone, event_type, event_date, event_address, package, total_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssssssd", $contact_name, $contact_email, $contact_phone, $event_type, $event_date, $event_address, $packages[$package_key]['name'], $total_amount);
+    
+    if ($stmt->execute()) {
+        $reservation_id = $conn->insert_id;
+        $success_message = "Reservation submitted successfully! Your Booking ID: #" . $reservation_id;
     } else {
-        // Validate date
-        $today = new DateTime();
-        $selected = DateTime::createFromFormat('Y-m-d', $event_date);
-        if (!$selected || $selected <= $today) {
-            $error = "Event date must be after today.";
-        } else {
-            // Insert into database
-            $stmt = $conn->prepare("INSERT INTO reservations (package, event_type, event_date, event_time, address, contact_name, facebook_account, contact_phone, payment_method, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("ssssssssss", $package, $event_type, $event_date, $event_time, $address, $contact_name, $facebook_account, $contact_phone, $payment, $notes);
-            
-            if ($stmt->execute()) {
-                $inserted = true;
-                $id = $stmt->insert_id;
-                $submission = [
-                    'id' => $id,
-                    'package' => $package,
-                    'event_type' => $event_type,
-                    'event_date' => $event_date,
-                    'event_time' => $event_time,
-                    'address' => $address,
-                    'contact_name' => $contact_name,
-                    'contact_phone' => $contact_phone,
-                    'facebook_account' => $facebook_account,
-                    'payment' => $payment,
-                    'notes' => $notes
-                ];
-            } else {
-                $error = "Database error: " . $stmt->error;
-            }
-            $stmt->close();
-        }
+        $error_message = "Error submitting reservation. Please try again.";
     }
+    $stmt->close();
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Your Event - JB Lights & Sound</title>
+    <title>Make Reservation - JB Lights & Sound</title>
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-        <!-- Header - MATCHES INDEX.PHP -->
-    <!-- Header - CLEAN & SIMPLE -->
-    <header class="main-header">
+<!-- Header -->
+<header class="main-header">
     <div class="header-container">
         <a href="index.php" class="logo">
-    <img src="img/JB_logo.jpg" alt="JB Lights & Sound" class="logo-image">
-    <div class="logo-text">
-        <span class="logo-main">JB LIGHTS & SOUND</span>
-        <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
-    </div>
-</a>
+            <img src="https://i.imgur.com/wOkfD9T.jpeg" alt="JB Lights & Sound" class="logo-image">
+            <div class="logo-text">
+                <span class="logo-main">JB LIGHTS & SOUND</span>
+                <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
+            </div>
+        </a>
         <nav class="main-nav">
+            <a href="reservation.php" class="btn btn-primary me-2 d-none d-md-inline-block">
+                <i class="bi bi-calendar-check"></i> BOOK NOW
+            </a>
             <button class="menu-toggle">
                 <div class="hamburger">
                     <span></span>
@@ -100,476 +162,340 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['final_submit'])) {
     </div>
 </header>
 
-    <main class="main-content">
+    <!-- Main Content -->
+    <main class="reservation-page">
         <div class="container">
-            <!-- Progress Bar -->
-            <div class="progress-shell">
-                <div class="progress-track">
-                    <div id="progressFill" class="progress-fill"></div>
-                </div>
-                <div class="progress-labels">
-                    <div>Package</div>
-                    <div>Date & Time</div>
-                    <div>Location & Contact</div>
-                    <div>Review & Pay</div>
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="reservation-card">
+                        <div class="reservation-header text-center mb-4">
+                            <h1 class="text-white">Make a Reservation</h1>
+                            <p class="text-secondary">Book your lights and sound package for your event</p>
+                        </div>
+
+                        <?php if (isset($success_message)): ?>
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <?php echo $success_message; ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if (isset($error_message)): ?>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <?php echo $error_message; ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+
+                        <form method="POST" id="reservationForm">
+                            <!-- Step 1: Package Selection -->
+                            <div class="step-card active" id="step1">
+                                <h3 class="step-title">1. Select Your Package</h3>
+                                <div class="row">
+                                    <?php foreach ($packages as $key => $package): ?>
+                                    <div class="col-md-6 mb-4">
+                                        <div class="package-card">
+                                            <input type="radio" name="package" id="<?php echo $key; ?>" value="<?php echo $key; ?>" class="package-radio" required>
+                                            <label for="<?php echo $key; ?>" class="package-label">
+                                                <div class="package-header">
+                                                    <h4><?php echo $package['name']; ?></h4>
+                                                    <div class="package-price">₱<?php echo number_format($package['price'], 2); ?></div>
+                                                </div>
+                                                <div class="package-features">
+                                                    <h6>Sound System:</h6>
+                                                    <ul>
+                                                        <?php foreach ($package['sound_system'] as $feature): ?>
+                                                            <li><?php echo $feature; ?></li>
+                                                        <?php endforeach; ?>
+                                                    </ul>
+                                                    <h6>Lights Setup:</h6>
+                                                    <ul>
+                                                        <?php foreach ($package['lights_setup'] as $feature): ?>
+                                                            <li><?php echo $feature; ?></li>
+                                                        <?php endforeach; ?>
+                                                    </ul>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <div class="text-end">
+                                    <button type="button" class="btn btn-primary" onclick="nextStep(1)">Next <i class="fas fa-arrow-right ms-2"></i></button>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Event Details -->
+                            <div class="step-card" id="step2">
+                                <h3 class="step-title">2. Event Details</h3>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label text-white">Contact Name</label>
+                                        <input type="text" class="form-control" name="contact_name" value="<?php echo htmlspecialchars($user['name']); ?>" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label text-white">Contact Email</label>
+                                        <input type="email" class="form-control" name="contact_email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label text-white">Contact Phone</label>
+                                        <input type="tel" class="form-control" name="contact_phone" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label text-white">Event Type</label>
+                                        <select class="form-select" name="event_type" required>
+                                            <option value="">Select Event Type</option>
+                                            <option value="Wedding">Wedding</option>
+                                            <option value="Birthday">Birthday</option>
+                                            <option value="Corporate">Corporate Event</option>
+                                            <option value="Concert">Concert</option>
+                                            <option value="Party">Party</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label text-white">Event Date</label>
+                                        <input type="date" class="form-control" name="event_date" min="<?php echo date('Y-m-d'); ?>" required>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label text-white">Event Address</label>
+                                        <textarea class="form-control" name="event_address" rows="3" required placeholder="Full event address..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-secondary" onclick="prevStep(2)"><i class="fas fa-arrow-left me-2"></i> Back</button>
+                                    <button type="button" class="btn btn-primary" onclick="nextStep(2)">Next <i class="fas fa-arrow-right ms-2"></i></button>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Review & Submit -->
+                            <div class="step-card" id="step3">
+                                <h3 class="step-title">3. Review & Submit</h3>
+                                <div class="review-section">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h5 class="text-primary">Package Details</h5>
+                                            <div id="reviewPackage"></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h5 class="text-primary">Event Details</h5>
+                                            <div id="reviewEvent"></div>
+                                        </div>
+                                    </div>
+                                    <div class="total-section mt-4 p-3 rounded" style="background: var(--dark);">
+                                        <h4 class="text-white text-center">Total Amount: <span id="reviewTotal" class="text-primary"></span></h4>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-secondary" onclick="prevStep(3)"><i class="fas fa-arrow-left me-2"></i> Back</button>
+                                    <button type="submit" name="submit_reservation" class="btn btn-success">Confirm Reservation <i class="fas fa-check ms-2"></i></button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
-
-            <?php if ($inserted): ?>
-                <!-- Success Message -->
-                <div class="step-card success-card">
-                    <div class="success-icon">
-                        <i class="bi bi-check-circle-fill"></i>
-                    </div>
-                    <h2>Reservation Confirmed!</h2>
-                    <p class="success-message">Thank you for your booking. We'll contact you within 24 hours to confirm details.</p>
-                    
-                    <div class="booking-details">
-                        <h5>Booking Details:</h5>
-                        <div class="detail-item">
-                            <strong>Booking ID:</strong> #<?php echo htmlspecialchars($submission['id']); ?>
-                        </div>
-                        <div class="detail-item">
-                            <strong>Package:</strong> <?php echo htmlspecialchars($submission['package']); ?>
-                        </div>
-                        <div class="detail-item">
-                            <strong>Event:</strong> <?php echo htmlspecialchars($submission['event_type'] ?: 'Not specified'); ?> 
-                            on <?php echo htmlspecialchars($submission['event_date']); ?>
-                            <?php echo $submission['event_time'] ? 'at ' . htmlspecialchars($submission['event_time']) : ''; ?>
-                        </div>
-                        <div class="detail-item">
-                            <strong>Contact:</strong> <?php echo htmlspecialchars($submission['contact_name']); ?> • 
-                            <?php echo htmlspecialchars($submission['contact_phone']); ?>
-                        </div>
-                        <div class="detail-item">
-                            <strong>Payment Method:</strong> <?php echo htmlspecialchars($submission['payment']); ?>
-                        </div>
-                    </div>
-
-                    <div class="actions">
-                        <a href="reservation.php" class="btn btn-primary">Book Another Event</a>
-                        <a href="index.php" class="btn btn-outline">Back to Home</a>
-                    </div>
-                </div>
-
-            <?php else: ?>
-                <?php if ($error): ?>
-                    <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
-                <?php endif; ?>
-
-                <!-- Reservation Form -->
-                <div class="step-card">
-                    <form id="reservationForm" method="POST" novalidate>
-                        <input type="hidden" name="final_submit" value="1">
-
-                        <!-- Step 1: Package Selection -->
-                        <section id="step-1" class="step active">
-                            <h2>Choose Your Package</h2>
-                            <p class="step-description">Select the perfect package for your event</p>
-
-                            <div class="packages-grid">
-                                <div class="package-card" data-value="Basic Package (₱5,000)">
-                                    <div class="package-header">
-                                        <h4>BASIC</h4>
-                                        <div class="price">₱5,000</div>
-                                    </div>
-                                    <div class="package-features">
-                                        <div>✓ Basic Sound System</div>
-                                        <div>✓ Basic Lighting</div>
-                                        <div>✓ 4 Hours Service</div>
-                                        <div>✓ 1 Technician</div>
-                                    </div>
-                                    <button type="button" class="btn-select" onclick="selectPackage(this)">Select</button>
-                                </div>
-
-                                <div class="package-card" data-value="Upgraded Package (₱6,000)">
-                                    <div class="package-header">
-                                        <h4>UPGRADED</h4>
-                                        <div class="price">₱6,000</div>
-                                    </div>
-                                    <div class="package-features">
-                                        <div>✓ Enhanced Sound System</div>
-                                        <div>✓ Basic + Effects Lighting</div>
-                                        <div>✓ 5 Hours Service</div>
-                                        <div>✓ 1 Technician</div>
-                                    </div>
-                                    <button type="button" class="btn-select" onclick="selectPackage(this)">Select</button>
-                                </div>
-
-                                <div class="package-card" data-value="Professional Package (₱7,000)">
-                                    <div class="package-header">
-                                        <h4>PROFESSIONAL</h4>
-                                        <div class="price">₱7,000</div>
-                                    </div>
-                                    <div class="package-features">
-                                        <div>✓ Professional Sound System</div>
-                                        <div>✓ Full Lighting Effects</div>
-                                        <div>✓ 6 Hours Service</div>
-                                        <div>✓ 2 Technicians</div>
-                                    </div>
-                                    <button type="button" class="btn-select" onclick="selectPackage(this)">Select</button>
-                                </div>
-
-                                <div class="package-card" data-value="Premium Package (₱10,000)">
-                                    <div class="package-header">
-                                        <h4>PREMIUM</h4>
-                                        <div class="price">₱10,000</div>
-                                    </div>
-                                    <div class="package-features">
-                                        <div>✓ Premium Sound System</div>
-                                        <div>✓ Advanced Lighting Rig</div>
-                                        <div>✓ 8 Hours Service</div>
-                                        <div>✓ 2 Technicians</div>
-                                        <div>✓ DJ Support</div>
-                                    </div>
-                                    <button type="button" class="btn-select" onclick="selectPackage(this)">Select</button>
-                                </div>
-                            </div>
-
-                            <input type="hidden" name="package" id="inputPackage" required>
-
-                            <div class="form-actions">
-                                <button type="button" class="btn btn-outline" onclick="goStep(2)">Next: Date & Time</button>
-                            </div>
-                        </section>
-
-                        <!-- Step 2: Event Details -->
-                        <section id="step-2" class="step">
-                            <h2>Event Details</h2>
-                            <p class="step-description">Tell us about your event</p>
-
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label for="inputEventType">Event Type *</label>
-                                    <select id="inputEventType" name="event_type" class="form-control" required>
-                                        <option value="">Select event type</option>
-                                        <option value="Wedding">Wedding</option>
-                                        <option value="Birthday">Birthday Party</option>
-                                        <option value="Corporate">Corporate Event</option>
-                                        <option value="Anniversary">Anniversary</option>
-                                        <option value="Christmas Party">Christmas Party</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="inputDate">Event Date *</label>
-                                    <input type="date" id="inputDate" name="event_date" class="form-control" required>
-                                    <small class="form-text">Please select a future date</small>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="inputTime">Start Time</label>
-                                    <input type="time" id="inputTime" name="event_time" class="form-control">
-                                </div>
-                            </div>
-
-                            <div class="form-actions">
-                                <button type="button" class="btn btn-outline" onclick="goStep(1)">Back</button>
-                                <button type="button" class="btn btn-primary" onclick="goStep(3)">Next: Location & Contact</button>
-                            </div>
-                        </section>
-
-                                                  <!-- Step 3: Location & Contact -->
-                          <section id="step-3" class="step">
-                              <h2>Location & Contact Details</h2>
-                              <p class="step-description">Where and how can we reach you?</p>
-
-                              <div class="form-group">
-                                  <label for="inputAddress">Event Address *</label>
-                                  <input type="text" id="inputAddress" name="address" class="form-control" 
-                                        placeholder="Click on the map or type address and press Enter" required>
-                              </div>
-
-                              <div class="map-container">
-                                  <div class="map-instructions">
-                                      <i class="bi bi-info-circle"></i> Click anywhere on the map to set your event location
-                                  </div>
-                                  <div id="map"></div>
-                                  <div class="map-help">
-                                      <i class="bi bi-lightbulb"></i>
-                                      Click on the map or drag the marker to set your exact location. The address will update automatically.
-                                  </div>
-                              </div>
-
-                              <div class="form-grid">
-                                  <div class="form-group">
-                                      <label for="inputName">Contact Person Name *</label>
-                                      <input type="text" id="inputName" name="contact_name" class="form-control" required>
-                                  </div>
-
-                                  <div class="form-group">
-                                      <label for="inputPhone">Contact Number *</label>
-                                      <input type="tel" id="inputPhone" name="contact_phone" class="form-control" 
-                                            placeholder="09XX-XXX-XXXX" required>
-                                  </div>
-
-                                  <div class="form-group">
-                                      <label for="facebook_account">Facebook Account (Optional)</label>
-                                      <input type="text" id="facebook_account" name="facebook_account" class="form-control"
-                                            placeholder="For easier communication">
-                                  </div>
-                              </div>
-
-                              <div class="form-group">
-                                  <label for="inputNotes">Additional Notes</label>
-                                  <textarea id="inputNotes" name="notes" class="form-control" rows="3" 
-                                            placeholder="Any special requests or instructions..."></textarea>
-                              </div>
-
-                              <div class="form-actions">
-                                  <button type="button" class="btn btn-outline" onclick="goStep(2)">Back</button>
-                                  <button type="button" class="btn btn-primary" onclick="goStep(4)">Next: Review & Pay</button>
-                              </div>
-                          </section>
-
-                        <!-- Step 4: Payment & Review -->
-                        <section id="step-4" class="step">
-                            <h2>Review & Payment</h2>
-                            <p class="step-description">Confirm your details and choose payment method</p>
-
-                            <div class="review-section">
-                                <h5>Your Booking Summary</h5>
-                                <div class="review-details">
-                                    <div class="review-item">
-                                        <span>Package:</span>
-                                        <span id="reviewPackage">—</span>
-                                    </div>
-                                    <div class="review-item">
-                                        <span>Event:</span>
-                                        <span id="reviewEvent">—</span>
-                                    </div>
-                                    <div class="review-item">
-                                        <span>Address:</span>
-                                        <span id="reviewAddress">—</span>
-                                    </div>
-                                    <div class="review-item">
-                                        <span>Contact:</span>
-                                        <span id="reviewContact">—</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="payment-section">
-                                <h5>Payment Method *</h5>
-                                <div class="payment-options">
-                                    <div class="payment-option">
-                                        <input type="radio" id="payCash" name="payment" value="Cash" required>
-                                        <label for="payCash">
-                                            <i class="bi bi-cash-coin"></i>
-                                            <div>
-                                                <strong>Cash on Delivery</strong>
-                                                <small>Pay after the event</small>
-                                            </div>
-                                        </label>
-                                    </div>
-                                    <div class="payment-option">
-                                        <input type="radio" id="payGcash" name="payment" value="GCash">
-                                        <label for="payGcash">
-                                            <i class="bi bi-phone"></i>
-                                            <div>
-                                                <strong>GCash</strong>
-                                                <small>30% downpayment required</small>
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div id="downpaymentInfo" class="downpayment-info" style="display: none;">
-                                    <div class="downpayment-amount">
-                                        <strong>Downpayment Required:</strong>
-                                        <span id="reviewDown">—</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-actions">
-                                <button type="button" class="btn btn-outline" onclick="goStep(3)">Back</button>
-                                <button type="button" class="btn btn-primary" onclick="openPreviewModal()">
-                                    Review & Confirm Booking
-                                </button>
-                            </div>
-                        </section>
-                    </form>
-                </div>
-            <?php endif; ?>
         </div>
     </main>
 
-    <!-- Confirmation Modal -->
-    <div class="modal fade" id="previewModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirm Your Booking</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="modalReview"></div>
-                    <div id="gcashBox" class="gcash-payment" style="display: none;">
-                        <hr>
-                        <h6>GCash Payment Instructions</h6>
-                        <div class="gcash-details">
-                            <div class="gcash-qr">
-                                <div class="qr-placeholder">
-                                    <i class="bi bi-qr-code"></i>
-                                    <small>GCash QR Code</small>
-                                </div>
-                            </div>
-                            <div class="gcash-info">
-                                <p><strong>Send payment to:</strong></p>
-                                <p>Account Name: <strong>JB Lights & Sound</strong></p>
-                                <p>Mobile: <strong>0965-639-6053</strong></p>
-                                <p>Downpayment Amount: <strong id="modalDown">—</strong></p>
-                                <small class="text-muted">Please send screenshot of payment confirmation</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" id="modalConfirm" class="btn btn-primary">Confirm Booking</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Footer -->
-    <footer class="main-footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                        <div class="logo">
-                        <img src="img/jb_logo.jpg" alt="JB Lights & Sound" class="logo-image">
+<footer class="main-footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <a href="index.php" class="logo">
+                    <img src="https://i.imgur.com/wOkfD9T.jpeg" alt="JB Lights & Sound" class="logo-image">
+                    <div class="logo-text">
+                        <span class="logo-main">JB LIGHTS & SOUND</span>
+                        <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
                     </div>
-                        <div class="logo-text">
-                            <span class="logo-main">JB LIGHTS & SOUND</span>
-                            <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
-                        </div>
-                    <p class="footer-desc">Your trusted partner for professional lights and sound rental services in Pampanga and surrounding areas.</p>
-                    <div class="social-links">
-                        <a href="#" class="social-link"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="social-link"><i class="bi bi-messenger"></i></a>
-                        <a href="#" class="social-link"><i class="bi bi-telephone"></i></a>
-                    </div>
-                </div>
-                
-                <div class="footer-links">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="index.php">Home</a></li>
-                        <li><a href="index.php#services">Services</a></li>
-                        <li><a href="index.php#featured">Gallery</a></li>
-                        <li><a href="reservation.php">Book Event</a></li>
-                        <li><a href="ContactUs.php">Contact</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-services">
-                    <h4>Our Services</h4>
-                    <ul>
-                        <li>Sound System Rental</li>
-                        <li>Lighting Equipment</li>
-                        <li>Stage & Trusses</li>
-                        <li>LED Walls & Projectors</li>
-                        <li>Chairs & Tables</li>
-                        <li>Event Production</li>
-                    </ul>
-                </div>
-                
-                <div class="footer-contact">
-                    <h4>Contact Us</h4>
-                    <div class="contact-item">
-                        <i class="bi bi-telephone-fill"></i>
-                        <span>0965-639-6053</span>
-                    </div>
-                    <div class="contact-item">
-                        <i class="bi bi-envelope-fill"></i>
-                        <span>jblightsandsoundrental@gmail.com</span>
-                    </div>
-                    <div class="contact-item">
-                        <i class="bi bi-geo-alt-fill"></i>
-                        <span>235, Purok 2, Bical, Mabalacat City, Pampanga</span>
-                    </div>
+                </a>
+                <p class="footer-desc">Your premier partner for professional event production services in Pampanga and surrounding areas.</p>
+                <div class="social-links">
+                    <a href="#" class="social-link"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="social-link"><i class="bi bi-messenger"></i></a>
+                    <a href="#" class="social-link"><i class="bi bi-instagram"></i></a>
+                    <a href="tel:+639656396053" class="social-link"><i class="bi bi-telephone"></i></a>
                 </div>
             </div>
             
-            <div class="footer-bottom">
-                <p>&copy; 2025 JB Lights & Sound. All rights reserved.</p>
+            <div class="footer-links">
+                <h4>QUICK LINKS</h4>
+                <ul>
+                    <li><a href="index.php">HOME</a></li>
+                    <li><a href="about_us.php">ABOUT US</a></li>
+                    <li><a href="index.php#services">SERVICES</a></li>
+                    <li><a href="index.php#packages">PACKAGES</a></li>
+                    <li><a href="ContactUs.php">CONTACT</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-services">
+                <h4>OUR SERVICES</h4>
+                <ul>
+                    <li>SOUND SYSTEMS</li>
+                    <li>LIGHTING EQUIPMENT</li>
+                    <li>STAGE & TRUSSES</li>
+                    <li>LED VIDEO WALLS</li>
+                    <li>EVENT PRODUCTION</li>
+                    <li>TECHNICAL SUPPORT</li>
+                </ul>
+            </div>
+            
+            <div class="footer-contact">
+                <h4>CONTACT INFO</h4>
+                <div class="contact-item">
+                    <i class="bi bi-geo-alt"></i>
+                    <span>235, PUROK 2, BICAL, MABALACAT CITY, PAMPANGA</span>
+                </div>
+                <div class="contact-item">
+                    <i class="bi bi-telephone"></i>
+                    <span>0965-639-6053</span>
+                </div>
+                <div class="contact-item">
+                    <i class="bi bi-envelope"></i>
+                    <span>JBLIGHTSANDSOUNDRENTAL@GMAIL.COM</span>
+                </div>
+                <div class="contact-item">
+                    <i class="bi bi-clock"></i>
+                    <span>24/7 EMERGENCY SUPPORT</span>
+                </div>
             </div>
         </div>
-    </footer>
-
-    <!-- Side Navigation -->
-    <div id="mySidenav" class="sidenav">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">
-            <i class="bi bi-x-lg"></i>
-        </a>
         
-        <div class="sidenav-content">
-            <div class="user-profile">
-                <div class="user-avatar">
-                    <i class="bi bi-person-circle"></i>
-                </div>
-                <div class="user-info">
-                    <p class="user-name">Welcome to JB Lights</p>
-                    <p class="user-email">Event Services</p>
-                </div>
-            </div>
-
-            <nav class="sidenav-menu">
-                <a href="index.php" class="menu-item">
-                    <i class="bi bi-house"></i>
-                    HOME
-                </a>
-                <a href="index.php#services" class="menu-item">
-                    <i class="bi bi-speaker"></i>
-                    SERVICES
-                </a>
-                <a href="index.php#featured" class="menu-item">
-                    <i class="bi bi-images"></i>
-                    GALLERY
-                </a>
-                <a href="reservation.php" class="menu-item active">
-                    <i class="bi bi-calendar-check"></i>
-                    BOOK EVENT
-                </a>
-                <a href="ContactUs.php" class="menu-item">
-                    <i class="bi bi-telephone"></i>
-                    CONTACT US
-                </a>
-                <a href="#" class="menu-item">
-                    <i class="bi bi-credit-card"></i>
-                    PAYMENT METHODS
-                </a>
-                <a href="#" class="menu-item">
-                    <i class="bi bi-question-circle"></i>
-                    FAQ
-                </a>
-            </nav>
-
-            <div class="sidenav-footer">
-                <div class="contact-info-sidebar">
-                    <div class="contact-item">
-                        <i class="bi bi-telephone-fill"></i>
-                        <span>0965-639-6053</span>
-                    </div>
-                    <div class="contact-item">
-                        <i class="bi bi-clock-fill"></i>
-                        <span>8:00 AM - 10:00 PM</span>
-                    </div>
-                </div>
-                <button class="logout-button" onclick="closeNav()">
-                    <i class="bi bi-x-circle"></i>
-                    CLOSE MENU
-                </button>
-            </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 JB LIGHTS & SOUND. ALL RIGHTS RESERVED.</p>
         </div>
     </div>
+</footer>
 
+    <!-- Side Navigation -->
+    <?php include 'side_nav.php'; ?>
+    
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="home.js"></script>
-    <script src="reservation.js"></script>
+    <script>
+        // Navigation functions
+        function openNav() {
+            document.getElementById("sidenav").style.width = "320px";
+        }
+
+        function closeNav() {
+            document.getElementById("sidenav").style.width = "0";
+        }
+
+        // Step navigation
+        let currentStep = 1;
+
+        function showStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.step-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            // Show current step
+            document.getElementById('step' + step).classList.add('active');
+            currentStep = step;
+        }
+
+        function nextStep(step) {
+            if (validateStep(step)) {
+                if (step === 2) {
+                    updateReview();
+                }
+                showStep(step + 1);
+            }
+        }
+
+        function prevStep(step) {
+            showStep(step - 1);
+        }
+
+        function validateStep(step) {
+            if (step === 1) {
+                const selectedPackage = document.querySelector('input[name="package"]:checked');
+                if (!selectedPackage) {
+                    alert('Please select a package');
+                    return false;
+                }
+            } else if (step === 2) {
+                const requiredFields = document.querySelectorAll('#step2 [required]');
+                for (let field of requiredFields) {
+                    if (!field.value.trim()) {
+                        alert('Please fill in all required fields');
+                        field.focus();
+                        return false;
+                    }
+                }
+                
+                // Validate date is not in the past
+                const eventDate = new Date(document.querySelector('input[name="event_date"]').value);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                if (eventDate < today) {
+                    alert('Event date cannot be in the past');
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function updateReview() {
+            // Package details
+            const selectedPackage = document.querySelector('input[name="package"]:checked');
+            if (selectedPackage) {
+                const packageLabel = selectedPackage.parentElement.querySelector('.package-header h4').textContent;
+                const packagePrice = selectedPackage.parentElement.querySelector('.package-price').textContent;
+                document.getElementById('reviewPackage').innerHTML = `
+                    <p><strong>Package:</strong> ${packageLabel}</p>
+                    <p><strong>Price:</strong> ${packagePrice}</p>
+                `;
+                document.getElementById('reviewTotal').textContent = packagePrice;
+            }
+
+            // Event details
+            const contactName = document.querySelector('input[name="contact_name"]').value;
+            const contactEmail = document.querySelector('input[name="contact_email"]').value;
+            const contactPhone = document.querySelector('input[name="contact_phone"]').value;
+            const eventType = document.querySelector('select[name="event_type"]').value;
+            const eventDate = document.querySelector('input[name="event_date"]').value;
+            const eventAddress = document.querySelector('textarea[name="event_address"]').value;
+
+            document.getElementById('reviewEvent').innerHTML = `
+                <p><strong>Name:</strong> ${contactName}</p>
+                <p><strong>Email:</strong> ${contactEmail}</p>
+                <p><strong>Phone:</strong> ${contactPhone}</p>
+                <p><strong>Event Type:</strong> ${eventType}</p>
+                <p><strong>Event Date:</strong> ${eventDate}</p>
+                <p><strong>Address:</strong> ${eventAddress}</p>
+            `;
+        }
+
+        // Package selection styling
+        document.querySelectorAll('.package-radio').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.querySelectorAll('.package-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                if (this.checked) {
+                    this.closest('.package-card').classList.add('selected');
+                }
+            });
+        });
+
+        // Header scroll effect
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('.main-header');
+            if (window.scrollY > 100) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Set minimum date to today
+        document.querySelector('input[name="event_date"]').min = new Date().toISOString().split('T')[0];
+    </script>
 </body>
 </html>
