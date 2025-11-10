@@ -1,4 +1,4 @@
-/* reservation.css */
+/* css/pages/reservation.css */
 .reservation-page {
     padding-top: 100px;
     min-height: 100vh;
@@ -27,8 +27,11 @@
     padding-bottom: 0.5rem;
     margin-bottom: 2rem;
     font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
+/* Package Cards */
 .package-card {
     background: var(--dark);
     border: 2px solid var(--border);
@@ -37,6 +40,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     height: 100%;
+    margin-bottom: 1.5rem;
 }
 
 .package-card:hover {
@@ -71,6 +75,8 @@
     color: var(--white);
     margin: 0;
     font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .package-price {
@@ -84,6 +90,8 @@
     margin-top: 1rem;
     margin-bottom: 0.5rem;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .package-features ul {
@@ -107,6 +115,64 @@
     font-weight: bold;
 }
 
+/* Map Styles */
+.map-container {
+    margin-bottom: 1.5rem;
+}
+
+#map {
+    height: 300px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+}
+
+.map-instructions {
+    background: var(--dark);
+    border: 1px solid var(--blue);
+    border-radius: 6px;
+    padding: 0.75rem;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Payment Methods */
+.payment-option {
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--dark);
+}
+
+.payment-option:hover {
+    border-color: var(--blue);
+    transform: translateY(-2px);
+}
+
+.payment-option.selected {
+    border-color: var(--blue);
+    background: rgba(0, 102, 255, 0.1);
+}
+
+.payment-option input[type="radio"] {
+    display: none;
+}
+
+.downpayment-info {
+    background: var(--dark);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-top: 1rem;
+    display: none;
+    border: 1px solid var(--blue);
+}
+
+/* Review Section */
 .review-section {
     background: var(--dark);
     border-radius: 12px;
@@ -115,12 +181,16 @@
 
 .total-section {
     border: 2px solid var(--blue);
+    background: var(--dark-gray);
 }
 
+/* Form Elements */
 .form-control, .form-select {
     background: var(--dark);
     border: 1px solid var(--border);
     color: var(--white);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .form-control:focus, .form-select:focus {
@@ -130,34 +200,38 @@
     box-shadow: 0 0 0 0.2rem rgba(0, 102, 255, 0.25);
 }
 
+.form-control:read-only {
+    background-color: var(--dark-gray) !important;
+    color: var(--text-secondary) !important;
+    cursor: not-allowed;
+}
+
 .form-label {
     color: var(--white);
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.btn-primary {
-    background: var(--gradient);
-    border: none;
+/* Buttons */
+.btn-reservation {
+    text-transform: uppercase;
+    letter-spacing: 1px;
     font-weight: 600;
 }
 
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3);
+/* Address Search */
+.input-group .btn {
+    border: 1px solid var(--border);
+    border-left: none;
 }
 
-.btn-success {
-    background: linear-gradient(135deg, #0a8a36, #0cc75b);
-    border: none;
-    font-weight: 600;
+.input-group .btn:hover {
+    background: var(--blue);
+    border-color: var(--blue);
 }
 
-.btn-success:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(10, 138, 54, 0.3);
-}
-
-/* Responsive */
+/* Responsive Design */
 @media (max-width: 768px) {
     .reservation-page {
         padding-top: 80px;
@@ -176,6 +250,20 @@
     
     .package-price {
         font-size: 1.25rem;
+    }
+    
+    #map {
+        height: 250px;
+    }
+
+    .input-group {
+        flex-direction: column;
+    }
+
+    .input-group .btn {
+        border-left: 1px solid var(--border);
+        border-top: none;
+        margin-top: 0.5rem;
     }
 }
 

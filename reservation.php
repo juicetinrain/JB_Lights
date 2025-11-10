@@ -1,6 +1,6 @@
 <?php
 // reservation.php
-require_once 'db/db_connect.php';
+require_once 'dB/db_connect.php';
 
 // Check if user is logged in
 if (!isLoggedIn()) {
@@ -10,7 +10,7 @@ if (!isLoggedIn()) {
 
 $user = getCurrentUser();
 
-// Define packages
+// Define packages (same as before)
 $packages = [
     'basic_setup' => [
         'name' => 'BASIC SETUP',
@@ -106,18 +106,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
     $event_type = $_POST['event_type'];
     $event_date = $_POST['event_date'];
     $event_address = $_POST['event_address'];
+    $event_location = $_POST['event_location'] ?? '';
     $package_key = $_POST['package'];
+    $payment_method = $_POST['payment_method'];
     $total_amount = $packages[$package_key]['price'];
     
+    // Calculate downpayment for GCash
+    $downpayment_amount = 0;
+    if ($payment_method === 'gcash') {
+        $downpayment_amount = $total_amount * 0.30;
+    }
+    
     // Insert reservation
-    $stmt = $conn->prepare("INSERT INTO reservations (contact_name, contact_email, contact_phone, event_type, event_date, event_address, package, total_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssssssd", $contact_name, $contact_email, $contact_phone, $event_type, $event_date, $event_address, $packages[$package_key]['name'], $total_amount);
+    $stmt = $conn->prepare("INSERT INTO reservations (contact_name, contact_email, contact_phone, event_type, event_date, event_address, event_location, package, total_amount, payment_method, downpayment_amount, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')");
+    $stmt->bind_param("ssssssssdsd", $contact_name, $contact_email, $contact_phone, $event_type, $event_date, $event_address, $event_location, $packages[$package_key]['name'], $total_amount, $payment_method, $downpayment_amount);
     
     if ($stmt->execute()) {
         $reservation_id = $conn->insert_id;
-        $success_message = "Reservation submitted successfully! Your Booking ID: #" . $reservation_id;
+        $success_message = "RESERVATION SUBMITTED SUCCESSFULLY! YOUR BOOKING ID: #" . $reservation_id;
     } else {
-        $error_message = "Error submitting reservation. Please try again.";
+        $error_message = "ERROR SUBMITTING RESERVATION. PLEASE TRY AGAIN.";
     }
     $stmt->close();
 }
@@ -131,36 +139,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
     <title>Make Reservation - JB Lights & Sound</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/pages/reservation.css">
 </head>
-<body>
-<!-- Header -->
-<header class="main-header">
-    <div class="header-container">
-        <a href="index.php" class="logo">
-            <img src="https://i.imgur.com/wOkfD9T.jpeg" alt="JB Lights & Sound" class="logo-image">
-            <div class="logo-text">
-                <span class="logo-main">JB LIGHTS & SOUND</span>
-                <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
-            </div>
-        </a>
-        <nav class="main-nav">
-            <a href="reservation.php" class="btn btn-primary me-2 d-none d-md-inline-block">
-                <i class="bi bi-calendar-check"></i> BOOK NOW
-            </a>
-            <button class="menu-toggle">
-                <div class="hamburger">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+<body class="dark-mode">
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <a href="index.php" class="logo">
+                <img src="https://i.imgur.com/wOkfD9T.jpeg" alt="JB Lights & Sound" class="logo-image">
+                <div class="logo-text">
+                    <span class="logo-main">JB LIGHTS & SOUND</span>
+                    <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
                 </div>
-            </button>
-        </nav>
-    </div>
-</header>
+            </a>
+            <nav class="main-nav">
+                <a href="reservation.php" class="btn btn-primary me-2 d-none d-md-inline-block">
+                    <i class="fas fa-calendar-check"></i> BOOK NOW
+                </a>
+                <button class="menu-toggle">
+                    <div class="hamburger">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </button>
+            </nav>
+        </div>
+    </header>
 
     <!-- Main Content -->
     <main class="reservation-page">
@@ -169,8 +179,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
                 <div class="col-lg-10">
                     <div class="reservation-card">
                         <div class="reservation-header text-center mb-4">
-                            <h1 class="text-white">Make a Reservation</h1>
-                            <p class="text-secondary">Book your lights and sound package for your event</p>
+                            <h1 class="text-white">MAKE A RESERVATION</h1>
+                            <p class="text-secondary">BOOK YOUR LIGHTS AND SOUND PACKAGE FOR YOUR EVENT</p>
                         </div>
 
                         <?php if (isset($success_message)): ?>
@@ -190,7 +200,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
                         <form method="POST" id="reservationForm">
                             <!-- Step 1: Package Selection -->
                             <div class="step-card active" id="step1">
-                                <h3 class="step-title">1. Select Your Package</h3>
+                                <h3 class="step-title">1. SELECT YOUR PACKAGE</h3>
                                 <div class="row">
                                     <?php foreach ($packages as $key => $package): ?>
                                     <div class="col-md-6 mb-4">
@@ -202,13 +212,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
                                                     <div class="package-price">₱<?php echo number_format($package['price'], 2); ?></div>
                                                 </div>
                                                 <div class="package-features">
-                                                    <h6>Sound System:</h6>
+                                                    <h6>SOUND SYSTEM:</h6>
                                                     <ul>
                                                         <?php foreach ($package['sound_system'] as $feature): ?>
                                                             <li><?php echo $feature; ?></li>
                                                         <?php endforeach; ?>
                                                     </ul>
-                                                    <h6>Lights Setup:</h6>
+                                                    <h6>LIGHTS SETUP:</h6>
                                                     <ul>
                                                         <?php foreach ($package['lights_setup'] as $feature): ?>
                                                             <li><?php echo $feature; ?></li>
@@ -221,74 +231,169 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
                                     <?php endforeach; ?>
                                 </div>
                                 <div class="text-end">
-                                    <button type="button" class="btn btn-primary" onclick="nextStep(1)">Next <i class="fas fa-arrow-right ms-2"></i></button>
+                                    <button type="button" class="btn btn-primary btn-reservation" onclick="nextStep(1)">NEXT <i class="fas fa-arrow-right ms-2"></i></button>
                                 </div>
                             </div>
 
-                            <!-- Step 2: Event Details -->
+                            <!-- Step 2: Event Details with Map -->
                             <div class="step-card" id="step2">
-                                <h3 class="step-title">2. Event Details</h3>
+                                <h3 class="step-title">2. EVENT DETAILS & LOCATION</h3>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label text-white">Contact Name</label>
-                                        <input type="text" class="form-control" name="contact_name" value="<?php echo htmlspecialchars($user['name']); ?>" required>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label text-white">Contact Email</label>
-                                        <input type="email" class="form-control" name="contact_email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label text-white">Contact Phone</label>
-                                        <input type="tel" class="form-control" name="contact_phone" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>" required>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label text-white">Event Type</label>
+                                        <label class="form-label text-white">EVENT TYPE *</label>
                                         <select class="form-select" name="event_type" required>
-                                            <option value="">Select Event Type</option>
-                                            <option value="Wedding">Wedding</option>
-                                            <option value="Birthday">Birthday</option>
-                                            <option value="Corporate">Corporate Event</option>
-                                            <option value="Concert">Concert</option>
-                                            <option value="Party">Party</option>
-                                            <option value="Other">Other</option>
+                                            <option value="">SELECT EVENT TYPE</option>
+                                            <option value="Wedding">WEDDING</option>
+                                            <option value="Birthday">BIRTHDAY</option>
+                                            <option value="Corporate">CORPORATE EVENT</option>
+                                            <option value="Concert">CONCERT</option>
+                                            <option value="Party">PARTY</option>
+                                            <option value="Other">OTHER</option>
                                         </select>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label text-white">Event Date</label>
-                                        <input type="date" class="form-control" name="event_date" min="<?php echo date('Y-m-d'); ?>" required>
+                                        <label class="form-label text-white">EVENT DATE *</label>
+                                        <input type="date" class="form-control" name="event_date" min="<?php echo date('Y-m-d', strtotime('+1 day')); ?>" required>
                                     </div>
                                     <div class="col-12 mb-3">
-                                        <label class="form-label text-white">Event Address</label>
-                                        <textarea class="form-control" name="event_address" rows="3" required placeholder="Full event address..."></textarea>
+                                        <label class="form-label text-white">EVENT ADDRESS *</label>
+                                        <div class="input-group mb-3">
+                                            <textarea class="form-control" name="event_address" rows="2" required placeholder="FULL EVENT ADDRESS..."></textarea>
+                                            <button type="button" class="btn btn-outline-primary" onclick="searchAddressFromInput()">
+                                                <i class="fas fa-search"></i> SEARCH
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label text-white">SET LOCATION ON MAP</label>
+                                        <div class="map-instructions">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            CLICK ON THE MAP TO SET YOUR EXACT EVENT LOCATION OR SEARCH FOR AN ADDRESS ABOVE
+                                        </div>
+                                        <div class="map-container">
+                                            <div id="map"></div>
+                                        </div>
+                                        <input type="hidden" name="event_location" id="event_location">
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-between">
-                                    <button type="button" class="btn btn-secondary" onclick="prevStep(2)"><i class="fas fa-arrow-left me-2"></i> Back</button>
-                                    <button type="button" class="btn btn-primary" onclick="nextStep(2)">Next <i class="fas fa-arrow-right ms-2"></i></button>
+                                    <button type="button" class="btn btn-secondary btn-reservation" onclick="prevStep(2)"><i class="fas fa-arrow-left me-2"></i> BACK</button>
+                                    <button type="button" class="btn btn-primary btn-reservation" onclick="nextStep(2)">NEXT <i class="fas fa-arrow-right ms-2"></i></button>
                                 </div>
                             </div>
 
-                            <!-- Step 3: Review & Submit -->
+                            <!-- Step 3: Contact Details -->
                             <div class="step-card" id="step3">
-                                <h3 class="step-title">3. Review & Submit</h3>
-                                <div class="review-section">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <h5 class="text-primary">Package Details</h5>
-                                            <div id="reviewPackage"></div>
+                                <h3 class="step-title">3. CONTACT DETAILS</h3>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label text-white">CONTACT NAME *</label>
+                                        <input type="text" class="form-control" name="contact_name" value="<?php echo htmlspecialchars($user['name']); ?>" required readonly style="background-color: var(--dark-gray); color: var(--text-secondary);">
+                                        <small class="text-muted">TAKEN FROM YOUR PROFILE</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label text-white">CONTACT EMAIL *</label>
+                                        <input type="email" class="form-control" name="contact_email" value="<?php echo htmlspecialchars($user['email']); ?>" required readonly style="background-color: var(--dark-gray); color: var(--text-secondary);">
+                                        <small class="text-muted">TAKEN FROM YOUR PROFILE</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label text-white">CONTACT PHONE *</label>
+                                        <input type="tel" class="form-control" name="contact_phone" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>" required placeholder="09XXXXXXXXX">
+                                        <small class="text-muted">PLEASE ENTER YOUR CURRENT PHONE NUMBER</small>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-secondary btn-reservation" onclick="prevStep(3)"><i class="fas fa-arrow-left me-2"></i> BACK</button>
+                                    <button type="button" class="btn btn-primary btn-reservation" onclick="nextStep(3)">NEXT <i class="fas fa-arrow-right ms-2"></i></button>
+                                </div>
+                            </div>
+
+                            <!-- Step 4: Payment Method -->
+                            <div class="step-card" id="step4">
+                                <h3 class="step-title">4. PAYMENT METHOD</h3>
+                                <div class="row">
+                                    <div class="col-12 mb-4">
+                                        <div class="payment-option" onclick="selectPayment('cod')">
+                                            <input type="radio" name="payment_method" id="cod" value="cod" required>
+                                            <label for="cod" class="w-100">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-3">
+                                                        <i class="fas fa-money-bill-wave fa-2x text-success"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h5 class="mb-1 text-white">CASH ON DELIVERY</h5>
+                                                        <p class="mb-0 text-secondary">PAY AFTER THE EVENT - NO DOWNPAYMENT REQUIRED</p>
+                                                    </div>
+                                                </div>
+                                            </label>
                                         </div>
-                                        <div class="col-md-6">
-                                            <h5 class="text-primary">Event Details</h5>
-                                            <div id="reviewEvent"></div>
+
+                                        <div class="payment-option" onclick="selectPayment('gcash')">
+                                            <input type="radio" name="payment_method" id="gcash" value="gcash" required>
+                                            <label for="gcash" class="w-100">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-3">
+                                                        <i class="fas fa-mobile-alt fa-2x text-primary"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h5 class="mb-1 text-white">GCASH PAYMENT</h5>
+                                                        <p class="mb-0 text-secondary">SECURE ONLINE PAYMENT - 30% DOWNPAYMENT REQUIRED</p>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
+
+                                        <div class="downpayment-info" id="downpaymentInfo">
+                                            <div class="alert alert-info">
+                                                <h6><i class="fas fa-info-circle me-2"></i>GCASH PAYMENT DETAILS</h6>
+                                                <p class="mb-1">DOWNPAYMENT: <strong id="downpaymentAmount" class="text-primary">₱0.00</strong></p>
+                                                <p class="mb-0">REMAINING BALANCE: <strong id="remainingAmount" class="text-primary">₱0.00</strong></p>
+                                            </div>
+                                            <div class="alert alert-warning">
+                                                <small>
+                                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                                    AFTER SUBMITTING YOUR RESERVATION, YOU WILL RECEIVE GCASH PAYMENT INSTRUCTIONS VIA EMAIL AND SMS.
+                                                </small>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="total-section mt-4 p-3 rounded" style="background: var(--dark);">
-                                        <h4 class="text-white text-center">Total Amount: <span id="reviewTotal" class="text-primary"></span></h4>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-secondary btn-reservation" onclick="prevStep(4)"><i class="fas fa-arrow-left me-2"></i> BACK</button>
+                                    <button type="button" class="btn btn-primary btn-reservation" onclick="nextStep(4)">NEXT <i class="fas fa-arrow-right ms-2"></i></button>
+                                </div>
+                            </div>
+
+                            <!-- Step 5: Review & Submit -->
+                            <div class="step-card" id="step5">
+                                <h3 class="step-title">5. REVIEW & SUBMIT</h3>
+                                <div class="review-section">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-4">
+                                            <h5 class="text-primary">PACKAGE DETAILS</h5>
+                                            <div id="reviewPackage" class="text-white"></div>
+                                        </div>
+                                        <div class="col-md-6 mb-4">
+                                            <h5 class="text-primary">EVENT DETAILS</h5>
+                                            <div id="reviewEvent" class="text-white"></div>
+                                        </div>
+                                        <div class="col-md-6 mb-4">
+                                            <h5 class="text-primary">CONTACT DETAILS</h5>
+                                            <div id="reviewContact" class="text-white"></div>
+                                        </div>
+                                        <div class="col-md-6 mb-4">
+                                            <h5 class="text-primary">PAYMENT DETAILS</h5>
+                                            <div id="reviewPayment" class="text-white"></div>
+                                        </div>
+                                    </div>
+                                    <div class="total-section mt-4 p-3 rounded">
+                                        <h4 class="text-white text-center">TOTAL AMOUNT: <span id="reviewTotal" class="text-primary"></span></h4>
+                                        <div id="reviewDownpayment" class="text-center mt-2"></div>
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-between mt-4">
-                                    <button type="button" class="btn btn-secondary" onclick="prevStep(3)"><i class="fas fa-arrow-left me-2"></i> Back</button>
-                                    <button type="submit" name="submit_reservation" class="btn btn-success">Confirm Reservation <i class="fas fa-check ms-2"></i></button>
+                                    <button type="button" class="btn btn-secondary btn-reservation" onclick="prevStep(5)"><i class="fas fa-arrow-left me-2"></i> BACK</button>
+                                    <button type="submit" name="submit_reservation" class="btn btn-success btn-reservation">CONFIRM RESERVATION <i class="fas fa-check ms-2"></i></button>
                                 </div>
                             </div>
                         </form>
@@ -297,8 +402,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
             </div>
         </div>
     </main>
-
-    <!-- Footer -->
+<!-- Footer -->
 <footer class="main-footer">
     <div class="container">
         <div class="footer-content">
@@ -371,131 +475,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
 
     <!-- Side Navigation -->
     <?php include 'side_nav.php'; ?>
-    
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Navigation functions
-        function openNav() {
-            document.getElementById("sidenav").style.width = "320px";
-        }
-
-        function closeNav() {
-            document.getElementById("sidenav").style.width = "0";
-        }
-
-        // Step navigation
-        let currentStep = 1;
-
-        function showStep(step) {
-            // Hide all steps
-            document.querySelectorAll('.step-card').forEach(card => {
-                card.classList.remove('active');
-            });
-            
-            // Show current step
-            document.getElementById('step' + step).classList.add('active');
-            currentStep = step;
-        }
-
-        function nextStep(step) {
-            if (validateStep(step)) {
-                if (step === 2) {
-                    updateReview();
-                }
-                showStep(step + 1);
-            }
-        }
-
-        function prevStep(step) {
-            showStep(step - 1);
-        }
-
-        function validateStep(step) {
-            if (step === 1) {
-                const selectedPackage = document.querySelector('input[name="package"]:checked');
-                if (!selectedPackage) {
-                    alert('Please select a package');
-                    return false;
-                }
-            } else if (step === 2) {
-                const requiredFields = document.querySelectorAll('#step2 [required]');
-                for (let field of requiredFields) {
-                    if (!field.value.trim()) {
-                        alert('Please fill in all required fields');
-                        field.focus();
-                        return false;
-                    }
-                }
-                
-                // Validate date is not in the past
-                const eventDate = new Date(document.querySelector('input[name="event_date"]').value);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                
-                if (eventDate < today) {
-                    alert('Event date cannot be in the past');
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        function updateReview() {
-            // Package details
-            const selectedPackage = document.querySelector('input[name="package"]:checked');
-            if (selectedPackage) {
-                const packageLabel = selectedPackage.parentElement.querySelector('.package-header h4').textContent;
-                const packagePrice = selectedPackage.parentElement.querySelector('.package-price').textContent;
-                document.getElementById('reviewPackage').innerHTML = `
-                    <p><strong>Package:</strong> ${packageLabel}</p>
-                    <p><strong>Price:</strong> ${packagePrice}</p>
-                `;
-                document.getElementById('reviewTotal').textContent = packagePrice;
-            }
-
-            // Event details
-            const contactName = document.querySelector('input[name="contact_name"]').value;
-            const contactEmail = document.querySelector('input[name="contact_email"]').value;
-            const contactPhone = document.querySelector('input[name="contact_phone"]').value;
-            const eventType = document.querySelector('select[name="event_type"]').value;
-            const eventDate = document.querySelector('input[name="event_date"]').value;
-            const eventAddress = document.querySelector('textarea[name="event_address"]').value;
-
-            document.getElementById('reviewEvent').innerHTML = `
-                <p><strong>Name:</strong> ${contactName}</p>
-                <p><strong>Email:</strong> ${contactEmail}</p>
-                <p><strong>Phone:</strong> ${contactPhone}</p>
-                <p><strong>Event Type:</strong> ${eventType}</p>
-                <p><strong>Event Date:</strong> ${eventDate}</p>
-                <p><strong>Address:</strong> ${eventAddress}</p>
-            `;
-        }
-
-        // Package selection styling
-        document.querySelectorAll('.package-radio').forEach(radio => {
-            radio.addEventListener('change', function() {
-                document.querySelectorAll('.package-card').forEach(card => {
-                    card.classList.remove('selected');
-                });
-                if (this.checked) {
-                    this.closest('.package-card').classList.add('selected');
-                }
-            });
-        });
-
-        // Header scroll effect
-        window.addEventListener('scroll', function() {
-            const header = document.querySelector('.main-header');
-            if (window.scrollY > 100) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
-        });
-
-        // Set minimum date to today
-        document.querySelector('input[name="event_date"]').min = new Date().toISOString().split('T')[0];
-    </script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Custom JS -->
+    <script src="js/common.js"></script>
+    <script src="js/reservation.js"></script>
 </body>
 </html>

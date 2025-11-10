@@ -176,7 +176,10 @@ require_once 'db/db_connect.php';
     <!-- Side Navigation -->
     <?php include 'side_nav.php'; ?>
 
+        <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="home.js"></script>
+    <!-- Custom JS -->
+    <script src="js/common.js"></script>
+    <script src="js/home.js"></script>
 </body>
 </html>

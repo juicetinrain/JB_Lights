@@ -1,12 +1,12 @@
-// admin.js - Fixed Tab Navigation
+// js/admin.js - Admin Panel JavaScript
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Admin JS loaded'); // Debug log
+    console.log('Admin JS loaded');
     
-    // Tab navigation - FIXED
+    // Tab navigation
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', function(e) {
             e.preventDefault();
-            console.log('Tab clicked:', this.dataset.tab); // Debug log
+            console.log('Tab clicked:', this.dataset.tab);
             
             if (this.classList.contains('logout')) {
                 if (confirm('Are you sure you want to logout?')) {
@@ -70,9 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Delete booking
 function deleteBooking(id) {
     if (confirm('Are you sure you want to delete booking #' + id + '?')) {
-        // For now, just reload - you can add actual delete functionality later
         alert('Delete functionality would remove booking #' + id);
-        // window.location.href = 'admin.php?delete=' + id;
     }
 }
 
@@ -81,12 +79,10 @@ function performSearch() {
     const searchTerm = document.getElementById('globalSearch').value;
     const activeTab = document.querySelector('.nav-item.active').dataset.tab;
     alert('Searching for "' + searchTerm + '" in ' + activeTab + ' tab');
-    // You can implement actual search here based on active tab
 }
 
 // Filter bookings
 function filterBookings() {
     const filter = document.getElementById('statusFilter').value;
     alert('Filtering bookings by: ' + filter);
-    // You can implement actual filter here
 }
