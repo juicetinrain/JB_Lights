@@ -488,7 +488,7 @@ $cancelled_bookings = count(array_filter($reservations, function($r) {
         </div>
     </div>
 
-    <!-- Footer -->
+        <!-- Footer -->
     <footer class="main-footer">
         <div class="container">
             <div class="footer-content">
@@ -540,7 +540,7 @@ $cancelled_bookings = count(array_filter($reservations, function($r) {
                     </div>
                     <div class="contact-item">
                         <i class="bi bi-telephone"></i>
-                        <span>0965-639-6053</span>
+                        <span>09656396053</span>
                     </div>
                     <div class="contact-item">
                         <i class="bi bi-envelope"></i>
@@ -553,8 +553,13 @@ $cancelled_bookings = count(array_filter($reservations, function($r) {
                 </div>
             </div>
             
+            <!-- Fixed Footer Bottom -->
             <div class="footer-bottom">
-                <p>&copy; 2025 JB LIGHTS & SOUND. ALL RIGHTS RESERVED.</p>
+                <div class="container">
+                    <div class="footer-bottom-content">
+                        <p>&copy; 2025 JB LIGHTS & SOUND. ALL RIGHTS RESERVED.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>

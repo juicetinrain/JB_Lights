@@ -373,7 +373,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_contact'])) {
         </div>
     </section>
 
-    <!-- Footer -->
+        <!-- Footer -->
     <footer class="main-footer">
         <div class="container">
             <div class="footer-content">
@@ -420,6 +420,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_contact'])) {
                 <div class="footer-contact">
                     <h4>CONTACT INFO</h4>
                     <div class="contact-item">
+                        <i class="bi bi-geo-alt"></i>
+                        <span>235, PUROK 2, BICAL, MABALACAT CITY, PAMPANGA</span>
+                    </div>
+                    <div class="contact-item">
                         <i class="bi bi-telephone"></i>
                         <span>09656396053</span>
                     </div>
@@ -428,14 +432,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_contact'])) {
                         <span>JBLIGHTSANDSOUNDRENTAL@GMAIL.COM</span>
                     </div>
                     <div class="contact-item">
-                        <i class="bi bi-geo-alt"></i>
-                        <span>235, PUROK 2, BICAL, MABALACAT CITY, PAMPANGA</span>
+                        <i class="bi bi-clock"></i>
+                        <span>24/7 EMERGENCY SUPPORT</span>
                     </div>
                 </div>
             </div>
             
+            <!-- Fixed Footer Bottom -->
             <div class="footer-bottom">
-                <p>&copy; 2025 JB LIGHTS & SOUND. ALL RIGHTS RESERVED.</p>
+                <div class="container">
+                    <div class="footer-bottom-content">
+                        <p>&copy; 2025 JB LIGHTS & SOUND. ALL RIGHTS RESERVED.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>

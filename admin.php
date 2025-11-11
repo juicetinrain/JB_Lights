@@ -730,7 +730,7 @@ $total_contacts = count($contacts);
         </div>
     </div>
 
-    <!-- Footer -->
+        <!-- Footer -->
     <footer class="main-footer">
         <div class="container">
             <div class="footer-content">
@@ -795,8 +795,13 @@ $total_contacts = count($contacts);
                 </div>
             </div>
             
+            <!-- Fixed Footer Bottom -->
             <div class="footer-bottom">
-                <p>&copy; 2025 JB LIGHTS & SOUND. ALL RIGHTS RESERVED.</p>
+                <div class="container">
+                    <div class="footer-bottom-content">
+                        <p>&copy; 2025 JB LIGHTS & SOUND. ALL RIGHTS RESERVED.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>

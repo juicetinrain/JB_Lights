@@ -2,6 +2,12 @@
 // login_register.php
 require_once 'db/db_connect.php';
 
+// Redirect to index.php if user is already logged in
+if (isLoggedIn()) {
+    header('Location: index.php');
+    exit();
+}
+
 // Handle login
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     $email = $_POST['email'] ?? '';
@@ -32,7 +38,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     }
     $stmt->close();
 }
-
 // Handle registration
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
     $name = $_POST['name'] ?? '';
