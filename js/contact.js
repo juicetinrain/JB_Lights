@@ -1,182 +1,100 @@
-// js/contact.js - Contact Form Validation and Submission
-class ContactForm {
-    constructor() {
-        this.form = document.getElementById('contactForm');
-        this.submitBtn = document.getElementById('submitBtn');
-        this.charCount = document.getElementById('charCount');
-        this.messageInput = document.getElementById('message');
-        this.init();
-    }
+// js/contact.js - Clean and Simple Contact Form
+document.addEventListener('DOMContentLoaded', function() {
+    const contactForm = document.getElementById('contactForm');
+    const phoneInput = document.getElementById('phone');
+    const messageInput = document.getElementById('message');
+    const charCount = document.getElementById('charCount');
+    const submitBtn = document.getElementById('submitBtn');
 
-    init() {
-        this.initEventListeners();
-        this.initCharacterCount();
-        console.log('Contact form initialized');
-    }
-
-    initEventListeners() {
-        if (this.form) {
-            this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+    // Character counter for message
+    if (messageInput && charCount) {
+        messageInput.addEventListener('input', function() {
+            const count = this.value.length;
+            charCount.textContent = count;
             
-            // Real-time validation
-            const inputs = this.form.querySelectorAll('input, select, textarea');
-            inputs.forEach(input => {
-                input.addEventListener('blur', () => this.validateField(input));
-                input.addEventListener('input', () => this.clearError(input));
-            });
-        }
-    }
-
-    initCharacterCount() {
-        if (this.messageInput && this.charCount) {
-            this.messageInput.addEventListener('input', () => {
-                const count = this.messageInput.value.length;
-                this.charCount.textContent = count;
-                
-                if (count > 1000) {
-                    this.charCount.style.color = '#ef4444';
-                } else {
-                    this.charCount.style.color = 'var(--text-secondary)';
-                }
-            });
-        }
-    }
-
-    handleSubmit(e) {
-        e.preventDefault();
+            if (count > 1000) {
+                charCount.style.color = '#ef4444';
+                this.style.borderColor = '#ef4444';
+            } else {
+                charCount.style.color = 'var(--text-secondary)';
+                this.style.borderColor = '';
+            }
+        });
         
-        if (this.validateForm()) {
-            this.setLoadingState(true);
-            this.form.submit();
-        }
+        // Initialize count
+        charCount.textContent = messageInput.value.length;
     }
 
-    validateForm() {
-        let isValid = true;
-        const fields = [
-            'first-name', 'last-name', 'phone', 'email', 'subject', 'message'
-        ];
-
-        fields.forEach(fieldId => {
-            const field = document.getElementById(fieldId);
-            if (!this.validateField(field)) {
-                isValid = false;
+    // Phone number validation - only numbers, max 11 digits
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            // Remove any non-numeric characters
+            this.value = this.value.replace(/\D/g, '');
+            
+            // Limit to 11 digits
+            if (this.value.length > 11) {
+                this.value = this.value.slice(0, 11);
             }
         });
 
-        return isValid;
-    }
-
-    validateField(field) {
-        this.clearError(field);
-        
-        const value = field.value.trim();
-        let isValid = true;
-        let errorMessage = '';
-
-        switch(field.type) {
-            case 'text':
-                if (field.id === 'first-name' || field.id === 'last-name') {
-                    if (!value) {
-                        errorMessage = 'THIS FIELD IS REQUIRED';
-                        isValid = false;
-                    } else if (value.length < 2) {
-                        errorMessage = 'PLEASE ENTER AT LEAST 2 CHARACTERS';
-                        isValid = false;
-                    }
-                }
-                break;
-                
-            case 'tel':
-                if (!value) {
-                    errorMessage = 'PHONE NUMBER IS REQUIRED';
-                    isValid = false;
-                } else if (!this.validatePhone(value)) {
-                    errorMessage = 'PLEASE ENTER A VALID PHILIPPINE MOBILE NUMBER (09XXXXXXXXX)';
-                    isValid = false;
-                }
-                break;
-                
-            case 'email':
-                if (!value) {
-                    errorMessage = 'EMAIL ADDRESS IS REQUIRED';
-                    isValid = false;
-                } else if (!this.validateEmail(value)) {
-                    errorMessage = 'PLEASE ENTER A VALID EMAIL ADDRESS';
-                    isValid = false;
-                }
-                break;
-                
-            case 'select-one':
-                if (!value) {
-                    errorMessage = 'PLEASE SELECT A SUBJECT';
-                    isValid = false;
-                }
-                break;
-                
-            case 'textarea':
-                if (!value) {
-                    errorMessage = 'MESSAGE IS REQUIRED';
-                    isValid = false;
-                } else if (value.length < 10) {
-                    errorMessage = 'MESSAGE SHOULD BE AT LEAST 10 CHARACTERS LONG';
-                    isValid = false;
-                } else if (value.length > 1000) {
-                    errorMessage = 'MESSAGE SHOULD NOT EXCEED 1000 CHARACTERS';
-                    isValid = false;
-                }
-                break;
-        }
-
-        if (!isValid) {
-            this.showError(field, errorMessage);
-        }
-
-        return isValid;
-    }
-
-    validateEmail(email) {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
-    }
-
-    validatePhone(phone) {
-        const cleanPhone = phone.replace(/\D/g, '');
-        const phoneRegex = /^(09)\d{9}$/;
-        return phoneRegex.test(cleanPhone);
-    }
-
-    showError(field, message) {
-        const formGroup = field.closest('.form-group');
-        formGroup.classList.add('error');
-        
-        const errorElement = formGroup.querySelector('.error-message');
-        if (errorElement) {
-            errorElement.textContent = message;
-        }
-        
-        field.focus();
-    }
-
-    clearError(field) {
-        const formGroup = field.closest('.form-group');
-        formGroup.classList.remove('error');
-    }
-
-    setLoadingState(loading) {
-        if (this.submitBtn) {
-            if (loading) {
-                this.submitBtn.disabled = true;
-                this.submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> SENDING...';
+        phoneInput.addEventListener('blur', function() {
+            if (this.value.length === 11 && !this.value.startsWith('09')) {
+                this.setCustomValidity('Phone number must start with 09');
+                this.reportValidity();
             } else {
-                this.submitBtn.disabled = false;
-                this.submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> SEND MESSAGE';
+                this.setCustomValidity('');
             }
-        }
+        });
     }
-}
 
-// Initialize contact form when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    new ContactForm();
+    // Form submission
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            let isValid = true;
+
+            // Basic validation
+            const requiredFields = contactForm.querySelectorAll('[required]');
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.style.borderColor = '#ef4444';
+                } else {
+                    field.style.borderColor = '';
+                }
+            });
+
+            // Phone validation
+            if (phoneInput && phoneInput.value) {
+                const phoneRegex = /^09\d{9}$/;
+                if (!phoneRegex.test(phoneInput.value)) {
+                    isValid = false;
+                    phoneInput.style.borderColor = '#ef4444';
+                    alert('Please enter a valid 11-digit Philippine mobile number starting with 09');
+                }
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please fill in all required fields correctly.');
+            } else {
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spinner"></i> SENDING...';
+                
+                // Form will submit normally
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="bi bi-send"></i> SEND MESSAGE';
+                }, 3000);
+            }
+        });
+    }
+
+    // Clear error styles on input
+    const formInputs = document.querySelectorAll('#contactForm input, #contactForm select, #contactForm textarea');
+    formInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            this.style.borderColor = '';
+        });
+    });
 });

@@ -111,14 +111,6 @@
     margin-top: 0.1rem;
 }
 
-.footer-bottom {
-    border-top: 1px solid var(--border);
-    padding-top: 2rem;
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 0.9rem;
-}
-
 /* Footer ALL CAPS */
 .footer-links h4,
 .footer-services h4,
@@ -138,4 +130,24 @@
 .footer-bottom p {
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+.footer-bottom {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 0;
+    background: var(--dark-gray);
+    width: 100%;
+}
+
+.footer-bottom-content {
+    text-align: center;
+    width: 100%;
+}
+
+.footer-bottom-content p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
 }

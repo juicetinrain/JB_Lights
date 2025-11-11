@@ -1,5 +1,5 @@
 <?php
-// includes/email_handler.php
+// includes/email_handler.php - Fixed version
 require_once 'config/email_config.php';
 
 class EmailHandler {
@@ -23,16 +23,26 @@ class EmailHandler {
         $subject = $this->sanitize($data['subject']);
         $message = $this->sanitize($data['message']);
         
+        // Clean phone number for validation
+        $clean_phone = preg_replace('/\D/', '', $phone);
+        
+        // Validate Philippine phone number (11 digits starting with 09)
+        if (strlen($clean_phone) !== 11 || !preg_match('/^09\d{9}$/', $clean_phone)) {
+            return ['success' => false, 'message' => 'Please enter a valid Philippine mobile number (09XXXXXXXXX).'];
+        }
+        
         // Save to database first
-        $db_success = $this->saveToDatabase($first_name, $last_name, $phone, $email, $subject, $message);
+        $db_success = $this->saveToDatabase($first_name, $last_name, $clean_phone, $email, $subject, $message);
         
         // Send email
         $email_success = $this->sendEmail($first_name, $last_name, $phone, $email, $subject, $message);
         
-        if ($email_success) {
+        if ($db_success && $email_success) {
             return ['success' => true, 'message' => 'Thank you for your message! We will get back to you within 24 hours.'];
+        } elseif ($db_success) {
+            return ['success' => true, 'message' => 'Message saved but email delivery failed. We will still contact you soon.'];
         } else {
-            return ['success' => false, 'message' => 'Message saved but email delivery failed. We will still contact you soon.'];
+            return ['success' => false, 'message' => 'Sorry, there was an error processing your message. Please try again.'];
         }
     }
     
@@ -50,9 +60,8 @@ class EmailHandler {
             return false;
         }
         
-        // Validate phone (basic Philippine format)
-        $phone = preg_replace('/\D/', '', $data['phone']);
-        if (strlen($phone) < 10) {
+        // Validate name fields (letters and spaces only)
+        if (!preg_match('/^[a-zA-Z\s]+$/', $data['first_name']) || !preg_match('/^[a-zA-Z\s]+$/', $data['last_name'])) {
             return false;
         }
         
@@ -65,8 +74,9 @@ class EmailHandler {
     
     private function saveToDatabase($first_name, $last_name, $phone, $email, $subject, $message) {
         try {
-            $stmt = $this->conn->prepare("INSERT INTO contact_submissions (first_name, last_name, phone, email, subject, message, submitted_at) VALUES (?, ?, ?, ?, ?, ?, NOW())");
-            $stmt->bind_param("ssssss", $first_name, $last_name, $phone, $email, $subject, $message);
+            $stmt = $this->conn->prepare("INSERT INTO contact_submissions (first_name, last_name, phone, email, subject, message, submitted_at, ip_address) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)");
+            $ip_address = $_SERVER['REMOTE_ADDR'] ?? 'Unknown';
+            $stmt->bind_param("sssssss", $first_name, $last_name, $phone, $email, $subject, $message, $ip_address);
             return $stmt->execute();
         } catch (Exception $e) {
             error_log("Database error: " . $e->getMessage());
@@ -87,7 +97,7 @@ class EmailHandler {
             // Headers
             $headers = $this->buildEmailHeaders($from, $email);
             
-            // Send using PHP's mail function (most reliable)
+            // Send using PHP's mail function
             return mail($to, $email_subject, $email_message, $headers);
             
         } catch (Exception $e) {

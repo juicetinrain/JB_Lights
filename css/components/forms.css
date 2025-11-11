@@ -116,13 +116,12 @@
 }
 
 /* Alerts */
+/* Add to existing main.css */
+
+/* Alert Styles */
 .alert {
-    padding: 1rem;
     border-radius: 8px;
     margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
 }
 
 .alert-success {
@@ -131,8 +130,23 @@
     color: #22c55e;
 }
 
-.alert-error {
+.alert-danger {
     background: rgba(239, 68, 68, 0.1);
     border: 1px solid #ef4444;
     color: #ef4444;
+}
+
+/* Form Validation Styles */
+.form-control:invalid {
+    border-color: #ef4444;
+}
+
+.form-control:valid {
+    border-color: #22c55e;
+}
+
+/* Loading State */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }

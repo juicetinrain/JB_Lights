@@ -1,101 +1,272 @@
-// js/reservation.js - Complete Reservation System
+// js/reservation.js - Fixed with working OpenStreetMap search
 class ReservationSystem {
     constructor() {
         this.currentStep = 1;
+        this.totalSteps = 5;
+        this.selectedPackage = null;
+        this.selectedPayment = null;
         this.map = null;
         this.marker = null;
-        this.selectedPackage = null;
         this.init();
     }
 
     init() {
-        this.initStepNavigation();
-        this.initPackageSelection();
-        this.initDateRestrictions();
         this.initEventListeners();
+        this.initMap();
+        this.updateProgress();
         console.log('Reservation system initialized');
     }
 
-    initStepNavigation() {
-        // Make functions globally available
-        window.nextStep = (step) => this.nextStep(step);
-        window.prevStep = (step) => this.prevStep(step);
-        window.selectPayment = (method) => this.selectPayment(method);
-        window.searchAddressFromInput = () => this.searchAddressFromInput();
-    }
-
-    initPackageSelection() {
-        document.querySelectorAll('.package-radio').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                document.querySelectorAll('.package-card').forEach(card => {
-                    card.classList.remove('selected');
-                });
-                if (e.target.checked) {
-                    e.target.closest('.package-card').classList.add('selected');
-                    this.selectedPackage = e.target.value;
-                }
+    initEventListeners() {
+        // Package selection
+        document.querySelectorAll('.package-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                this.selectPackage(card);
             });
         });
-    }
 
-    initDateRestrictions() {
-        const dateInput = document.querySelector('input[name="event_date"]');
-        if (dateInput) {
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            dateInput.min = tomorrow.toISOString().split('T')[0];
-        }
-    }
-
-    initEventListeners() {
-        // Address search on Enter key
-        const addressInput = document.querySelector('textarea[name="event_address"]');
-        if (addressInput) {
-            addressInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    this.searchAddressFromInput();
-                }
+        // Payment selection
+        document.querySelectorAll('.payment-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                const method = option.querySelector('input').value;
+                this.selectPayment(method);
             });
-        }
+        });
 
-        // Package change updates downpayment
+        // Address search
+        document.getElementById('search-address-btn')?.addEventListener('click', () => {
+            this.searchAddressFromInput();
+        });
+
+        // Enter key in address field
+        document.getElementById('event_address')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.searchAddressFromInput();
+            }
+        });
+
+        // Package price change handler
         document.querySelectorAll('.package-radio').forEach(radio => {
             radio.addEventListener('change', () => {
-                if (document.querySelector('input[name="payment_method"]:checked')?.value === 'gcash') {
-                    this.calculateDownpayment();
-                }
+                this.updateDownpaymentInfo();
             });
+        });
+
+        // Update address textarea when input changes
+        document.getElementById('event_address')?.addEventListener('input', (e) => {
+            document.querySelector('textarea[name="event_address"]').value = e.target.value;
         });
     }
 
-    showStep(step) {
-        document.querySelectorAll('.step-card').forEach(card => {
-            card.classList.remove('active');
-        });
+    initMap() {
+        // Default to JB Lights & Sound location in Mabalacat
+        const defaultLocation = [15.1963, 120.6093];
         
-        const stepElement = document.getElementById('step' + step);
-        if (stepElement) {
-            stepElement.classList.add('active');
-        }
-        this.currentStep = step;
+        this.map = L.map('map').setView(defaultLocation, 15);
 
-        // Special handling for specific steps
-        if (step === 2) {
-            setTimeout(() => this.initMap(), 300);
-        } else if (step === 4) {
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(this.map);
+
+        // Add default marker
+        this.marker = L.marker(defaultLocation)
+            .addTo(this.map)
+            .bindPopup('JB Lights & Sound - Default Location')
+            .openPopup();
+
+        // Store initial location
+        document.getElementById('event_location').value = defaultLocation.join(',');
+
+        // Add click event to map
+        this.map.on('click', (e) => {
+            this.updateMapLocation(e.latlng.lat, e.latlng.lng, 'Selected Event Location');
+            this.reverseGeocode(e.latlng.lat, e.latlng.lng);
+        });
+    }
+
+    async searchAddressFromInput() {
+        const address = document.getElementById('event_address').value.trim();
+        if (!address) {
+            alert('Please enter an address to search');
+            return;
+        }
+
+        // Show loading state
+        const searchBtn = document.getElementById('search-address-btn');
+        const originalHtml = searchBtn.innerHTML;
+        searchBtn.innerHTML = '<i class="bi bi-arrow-repeat spinner"></i> Searching...';
+        searchBtn.disabled = true;
+
+        try {
+            // Use Nominatim for geocoding with proper headers
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address + ', Philippines')}&limit=1&addressdetails=1`,
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'User-Agent': 'JBLightsAndSound/1.0'
+                    }
+                }
+            );
+            
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            
+            const data = await response.json();
+            
+            if (data && data.length > 0) {
+                const lat = parseFloat(data[0].lat);
+                const lon = parseFloat(data[0].lon);
+                const displayName = data[0].display_name;
+                
+                this.updateMapLocation(lat, lon, displayName);
+                document.getElementById('event_address').value = displayName;
+                document.querySelector('textarea[name="event_address"]').value = displayName;
+            } else {
+                alert('Address not found. Please try a different search term.');
+            }
+        } catch (error) {
+            console.error('Error geocoding address:', error);
+            alert('Error searching address. Please try again.');
+        } finally {
+            // Reset button state
+            searchBtn.innerHTML = originalHtml;
+            searchBtn.disabled = false;
+        }
+    }
+
+    async reverseGeocode(lat, lng) {
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'User-Agent': 'JBLightsAndSound/1.0'
+                    }
+                }
+            );
+            
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            
+            const data = await response.json();
+            
+            if (data && data.display_name) {
+                document.getElementById('event_address').value = data.display_name;
+                document.querySelector('textarea[name="event_address"]').value = data.display_name;
+            }
+        } catch (error) {
+            console.error('Error reverse geocoding:', error);
+        }
+    }
+
+    updateMapLocation(lat, lng, popupText = 'Event Location') {
+        if (this.marker) {
+            this.marker.setLatLng([lat, lng]);
+            this.marker.bindPopup(popupText).openPopup();
+        } else {
+            this.marker = L.marker([lat, lng])
+                .addTo(this.map)
+                .bindPopup(popupText)
+                .openPopup();
+        }
+
+        this.map.setView([lat, lng], 15);
+        document.getElementById('event_location').value = `${lat},${lng}`;
+    }
+
+    selectPackage(packageElement) {
+        // Remove selected class from all packages
+        document.querySelectorAll('.package-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+
+        // Add selected class to clicked package
+        packageElement.classList.add('selected');
+        
+        // Check the radio button
+        const radio = packageElement.querySelector('.package-radio');
+        radio.checked = true;
+        this.selectedPackage = radio.value;
+        
+        this.updateDownpaymentInfo();
+    }
+
+    selectPayment(method) {
+        this.selectedPayment = method;
+        
+        // Remove selected class from all payment options
+        document.querySelectorAll('.payment-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+
+        // Add selected class to clicked payment option
+        document.querySelectorAll('.payment-option').forEach(option => {
+            if (option.querySelector('input').value === method) {
+                option.classList.add('selected');
+            }
+        });
+
+        // Show/hide downpayment info
+        const downpaymentInfo = document.getElementById('downpaymentInfo');
+        if (method === 'gcash') {
+            downpaymentInfo.style.display = 'block';
+            this.updateDownpaymentInfo();
+        } else {
+            downpaymentInfo.style.display = 'none';
+        }
+    }
+
+    updateDownpaymentInfo() {
+        if (this.selectedPayment === 'gcash' && this.selectedPackage) {
+            const packageElement = document.querySelector(`.package-card.selected`);
+            if (packageElement) {
+                const priceText = packageElement.querySelector('.package-price').textContent;
+                const price = parseFloat(priceText.replace('₱', '').replace(',', ''));
+                const downpayment = price * 0.3;
+                const remaining = price - downpayment;
+
+                document.getElementById('downpaymentAmount').textContent = `₱${downpayment.toLocaleString('en-PH', {minimumFractionDigits: 2})}`;
+                document.getElementById('remainingAmount').textContent = `₱${remaining.toLocaleString('en-PH', {minimumFractionDigits: 2})}`;
+            }
+        }
+    }
+
+    nextStep(current) {
+        if (this.validateStep(current)) {
+            this.hideStep(current);
+            this.showStep(current + 1);
+            this.currentStep = current + 1;
+            this.updateProgress();
             this.updateReview();
         }
     }
 
-    nextStep(step) {
-        if (this.validateStep(step)) {
-            this.showStep(step + 1);
+    prevStep(current) {
+        this.hideStep(current);
+        this.showStep(current - 1);
+        this.currentStep = current - 1;
+        this.updateProgress();
+    }
+
+    hideStep(step) {
+        const stepElement = document.getElementById(`step${step}`);
+        if (stepElement) {
+            stepElement.classList.remove('active');
         }
     }
 
-    prevStep(step) {
-        this.showStep(step - 1);
+    showStep(step) {
+        const stepElement = document.getElementById(`step${step}`);
+        if (stepElement) {
+            stepElement.classList.add('active');
+        }
     }
 
     validateStep(step) {
@@ -107,38 +278,52 @@ class ReservationSystem {
             case 3:
                 return this.validateContactDetails();
             case 4:
-                return this.validatePaymentMethod();
+                return this.validatePaymentSelection();
             default:
                 return true;
         }
     }
 
     validatePackageSelection() {
-        const selectedPackage = document.querySelector('input[name="package"]:checked');
+        const selectedPackage = document.querySelector('.package-radio:checked');
         if (!selectedPackage) {
-            this.showAlert('PLEASE SELECT A PACKAGE');
+            alert('Please select a package');
             return false;
         }
         return true;
     }
 
     validateEventDetails() {
-        const requiredFields = document.querySelectorAll('#step2 [required]');
-        for (let field of requiredFields) {
-            if (!field.value.trim()) {
-                this.showAlert('PLEASE FILL IN ALL REQUIRED FIELDS');
-                field.focus();
-                return false;
-            }
+        const eventType = document.querySelector('select[name="event_type"]');
+        const eventDate = document.querySelector('input[name="event_date"]');
+        const eventAddress = document.querySelector('textarea[name="event_address"]');
+
+        if (!eventType.value) {
+            alert('Please select an event type');
+            eventType.focus();
+            return false;
         }
 
-        // Validate date
-        const eventDate = new Date(document.querySelector('input[name="event_date"]').value);
+        if (!eventDate.value) {
+            alert('Please select an event date');
+            eventDate.focus();
+            return false;
+        }
+
+        // Check if date is in the future
         const today = new Date();
+        const selectedDate = new Date(eventDate.value);
         today.setHours(0, 0, 0, 0);
         
-        if (eventDate <= today) {
-            this.showAlert('EVENT DATE MUST BE IN THE FUTURE');
+        if (selectedDate <= today) {
+            alert('Event date must be in the future');
+            eventDate.focus();
+            return false;
+        }
+
+        if (!eventAddress.value.trim()) {
+            alert('Please enter the event address');
+            eventAddress.focus();
             return false;
         }
 
@@ -146,209 +331,57 @@ class ReservationSystem {
     }
 
     validateContactDetails() {
-        const requiredFields = document.querySelectorAll('#step3 [required]');
-        for (let field of requiredFields) {
-            if (!field.value.trim()) {
-                this.showAlert('PLEASE FILL IN ALL REQUIRED FIELDS');
-                field.focus();
-                return false;
-            }
+        const contactPhone = document.querySelector('input[name="contact_phone"]');
+
+        if (!contactPhone.value.trim()) {
+            alert('Please enter your phone number');
+            contactPhone.focus();
+            return false;
         }
 
-        // Validate phone number
-        const phone = document.querySelector('input[name="contact_phone"]').value;
-        if (!this.validatePhone(phone)) {
-            this.showAlert('PLEASE ENTER A VALID PHILIPPINE MOBILE NUMBER (09XXXXXXXXX)');
+        // Validate phone number format (Philippine mobile)
+        const phoneRegex = /^09\d{9}$/;
+        const cleanPhone = contactPhone.value.replace(/\D/g, '');
+        
+        if (!phoneRegex.test(cleanPhone)) {
+            alert('Please enter a valid Philippine mobile number (09XXXXXXXXX)');
+            contactPhone.focus();
             return false;
         }
 
         return true;
     }
 
-    validatePaymentMethod() {
-        const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
-        if (!paymentMethod) {
-            this.showAlert('PLEASE SELECT A PAYMENT METHOD');
+    validatePaymentSelection() {
+        const selectedPayment = document.querySelector('input[name="payment_method"]:checked');
+        if (!selectedPayment) {
+            alert('Please select a payment method');
             return false;
         }
         return true;
     }
 
-    validatePhone(phone) {
-        const cleanPhone = phone.replace(/\D/g, '');
-        const phoneRegex = /^(09)\d{9}$/;
-        return phoneRegex.test(cleanPhone);
+    updateProgress() {
+        console.log(`Current step: ${this.currentStep}`);
     }
 
-    showAlert(message) {
-        alert(message);
-    }
-
-    // Map Functions
-    initMap() {
-        if (this.map) {
-            this.map.invalidateSize();
-            return;
-        }
-
-        // Default center (Philippines)
-        const defaultCenter = [14.5995, 120.9842];
-        
-        // Initialize map
-        this.map = L.map('map').setView(defaultCenter, 13);
-
-        // Add tile layer
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors',
-            maxZoom: 19
-        }).addTo(this.map);
-
-        // Create draggable marker
-        this.marker = L.marker(defaultCenter, { 
-            draggable: true,
-            title: 'DRAG ME TO SET EXACT LOCATION'
-        }).addTo(this.map);
-
-        // Add popup to marker
-        this.marker.bindPopup('EVENT LOCATION<br>DRAG ME OR CLICK MAP TO SET LOCATION').openPopup();
-
-        // Marker drag event
-        this.marker.on('dragend', (e) => {
-            const position = this.marker.getLatLng();
-            this.updateLocation(position.lat, position.lng);
-        });
-
-        // Map click event
-        this.map.on('click', (e) => {
-            this.marker.setLatLng(e.latlng);
-            this.updateLocation(e.latlng.lat, e.latlng.lng);
-            this.marker.bindPopup('LOCATION SET!<br>ADDRESS UPDATED').openPopup();
-        });
-    }
-
-    updateLocation(lat, lng) {
-        // Store coordinates
-        document.getElementById('event_location').value = `${lat},${lng}`;
-        
-        // Update address field with coordinates temporarily
-        const addressInput = document.querySelector('textarea[name="event_address"]');
-        addressInput.value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-        
-        // Try to get address from coordinates
-        this.reverseGeocode(lat, lng);
-    }
-
-    reverseGeocode(lat, lng) {
-        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`;
-        
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.display_name) {
-                    const addressInput = document.querySelector('textarea[name="event_address"]');
-                    addressInput.value = data.display_name;
-                }
-            })
-            .catch(error => {
-                console.log('Reverse geocoding error:', error);
-            });
-    }
-
-    searchAddressFromInput() {
-        const addressInput = document.querySelector('textarea[name="event_address"]');
-        const query = addressInput.value.trim();
-        this.searchAddress(query);
-    }
-
-    searchAddress(query) {
-        if (query.length < 3) {
-            this.showAlert('PLEASE ENTER AT LEAST 3 CHARACTERS FOR SEARCH');
-            return;
-        }
-
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=ph`;
-        
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.length > 0) {
-                    const result = data[0];
-                    const lat = parseFloat(result.lat);
-                    const lon = parseFloat(result.lon);
-                    
-                    this.marker.setLatLng([lat, lon]);
-                    this.map.setView([lat, lon], 15);
-                    this.updateLocation(lat, lon);
-                    this.marker.bindPopup('LOCATION FOUND!<br>ADDRESS UPDATED FROM SEARCH').openPopup();
-                } else {
-                    this.showAlert('ADDRESS NOT FOUND. PLEASE TRY A DIFFERENT SEARCH TERM.');
-                }
-            })
-            .catch(error => {
-                console.log('Forward geocoding error:', error);
-                this.showAlert('SEARCH SERVICE UNAVAILABLE. PLEASE CLICK ON THE MAP TO SET LOCATION.');
-            });
-    }
-
-    // Payment Functions
-    selectPayment(method) {
-        document.querySelectorAll('.payment-option').forEach(option => {
-            option.classList.remove('selected');
-        });
-        
-        const selectedOption = document.querySelector(`#${method}`).closest('.payment-option');
-        selectedOption.classList.add('selected');
-        document.getElementById(method).checked = true;
-        
-        // Show/hide downpayment info
-        const downpaymentInfo = document.getElementById('downpaymentInfo');
-        if (method === 'gcash') {
-            downpaymentInfo.style.display = 'block';
-            this.calculateDownpayment();
-        } else {
-            downpaymentInfo.style.display = 'none';
-        }
-    }
-
-    calculateDownpayment() {
-        const selectedPackage = document.querySelector('input[name="package"]:checked');
-        if (selectedPackage) {
-            const packagePrice = this.getPackagePrice(selectedPackage.value);
-            const downpayment = packagePrice * 0.30;
-            const remaining = packagePrice - downpayment;
-            
-            document.getElementById('downpaymentAmount').textContent = '₱' + downpayment.toLocaleString();
-            document.getElementById('remainingAmount').textContent = '₱' + remaining.toLocaleString();
-        }
-    }
-
-    getPackagePrice(packageKey) {
-        const prices = {
-            'basic_setup': 5000,
-            'upgraded_setup_6000': 6000,
-            'upgraded_setup_7000': 7000,
-            'mid_setup': 10000
-        };
-        return prices[packageKey] || 0;
-    }
-
-    // Review Functions
     updateReview() {
-        this.updatePackageReview();
-        this.updateEventReview();
-        this.updateContactReview();
-        this.updatePaymentReview();
+        if (this.currentStep === 5) {
+            this.updatePackageReview();
+            this.updateEventReview();
+            this.updateContactReview();
+            this.updatePaymentReview();
+        }
     }
 
     updatePackageReview() {
-        const selectedPackage = document.querySelector('input[name="package"]:checked');
+        const selectedPackage = document.querySelector('.package-card.selected');
         if (selectedPackage) {
-            const packageLabel = selectedPackage.parentElement.querySelector('.package-header h4').textContent;
-            const packagePrice = selectedPackage.parentElement.querySelector('.package-price').textContent;
-            
+            const packageName = selectedPackage.querySelector('h4').textContent;
+            const packagePrice = selectedPackage.querySelector('.package-price').textContent;
             document.getElementById('reviewPackage').innerHTML = `
-                <p><strong>PACKAGE:</strong> ${packageLabel}</p>
-                <p><strong>PRICE:</strong> ${packagePrice}</p>
+                <strong>${packageName}</strong><br>
+                ${packagePrice}
             `;
             document.getElementById('reviewTotal').textContent = packagePrice;
         }
@@ -360,9 +393,9 @@ class ReservationSystem {
         const eventAddress = document.querySelector('textarea[name="event_address"]').value;
 
         document.getElementById('reviewEvent').innerHTML = `
-            <p><strong>EVENT TYPE:</strong> ${eventType}</p>
-            <p><strong>EVENT DATE:</strong> ${eventDate}</p>
-            <p><strong>ADDRESS:</strong> ${eventAddress}</p>
+            <strong>${eventType}</strong><br>
+            Date: ${eventDate}<br>
+            Address: ${eventAddress}
         `;
     }
 
@@ -372,41 +405,67 @@ class ReservationSystem {
         const contactPhone = document.querySelector('input[name="contact_phone"]').value;
 
         document.getElementById('reviewContact').innerHTML = `
-            <p><strong>NAME:</strong> ${contactName}</p>
-            <p><strong>EMAIL:</strong> ${contactEmail}</p>
-            <p><strong>PHONE:</strong> ${contactPhone}</p>
+            <strong>${contactName}</strong><br>
+            Email: ${contactEmail}<br>
+            Phone: ${contactPhone}
         `;
     }
 
     updatePaymentReview() {
-        const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
-        if (paymentMethod) {
-            const method = paymentMethod.value;
-            const methodText = method === 'cod' ? 'CASH ON DELIVERY' : 'GCASH';
-            let paymentHTML = `<p><strong>PAYMENT METHOD:</strong> ${methodText}</p>`;
+        const selectedPayment = document.querySelector('input[name="payment_method"]:checked');
+        if (selectedPayment) {
+            const paymentText = selectedPayment.value === 'cod' ? 'Cash on Delivery' : 'GCash';
+            let downpaymentText = '';
             
-            if (method === 'gcash') {
-                const downpayment = document.getElementById('downpaymentAmount').textContent;
-                const remaining = document.getElementById('remainingAmount').textContent;
-                paymentHTML += `
-                    <p><strong>DOWNPAYMENT:</strong> ${downpayment}</p>
-                    <p><strong>REMAINING BALANCE:</strong> ${remaining}</p>
-                `;
-                document.getElementById('reviewDownpayment').innerHTML = `
-                    <p class="text-warning mb-0"><small>30% DOWNPAYMENT REQUIRED VIA GCASH</small></p>
-                `;
-            } else {
-                document.getElementById('reviewDownpayment').innerHTML = `
-                    <p class="text-success mb-0"><small>PAY AFTER THE EVENT - NO DOWNPAYMENT REQUIRED</small></p>
-                `;
+            if (selectedPayment.value === 'gcash') {
+                const downpaymentAmount = document.getElementById('downpaymentAmount').textContent;
+                const remainingAmount = document.getElementById('remainingAmount').textContent;
+                downpaymentText = `<br>Downpayment: ${downpaymentAmount}<br>Remaining: ${remainingAmount}`;
             }
-            
-            document.getElementById('reviewPayment').innerHTML = paymentHTML;
+
+            document.getElementById('reviewPayment').innerHTML = `
+                <strong>${paymentText}</strong>${downpaymentText}
+            `;
+
+            document.getElementById('reviewDownpayment').innerHTML = downpaymentText ? 
+                `30% Downpayment Required: ${downpaymentAmount}` : 
+                'No Downpayment Required';
         }
+    }
+}
+
+// Global functions for HTML onclick
+function nextStep(step) {
+    if (window.reservationSystem) {
+        window.reservationSystem.nextStep(step);
+    }
+}
+
+function prevStep(step) {
+    if (window.reservationSystem) {
+        window.reservationSystem.prevStep(step);
+    }
+}
+
+function selectPackage(element) {
+    if (window.reservationSystem) {
+        window.reservationSystem.selectPackage(element);
+    }
+}
+
+function selectPayment(method) {
+    if (window.reservationSystem) {
+        window.reservationSystem.selectPayment(method);
+    }
+}
+
+function searchAddressFromInput() {
+    if (window.reservationSystem) {
+        window.reservationSystem.searchAddressFromInput();
     }
 }
 
 // Initialize reservation system when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    new ReservationSystem();
+    window.reservationSystem = new ReservationSystem();
 });

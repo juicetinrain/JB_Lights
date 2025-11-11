@@ -1,74 +1,9 @@
-/* css/pages/contact.css */
-.contact-hero {
-    position: relative;
-    height: 60vh;
-    min-height: 400px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    margin-top: 80px;
-    overflow: hidden;
-}
+/* css/pages/contact.css - Updated for new layout */
 
-.contact-hero::before {
-    content: '';
-    position: absolute;
-    top: -20px;
-    left: -20px;
-    right: -20px;
-    bottom: -20px;
-    background-image: url('https://i.imgur.com/dBvINgC.jpeg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    filter: blur(5px);
-    z-index: 1;
-}
-
-.contact-hero::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 2;
-}
-
-.contact-hero-content {
-    position: relative;
-    z-index: 3;
-    max-width: 800px;
-    padding: 0 20px;
-}
-
-.contact-hero .hero-title {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    color: var(--white);
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-.contact-hero .hero-subtitle {
-    font-size: 1.2rem;
-    color: var(--text-secondary);
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.contact-section {
-    padding: 6rem 0;
-    background: var(--black);
-}
-
+/* Contact Grid Layout */
 .contact-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1.2fr;
     gap: 3rem;
     max-width: 1200px;
     margin: 0 auto;
@@ -77,35 +12,52 @@
 .contact-info-side {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1.5rem;
 }
 
 .contact-form-side {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
 }
 
-.contact-card, .map-section, .form-section {
+/* Contact Cards */
+.contact-card {
     background: var(--dark-gray);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 2rem;
+    transition: all 0.3s ease;
 }
 
-.contact-card h2 {
-    color: var(--blue);
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
+.contact-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--blue);
+    box-shadow: var(--shadow);
+}
+
+.contact-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--gradient);
+    border-radius: 50%;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: var(--white);
+}
+
+.contact-content h3 {
+    color: var(--white);
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
 .contact-detail {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .contact-detail:last-child {
@@ -114,9 +66,8 @@
 
 .contact-detail p {
     color: var(--text-secondary);
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+    line-height: 1.4;
 }
 
 .contact-highlight {
@@ -131,43 +82,29 @@
     gap: 0.5rem;
     color: var(--blue);
     margin-top: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-weight: 600;
 }
 
-.map-section h3, .form-section h3 {
-    color: var(--blue);
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
+/* Form Styles */
+.form-header {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--blue);
+}
+
+.form-header i {
+    font-size: 2rem;
+    color: var(--blue);
+}
+
+.form-header h3 {
+    color: var(--white);
+    margin: 0;
     text-transform: uppercase;
     letter-spacing: 1px;
-}
-
-.map-container {
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 1rem;
-}
-
-.map-note {
-    background: var(--dark);
-    border: 1px solid var(--blue);
-    border-radius: 6px;
-    padding: 1rem;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.contact-form {
-    margin-top: 1rem;
 }
 
 .form-row {
@@ -186,8 +123,7 @@
     margin-bottom: 0.5rem;
     font-weight: 600;
     color: var(--white);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 0.9rem;
 }
 
 .form-control, .form-select {
@@ -199,8 +135,6 @@
     transition: all 0.3s ease;
     background: var(--dark);
     color: var(--white);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
 .form-control:focus, .form-select:focus {
@@ -211,7 +145,6 @@
 
 .form-control::placeholder {
     color: var(--text-muted);
-    text-transform: uppercase;
 }
 
 .char-count {
@@ -219,24 +152,12 @@
     font-size: 0.8rem;
     color: var(--text-secondary);
     margin-top: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
-.error-message {
-    color: #ef4444;
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
-    display: none;
-}
-
-.form-group.error .form-control,
-.form-group.error .form-select {
-    border-color: #ef4444;
-}
-
-.form-group.error .error-message {
-    display: block;
+.form-text {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
 }
 
 .btn-submit {
@@ -254,11 +175,9 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
-.btn-submit:hover {
+.btn-submit:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 102, 255, 0.4);
 }
@@ -269,54 +188,30 @@
     transform: none;
 }
 
-/* FAQ Section */
-.faq-section {
-    background: var(--black);
-    padding: 6rem 0;
-}
-
+/* FAQ Grid */
 .faq-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    gap: 1.5rem;
     max-width: 1200px;
     margin: 0 auto;
 }
 
-.faq-item {
-    background: var(--dark-gray);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 2rem;
-    transition: all 0.3s ease;
-}
-
-.faq-item:hover {
-    border-color: var(--blue);
-    transform: translateY(-2px);
-}
-
-.faq-item h4 {
+.faq-grid .contact-card h4 {
     color: var(--blue);
     margin-bottom: 1rem;
-    font-size: 1.2rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
 }
 
-.faq-item p {
+.faq-grid .contact-card p {
     color: var(--text-secondary);
     line-height: 1.6;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
-/* Emergency Section */
-.emergency-section {
-    background: var(--dark);
-    padding: 4rem 0;
-}
-
+/* Emergency Card */
 .emergency-card {
     background: var(--gradient);
     border-radius: 16px;
@@ -349,8 +244,6 @@
 .emergency-content p {
     margin-bottom: 1.5rem;
     opacity: 0.9;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
 .emergency-contact {
@@ -359,15 +252,38 @@
     gap: 0.75rem;
     font-size: 1.5rem;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
 .emergency-action .btn {
     padding: 1rem 2rem;
     font-size: 1.1rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+}
+
+/* Map Section */
+.map-container {
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.map-note {
+    background: var(--dark);
+    border: 1px solid var(--blue);
+    border-radius: 6px;
+    padding: 1rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.contact-form-side .contact-card h3 {
+    color: var(--white);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 /* Responsive Design */
@@ -385,10 +301,6 @@
 }
 
 @media (max-width: 768px) {
-    .contact-hero .hero-title {
-        font-size: 2.5rem;
-    }
-
     .form-row {
         grid-template-columns: 1fr;
     }
@@ -397,7 +309,7 @@
         grid-template-columns: 1fr;
     }
 
-    .contact-card, .map-section, .form-section {
+    .contact-card {
         padding: 1.5rem;
     }
 
@@ -411,11 +323,23 @@
 }
 
 @media (max-width: 480px) {
-    .contact-hero .hero-title {
-        font-size: 2rem;
-    }
-
     .emergency-card {
         padding: 1.5rem;
     }
+
+    .form-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+}
+
+/* Spinner Animation */
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }

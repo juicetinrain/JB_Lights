@@ -1,7 +1,7 @@
-/* css/pages/reservation.css */
+/* css/pages/reservation.css - Reservation Page Specific Styles */
+
 .reservation-page {
-    padding-top: 100px;
-    min-height: 100vh;
+    padding: 6rem 0;
     background: var(--black);
 }
 
@@ -31,7 +31,6 @@
     letter-spacing: 1px;
 }
 
-/* Package Cards */
 .package-card {
     background: var(--dark);
     border: 2px solid var(--border);
@@ -75,8 +74,6 @@
     color: var(--white);
     margin: 0;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
 .package-price {
@@ -90,8 +87,6 @@
     margin-top: 1rem;
     margin-bottom: 0.5rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
 .package-features ul {
@@ -115,7 +110,6 @@
     font-weight: bold;
 }
 
-/* Map Styles */
 .map-container {
     margin-bottom: 1.5rem;
 }
@@ -134,11 +128,8 @@
     color: var(--text-secondary);
     font-size: 0.8rem;
     margin-bottom: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
-/* Payment Methods */
 .payment-option {
     border: 2px solid var(--border);
     border-radius: 8px;
@@ -172,7 +163,6 @@
     border: 1px solid var(--blue);
 }
 
-/* Review Section */
 .review-section {
     background: var(--dark);
     border-radius: 12px;
@@ -184,13 +174,10 @@
     background: var(--dark-gray);
 }
 
-/* Form Elements */
 .form-control, .form-select {
     background: var(--dark);
     border: 1px solid var(--border);
     color: var(--white);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
 .form-control:focus, .form-select:focus {
@@ -209,18 +196,13 @@
 .form-label {
     color: var(--white);
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
-/* Buttons */
 .btn-reservation {
-    text-transform: uppercase;
-    letter-spacing: 1px;
     font-weight: 600;
+    padding: 0.75rem 1.5rem;
 }
 
-/* Address Search */
 .input-group .btn {
     border: 1px solid var(--border);
     border-left: none;
@@ -231,12 +213,38 @@
     border-color: var(--blue);
 }
 
+/* Alert Styles */
+.alert {
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.alert-success {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid #22c55e;
+    color: #22c55e;
+}
+
+.alert-danger {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid #ef4444;
+    color: #ef4444;
+}
+
+.alert-info {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid #3b82f6;
+    color: #3b82f6;
+}
+
+.alert-warning {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid #f59e0b;
+    color: #f59e0b;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
-    .reservation-page {
-        padding-top: 80px;
-    }
-    
     .reservation-card {
         padding: 1.5rem;
         margin: 1rem;
@@ -276,4 +284,14 @@
     .step-title {
         font-size: 1.25rem;
     }
+}
+
+/* Spinner Animation */
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }

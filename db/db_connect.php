@@ -1,15 +1,26 @@
 <?php
-// db_connect.php
-session_start();
+// db/db_connect.php
 
-$DB_HOST = 'localhost';
-$DB_USER = 'root';
-$DB_PASS = '';
-$DB_NAME = 'jb_lights';
+// Start session if not already started
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
-$conn = new mysqli($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
-if ($conn->connect_error) {
-    die("Database connection failed: " . $conn->connect_error);
+// Database connection
+$host = 'localhost';
+$dbname = 'jb_lights';
+$username = 'root'; // Change as per your configuration
+$password = ''; // Change as per your configuration
+
+try {
+    $conn = new mysqli($host, $username, $password, $dbname);
+    
+    // Check connection
+    if ($conn->connect_error) {
+        throw new Exception("Connection failed: " . $conn->connect_error);
+    }
+} catch (Exception $e) {
+    die("Database connection failed: " . $e->getMessage());
 }
 
 // Check if user is logged in
@@ -17,23 +28,45 @@ function isLoggedIn() {
     return isset($_SESSION['user_id']);
 }
 
+// Check if user is admin
+function isAdmin() {
+    return isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'admin';
+}
+
 // Get current user data
 function getCurrentUser() {
     global $conn;
-    if (isLoggedIn()) {
-        $user_id = $_SESSION['user_id'];
-        $result = $conn->query("SELECT * FROM users WHERE id = $user_id");
+    
+    if (!isLoggedIn()) {
+        return null;
+    }
+    
+    $user_id = $_SESSION['user_id'];
+    $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
         return $result->fetch_assoc();
     }
+    
     return null;
 }
 
-// Check if user is admin
-function isAdmin() {
-    if (isLoggedIn()) {
-        $user = getCurrentUser();
-        return $user && $user['user_type'] === 'admin';
+// Get user by ID
+function getUserById($id) {
+    global $conn;
+    
+    $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        return $result->fetch_assoc();
     }
-    return false;
+    
+    return null;
 }
 ?>
