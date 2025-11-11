@@ -22,6 +22,7 @@
 @import 'pages/home.css';
 @import 'pages/reservation.css';
 @import 'pages/contact.css';
+@import 'pages/admin.css';
 
 /* Utilities */
 @import 'utilities/animations.css';

@@ -12,6 +12,10 @@ $dbname = 'jb_lights';
 $username = 'root'; // Change as per your configuration
 $password = ''; // Change as per your configuration
 
+if (isset($_GET['action']) && $_GET['action'] === 'set_active_tab') {
+    $_SESSION['admin_active_tab'] = $_GET['tab'] ?? 'dashboard';
+}
+
 try {
     $conn = new mysqli($host, $username, $password, $dbname);
     
