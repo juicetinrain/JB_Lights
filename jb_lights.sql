@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 10, 2025 at 12:40 PM
+-- Generation Time: Nov 11, 2025 at 08:02 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -103,20 +103,26 @@ CREATE TABLE `reservations` (
   `event_type` varchar(50) NOT NULL,
   `event_date` date NOT NULL,
   `event_address` text NOT NULL,
+  `event_location` text DEFAULT NULL,
   `package` varchar(100) NOT NULL,
   `total_amount` decimal(10,2) NOT NULL,
+  `payment_method` varchar(20) NOT NULL,
+  `downpayment_amount` decimal(10,2) DEFAULT 0.00,
   `status` varchar(20) DEFAULT 'Pending',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `reservations`
 --
 
-INSERT INTO `reservations` (`id`, `contact_name`, `contact_email`, `contact_phone`, `event_type`, `event_date`, `event_address`, `package`, `total_amount`, `status`, `created_at`) VALUES
-(1, 'Justin Basco', 'justin@email.com', '12345678901', 'Wedding', '2026-08-20', 'Dau, Mabalacat City', 'Basic Package', 5000.00, 'Confirmed', '2025-11-09 20:07:52'),
-(2, 'Naven Cuenca', 'naven@email.com', '12345678902', 'Birthday', '2026-08-25', 'Angeles City', 'Tables', 2000.00, 'Confirmed', '2025-11-09 20:07:52'),
-(3, 'Tyron Gonzales', 'tyron@email.com', '12345678903', 'Corporate', '2026-08-04', 'San Fernando', 'Basic Package', 5000.00, 'Confirmed', '2025-11-09 20:07:52');
+INSERT INTO `reservations` (`id`, `contact_name`, `contact_email`, `contact_phone`, `event_type`, `event_date`, `event_address`, `event_location`, `package`, `total_amount`, `payment_method`, `downpayment_amount`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Justin Basco', 'justin@email.com', '12345678901', 'Wedding', '2026-08-20', 'Dau, Mabalacat City', '15.1963,120.6093', 'Basic Package', 5000.00, 'cod', 0.00, 'Confirmed', '2025-11-09 20:07:52', '2025-11-11 04:32:37'),
+(2, 'Naven Cuenca', 'naven@email.com', '12345678902', 'Birthday', '2026-08-25', 'Angeles City', '15.1963,120.6093', 'Tables', 2000.00, 'cod', 0.00, 'Confirmed', '2025-11-09 20:07:52', '2025-11-11 04:32:37'),
+(3, 'Tyron Gonzales', 'tyron@email.com', '12345678903', 'Corporate', '2026-08-04', 'San Fernando', '15.1963,120.6093', 'Basic Package', 5000.00, 'cod', 0.00, 'Confirmed', '2025-11-09 20:07:52', '2025-11-11 04:32:37'),
+(4, 'Admin User', 'admin@jblights.com', '09000000000', 'Birthday', '2025-11-13', 'Bamban-Centenial Bridge, MacArthur Highway, Xevera, Mabalacat, Pampanga, Central Luzon, 2317, Philippines', '15.244329136494445,120.56646000621666', 'Premium Setup', 7000.00, 'gcash', 2100.00, 'Confirmed', '2025-11-11 04:37:15', '2025-11-11 04:39:08'),
+(5, 'Nanana mmamw', 'errfjj@gga.com', '09334232112', 'Other', '2025-11-21', 'Xevera, Mabalacat, Pampanga, Central Luzon, 2317, Philippines', '15.2456825,120.5609601', 'Basic Setup', 5000.00, 'cod', 0.00, 'Pending', '2025-11-11 06:04:31', '2025-11-11 06:04:31');
 
 -- --------------------------------------------------------
 
@@ -129,6 +135,7 @@ CREATE TABLE `users` (
   `name` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
+  `user_type` varchar(20) DEFAULT 'user',
   `phone` varchar(20) DEFAULT NULL,
   `address` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -138,11 +145,12 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `email`, `password`, `phone`, `address`, `created_at`) VALUES
-(1, 'Admin User', 'admin@jblights.com', 'admin', '09000000000', NULL, '2025-11-09 20:07:52'),
-(2, 'Justin Basco', 'justin@email.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '12345678901', NULL, '2025-11-09 20:07:52'),
-(3, 'Naven Cuenca', 'naven@email.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '12345678902', NULL, '2025-11-09 20:07:52'),
-(4, 'Tyron Gonzales', 'tyron@email.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '12345678903', NULL, '2025-11-09 20:07:52');
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `user_type`, `phone`, `address`, `created_at`) VALUES
+(1, 'Admin', 'admin@jblights.com', 'admin', 'admin', '09000000000', '', '2025-11-09 20:07:52'),
+(2, 'Justin Basco', 'justin@email.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', '12345678901', NULL, '2025-11-09 20:07:52'),
+(3, 'Naven Cuenca', 'naven@email.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', '12345678902', NULL, '2025-11-09 20:07:52'),
+(4, 'Tyron Gonzales', 'tyron@email.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', '12345678903', NULL, '2025-11-09 20:07:52'),
+(5, 'Nanana mmamw', 'errfjj@gga.com', 'nigga', 'user', NULL, NULL, '2025-11-11 06:03:34');
 
 --
 -- Indexes for dumped tables
@@ -204,13 +212,13 @@ ALTER TABLE `packages`
 -- AUTO_INCREMENT for table `reservations`
 --
 ALTER TABLE `reservations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
