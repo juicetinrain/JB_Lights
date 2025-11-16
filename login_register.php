@@ -89,30 +89,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
     <link rel="stylesheet" href="css/pages/login_register.css">
 </head>
 <body class="dark-mode login-register-page">
-    <!-- Header -->
-    <header class="main-header">
-        <div class="header-container">
-            <a href="index.php" class="logo">
-                <img src="https://i.imgur.com/wOkfD9T.jpeg" alt="JB Lights & Sound" class="logo-image">
-                <div class="logo-text">
-                    <span class="logo-main">JB LIGHTS & SOUND</span>
-                    <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
-                </div>
-            </a>
-            <nav class="main-nav">
-                <a href="reservation.php" class="btn btn-primary me-2 d-none d-md-inline-block">
-                    <i class="bi bi-calendar-check"></i> BOOK NOW
-                </a>
-                <button class="menu-toggle">
-                    <div class="hamburger">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                </button>
-            </nav>
-        </div>
-    </header>
 
     <!-- Main Content -->
     <main class="login-register-main">
@@ -203,84 +179,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="main-footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <a href="index.php" class="logo">
-                        <img src="https://i.imgur.com/wOkfD9T.jpeg" alt="JB Lights & Sound" class="logo-image">
-                        <div class="logo-text">
-                            <span class="logo-main">JB LIGHTS & SOUND</span>
-                            <span class="logo-sub">PROFESSIONAL EVENT SERVICES</span>
-                        </div>
-                    </a>
-                    <p class="footer-desc">Your premier partner for professional event production services in Pampanga and surrounding areas.</p>
-                    <div class="social-links">
-                        <a href="#" class="social-link"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="social-link"><i class="bi bi-messenger"></i></a>
-                        <a href="#" class="social-link"><i class="bi bi-instagram"></i></a>
-                        <a href="tel:+639656396053" class="social-link"><i class="bi bi-telephone"></i></a>
-                    </div>
-                </div>
-                
-                <div class="footer-links">
-                    <h4>QUICK LINKS</h4>
-                    <ul>
-                        <li><a href="index.php">HOME</a></li>
-                        <li><a href="about_us.php">ABOUT US</a></li>
-                        <li><a href="index.php#services">SERVICES</a></li>
-                        <li><a href="index.php#packages">PACKAGES</a></li>
-                        <li><a href="ContactUs.php">CONTACT</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-services">
-                    <h4>OUR SERVICES</h4>
-                    <ul>
-                        <li>SOUND SYSTEMS</li>
-                        <li>LIGHTING EQUIPMENT</li>
-                        <li>STAGE & TRUSSES</li>
-                        <li>LED VIDEO WALLS</li>
-                        <li>EVENT PRODUCTION</li>
-                        <li>TECHNICAL SUPPORT</li>
-                    </ul>
-                </div>
-                
-                <div class="footer-contact">
-                    <h4>CONTACT INFO</h4>
-                    <div class="contact-item">
-                        <i class="bi bi-geo-alt"></i>
-                        <span>235, PUROK 2, BICAL, MABALACAT CITY, PAMPANGA</span>
-                    </div>
-                    <div class="contact-item">
-                        <i class="bi bi-telephone"></i>
-                        <span>09656396053</span>
-                    </div>
-                    <div class="contact-item">
-                        <i class="bi bi-envelope"></i>
-                        <span>JBLIGHTSANDSOUNDRENTAL@GMAIL.COM</span>
-                    </div>
-                    <div class="contact-item">
-                        <i class="bi bi-clock"></i>
-                        <span>24/7 EMERGENCY SUPPORT</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Fixed Footer Bottom -->
-            <div class="footer-bottom">
-                <div class="container">
-                    <div class="footer-bottom-content">
-                        <p>&copy; 2025 JB LIGHTS & SOUND. ALL RIGHTS RESERVED.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Side Navigation -->
-    <?php include 'side_nav.php'; ?>
 
     <script>
         function switchTab(tab) {
