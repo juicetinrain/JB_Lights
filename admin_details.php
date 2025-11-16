@@ -1,11 +1,6 @@
 <?php
-// admin_details.php - Handle details view for admin panel
+// admin_details.php - Updated with enhanced booking details
 require_once 'db/db_connect.php';
-
-if (!isLoggedIn() || !isAdmin()) {
-    http_response_code(403);
-    exit('Access Denied');
-}
 
 $type = $_GET['type'] ?? '';
 $id = intval($_GET['id'] ?? 0);
@@ -13,6 +8,12 @@ $id = intval($_GET['id'] ?? 0);
 if ($id <= 0) {
     http_response_code(400);
     exit('Invalid ID');
+}
+
+// Function to check if column exists in table
+function columnExists($conn, $table, $column) {
+    $result = $conn->query("SHOW COLUMNS FROM $table LIKE '$column'");
+    return $result->num_rows > 0;
 }
 
 switch ($type) {
@@ -36,7 +37,23 @@ switch ($type) {
 function showBookingDetails($id) {
     global $conn;
     
-    $stmt = $conn->prepare("SELECT * FROM reservations WHERE id = ?");
+    // Build query based on available columns
+    $query = "SELECT r.*";
+    
+    // Check if users table has name and phone columns
+    if (columnExists($conn, 'users', 'name') && columnExists($conn, 'users', 'phone')) {
+        $query .= ", u.name as user_name, u.phone as user_phone";
+    }
+    
+    $query .= " FROM reservations r";
+    
+    if (columnExists($conn, 'users', 'name') && columnExists($conn, 'users', 'phone')) {
+        $query .= " LEFT JOIN users u ON r.contact_email = u.email";
+    }
+    
+    $query .= " WHERE r.id = ?";
+    
+    $stmt = $conn->prepare($query);
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -48,7 +65,7 @@ function showBookingDetails($id) {
     }
     ?>
     <div class="details-section">
-        <h6>Booking Information</h6>
+        <h6><i class="bi bi-info-circle me-2"></i>Booking Information</h6>
         <div class="detail-item">
             <span class="detail-label">Booking ID:</span>
             <span class="detail-value">#<?php echo $booking['id']; ?></span>
@@ -70,7 +87,7 @@ function showBookingDetails($id) {
     </div>
 
     <div class="details-section">
-        <h6>Event Details</h6>
+        <h6><i class="bi bi-calendar-event me-2"></i>Event Details</h6>
         <div class="detail-item">
             <span class="detail-label">Event Type:</span>
             <span class="detail-value"><?php echo htmlspecialchars($booking['event_type']); ?></span>
@@ -79,6 +96,21 @@ function showBookingDetails($id) {
             <span class="detail-label">Event Date:</span>
             <span class="detail-value"><?php echo date('M j, Y', strtotime($booking['event_date'])); ?></span>
         </div>
+        
+        <?php if (isset($booking['start_time']) && $booking['start_time']): ?>
+        <div class="detail-item">
+            <span class="detail-label">Start Time:</span>
+            <span class="detail-value"><?php echo date('g:i A', strtotime($booking['start_time'])); ?></span>
+        </div>
+        <?php endif; ?>
+        
+        <?php if (isset($booking['end_time']) && $booking['end_time']): ?>
+        <div class="detail-item">
+            <span class="detail-label">End Time:</span>
+            <span class="detail-value"><?php echo date('g:i A', strtotime($booking['end_time'])); ?></span>
+        </div>
+        <?php endif; ?>
+        
         <div class="detail-item">
             <span class="detail-label">Package:</span>
             <span class="detail-value"><?php echo htmlspecialchars($booking['package']); ?></span>
@@ -87,16 +119,24 @@ function showBookingDetails($id) {
             <span class="detail-label">Event Address:</span>
             <span class="detail-value"><?php echo htmlspecialchars($booking['event_address']); ?></span>
         </div>
-        <?php if ($booking['event_location']): ?>
+        
+        <?php if (isset($booking['event_location']) && $booking['event_location']): ?>
         <div class="detail-item">
             <span class="detail-label">Location Coordinates:</span>
             <span class="detail-value"><?php echo htmlspecialchars($booking['event_location']); ?></span>
         </div>
         <?php endif; ?>
+        
+        <?php if (isset($booking['landmark_notes']) && $booking['landmark_notes']): ?>
+        <div class="detail-item">
+            <span class="detail-label">Landmark Notes:</span>
+            <span class="detail-value"><?php echo htmlspecialchars($booking['landmark_notes']); ?></span>
+        </div>
+        <?php endif; ?>
     </div>
 
     <div class="details-section">
-        <h6>Contact Information</h6>
+        <h6><i class="bi bi-person-lines-fill me-2"></i>Contact Information</h6>
         <div class="detail-item">
             <span class="detail-label">Contact Name:</span>
             <span class="detail-value"><?php echo htmlspecialchars($booking['contact_name']); ?></span>
@@ -109,17 +149,31 @@ function showBookingDetails($id) {
             <span class="detail-label">Phone:</span>
             <span class="detail-value"><?php echo htmlspecialchars($booking['contact_phone']); ?></span>
         </div>
+        
+        <?php if (isset($booking['preferred_contact']) && $booking['preferred_contact']): ?>
+        <div class="detail-item">
+            <span class="detail-label">Preferred Contact:</span>
+            <span class="detail-value text-capitalize"><?php echo str_replace('_', ' ', $booking['preferred_contact']); ?></span>
+        </div>
+        <?php endif; ?>
+        
+        <?php if (isset($booking['social_media_handle']) && $booking['social_media_handle']): ?>
+        <div class="detail-item">
+            <span class="detail-label">Social Media Handle:</span>
+            <span class="detail-value"><?php echo htmlspecialchars($booking['social_media_handle']); ?></span>
+        </div>
+        <?php endif; ?>
     </div>
 
     <div class="details-section">
-        <h6>Payment Information</h6>
+        <h6><i class="bi bi-credit-card me-2"></i>Payment Information</h6>
         <div class="detail-item">
             <span class="detail-label">Total Amount:</span>
             <span class="detail-value">₱<?php echo number_format($booking['total_amount'], 2); ?></span>
         </div>
         <div class="detail-item">
             <span class="detail-label">Payment Method:</span>
-            <span class="detail-value"><?php echo strtoupper($booking['payment_method']); ?></span>
+            <span class="detail-value text-uppercase"><?php echo $booking['payment_method']; ?></span>
         </div>
         <?php if ($booking['payment_method'] === 'gcash' && $booking['downpayment_amount'] > 0): ?>
         <div class="detail-item">
@@ -150,7 +204,7 @@ function showUserDetails($id) {
     }
     ?>
     <div class="details-section">
-        <h6>User Information</h6>
+        <h6><i class="bi bi-person-badge me-2"></i>User Information</h6>
         <div class="detail-item">
             <span class="detail-label">User ID:</span>
             <span class="detail-value">#<?php echo $user['id']; ?></span>
@@ -179,9 +233,9 @@ function showUserDetails($id) {
         </div>
     </div>
 
-    <?php if ($user['address']): ?>
+    <?php if (isset($user['address']) && $user['address']): ?>
     <div class="details-section">
-        <h6>Address Information</h6>
+        <h6><i class="bi bi-geo-alt me-2"></i>Address Information</h6>
         <div class="detail-item">
             <span class="detail-label">Address:</span>
             <span class="detail-value"><?php echo htmlspecialchars($user['address']); ?></span>
@@ -206,7 +260,7 @@ function showInventoryDetails($id) {
     }
     ?>
     <div class="details-section">
-        <h6>Item Information</h6>
+        <h6><i class="bi bi-box-seam me-2"></i>Item Information</h6>
         <div class="detail-item">
             <span class="detail-label">Item ID:</span>
             <span class="detail-value">#<?php echo $item['id']; ?></span>
@@ -236,18 +290,34 @@ function showInventoryDetails($id) {
     </div>
 
     <div class="details-section">
-        <h6>Quantity Information</h6>
+        <h6><i class="bi bi-clipboard-data me-2"></i>Quantity Information</h6>
         <div class="detail-item">
             <span class="detail-label">Total Quantity:</span>
             <span class="detail-value"><?php echo $item['quantity']; ?></span>
         </div>
         <div class="detail-item">
             <span class="detail-label">Available Quantity:</span>
-            <span class="detail-value"><?php echo $item['available_quantity']; ?></span>
+            <span class="detail-value <?php echo $item['available_quantity'] == 0 ? 'text-danger' : 'text-success'; ?>">
+                <?php echo $item['available_quantity']; ?>
+            </span>
         </div>
         <div class="detail-item">
             <span class="detail-label">Currently in Use:</span>
-            <span class="detail-value"><?php echo $item['quantity'] - $item['available_quantity']; ?></span>
+            <span class="detail-value <?php echo ($item['quantity'] - $item['available_quantity']) > 0 ? 'text-warning' : 'text-secondary'; ?>">
+                <?php echo $item['quantity'] - $item['available_quantity']; ?>
+            </span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Availability Status:</span>
+            <span class="detail-value">
+                <?php if ($item['available_quantity'] == 0): ?>
+                    <span class="badge bg-danger">Out of Stock</span>
+                <?php elseif ($item['available_quantity'] < $item['quantity'] * 0.3): ?>
+                    <span class="badge bg-warning">Low Stock</span>
+                <?php else: ?>
+                    <span class="badge bg-success">In Stock</span>
+                <?php endif; ?>
+            </span>
         </div>
     </div>
     <?php
@@ -268,7 +338,7 @@ function showContactDetails($id) {
     }
     ?>
     <div class="details-section">
-        <h6>Contact Information</h6>
+        <h6><i class="bi bi-person-lines-fill me-2"></i>Contact Information</h6>
         <div class="detail-item">
             <span class="detail-label">Message ID:</span>
             <span class="detail-value">#<?php echo $contact['id']; ?></span>
@@ -296,7 +366,7 @@ function showContactDetails($id) {
     </div>
 
     <div class="details-section">
-        <h6>Message Details</h6>
+        <h6><i class="bi bi-chat-left-text me-2"></i>Message Details</h6>
         <div class="detail-item">
             <span class="detail-label">Subject:</span>
             <span class="detail-value"><?php echo htmlspecialchars($contact['subject']); ?></span>

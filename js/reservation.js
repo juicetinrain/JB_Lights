@@ -1,4 +1,4 @@
-// reservation.js - SIMPLE AND WORKING
+// reservation.js - COMPLETELY REWRITTEN AND FIXED
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Reservation system loaded');
     
@@ -21,14 +21,14 @@ document.addEventListener('DOMContentLoaded', function() {
         initPaymentOptions();
         initTimeFields();
         
-        // Initialize map immediately
+        // Initialize map
         initMap();
         
         updateProgress();
         updateNavigation();
     }
 
-    // SIMPLE MAP INITIALIZATION
+    // MAP INITIALIZATION - COMPLETELY REWRITTEN
     function initMap() {
         console.log('Initializing map...');
         const mapContainer = document.getElementById('map');
@@ -39,22 +39,49 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            // Clear any existing content
-            mapContainer.innerHTML = '';
-            
+            // Clear loading message
+            const loadingEl = mapContainer.querySelector('.map-loading');
+            if (loadingEl) {
+                loadingEl.style.display = 'none';
+            }
+
             // Create map with Pampanga center
             const pampangaCenter = [15.0794, 120.6200];
             map = L.map('map').setView(pampangaCenter, 11);
             
             // Add tile layer
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 18,
+                minZoom: 10
+            }).addTo(map);
+            
+            // Define Pampanga bounds (approximate)
+            const pampangaBounds = L.latLngBounds(
+                [14.9, 120.4],  // Southwest corner
+                [15.3, 120.8]   // Northeast corner
+            );
+            
+            // Set map bounds to Pampanga
+            map.setMaxBounds(pampangaBounds);
+            map.setMinZoom(10);
+            
+            // Add bounds rectangle for visualization (optional)
+            L.rectangle(pampangaBounds, {
+                color: "#0066ff",
+                weight: 2,
+                fillOpacity: 0.1
             }).addTo(map);
             
             // Add draggable marker
             marker = L.marker(pampangaCenter, {
-                draggable: true
+                draggable: true,
+                autoPan: true
             }).addTo(map);
+            
+            // Set initial coordinates and get address
+            document.getElementById('event_location').value = `${pampangaCenter[0]},${pampangaCenter[1]}`;
+            getAddressFromCoordinates(pampangaCenter[0], pampangaCenter[1]);
             
             // MAP CLICK - Set location and get address
             map.on('click', function(e) {
@@ -78,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Get address from coordinates
+    // Get address from coordinates - SIMPLIFIED AND FIXED
     function getAddressFromCoordinates(lat, lng) {
         console.log('Getting address for:', lat, lng);
         
@@ -92,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
         addressTextarea.value = 'Getting address...';
         
         // Use Nominatim for reverse geocoding
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18`)
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=16`)
             .then(response => {
                 if (!response.ok) throw new Error('Network error');
                 return response.json();
@@ -119,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function showMapError() {
         const mapContainer = document.getElementById('map');
         mapContainer.innerHTML = `
-            <div style="padding: 2rem; text-align: center; color: white;">
+            <div class="map-error">
                 <i class="bi bi-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
                 <h4>Map Not Available</h4>
                 <p>You can still book by entering your address manually below.</p>
@@ -130,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     }
 
-    // ADDRESS SEARCH WITH AUTOCOMPLETE
+    // ADDRESS SEARCH - SIMPLIFIED AND FIXED
     function initAddressSearch() {
         const addressInput = document.getElementById('event_address');
         const resultsContainer = document.querySelector('.autocomplete-results');
@@ -148,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
             clearTimeout(searchTimeout);
             const query = this.value.trim();
             
-            if (query.length < 2) {
+            if (query.length < 3) {
                 resultsContainer.style.display = 'none';
                 return;
             }
@@ -159,14 +186,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
             searchTimeout = setTimeout(() => {
                 searchAddressOnline(query);
-            }, 300);
+            }, 500);
         });
 
         // Search button click
         if (searchButton) {
             searchButton.addEventListener('click', function() {
                 const query = addressInput.value.trim();
-                if (query.length >= 2) {
+                if (query.length >= 3) {
                     searchAddressOnline(query);
                 }
             });
@@ -177,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 const query = this.value.trim();
-                if (query.length >= 2) {
+                if (query.length >= 3) {
                     searchAddressOnline(query);
                 }
             }
@@ -191,16 +218,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Search addresses online
+    // SEARCH FUNCTION - SIMPLIFIED
     function searchAddressOnline(query) {
         const resultsContainer = document.querySelector('.autocomplete-results');
         
+        if (!query || query.length < 3) {
+            resultsContainer.innerHTML = '<div class="autocomplete-item">Please enter at least 3 characters</div>';
+            resultsContainer.style.display = 'block';
+            return;
+        }
+
         // Show loading
-        resultsContainer.innerHTML = '<div class="autocomplete-item">Searching Pampanga locations...</div>';
+        resultsContainer.innerHTML = '<div class="autocomplete-item">Searching locations...</div>';
         resultsContainer.style.display = 'block';
 
-        // Search in Pampanga area
-        const searchUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ' Pampanga')}&limit=8`;
+        // Search URL - Add Pampanga to query to bias results
+        const searchUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Pampanga')}&limit=8`;
+        
+        console.log('Searching for:', query);
         
         fetch(searchUrl)
             .then(response => {
@@ -208,19 +243,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
+                console.log('Found results:', data);
                 if (data && data.length > 0) {
                     displaySearchResults(data);
                 } else {
-                    // Fallback search without Pampanga filter
-                    return fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=8`)
-                        .then(response => response.json())
-                        .then(fallbackData => {
-                            if (fallbackData && fallbackData.length > 0) {
-                                displaySearchResults(fallbackData);
-                            } else {
-                                showNoResults();
-                            }
-                        });
+                    showNoResults();
                 }
             })
             .catch(error => {
@@ -236,11 +263,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         resultsContainer.innerHTML = '';
 
-        if (!results || results.length === 0) {
-            showNoResults();
-            return;
-        }
-
         results.forEach(result => {
             const item = document.createElement('div');
             item.className = 'autocomplete-item';
@@ -252,7 +274,7 @@ document.addEventListener('DOMContentLoaded', function() {
             item.addEventListener('click', function() {
                 console.log('Location selected:', result);
                 
-                // Update address fields with EXACT ADDRESS
+                // Update address fields
                 addressInput.value = result.display_name;
                 document.querySelector('textarea[name="event_address"]').value = result.display_name;
                 
@@ -300,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     }
 
-    // PACKAGE SELECTION
+    // PACKAGE SELECTION - FIXED
     function initPackageSelection() {
         document.querySelectorAll('.package-card').forEach(card => {
             const expandBtn = card.querySelector('.expand-toggle');
@@ -355,21 +377,33 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedPackage = packageKey;
         document.getElementById('selected_package').value = packageKey;
         
-        // Update UI
+        // Update UI - AUTO EXPAND SELECTED PACKAGE
         document.querySelectorAll('.package-card').forEach(card => {
-            card.classList.remove('selected');
+            card.classList.remove('selected', 'expanded');
         });
         
         const selectedCard = document.querySelector(`[data-package="${packageKey}"]`);
         if (selectedCard) {
-            selectedCard.classList.add('selected');
+            selectedCard.classList.add('selected', 'expanded');
+            
+            // Update toggle button to show "hide"
+            const icon = selectedCard.querySelector('.expand-toggle i');
+            const text = selectedCard.querySelector('.expand-toggle span');
+            icon.className = 'bi bi-chevron-up';
+            text.textContent = 'Hide Package Details';
         }
         
         updateReviewSection();
         updateNavigation();
+        
+        // ENABLE THE NEXT BUTTON IMMEDIATELY
+        const nextButton = document.querySelector('#step1 .btn-reservation');
+        if (nextButton) {
+            nextButton.disabled = false;
+        }
     }
 
-    // PAYMENT OPTIONS
+    // PAYMENT OPTIONS - FIXED
     function initPaymentOptions() {
         document.querySelectorAll('.payment-option').forEach(option => {
             option.addEventListener('click', function() {
@@ -417,7 +451,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         
         const total = packagePrices[selectedPackage] || 0;
-        const downpayment = total * 0.30;
+        const downpayment = total * 0.20; // 20% downpayment
         const remaining = total - downpayment;
         
         document.getElementById('downpaymentAmount').textContent = `₱${downpayment.toFixed(2)}`;
@@ -459,7 +493,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return true;
     }
 
-    // STEP NAVIGATION
+    // STEP NAVIGATION - FIXED
     function initSidebarSteps() {
         document.querySelectorAll('.step-item').forEach((step, index) => {
             step.addEventListener('click', function() {
@@ -528,7 +562,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateNavigation() {
-        const nextButton = document.querySelector(`#step${currentStep} .btn-reservation[onclick*="nextStep"]`);
+        const nextButton = document.querySelector(`#step${currentStep} .btn-reservation`);
         if (nextButton) {
             nextButton.disabled = !validateStep(currentStep);
         }
@@ -593,6 +627,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const startTime = document.getElementById('start_time').value;
         const endTime = document.getElementById('end_time').value;
         const eventAddress = document.querySelector('textarea[name="event_address"]').value;
+        const landmarkNotes = document.querySelector('textarea[name="landmark_notes"]').value;
         
         let html = `<strong>Event Type:</strong> ${eventType || 'Not specified'}<br>`;
         html += `<strong>Date:</strong> ${eventDate ? new Date(eventDate).toLocaleDateString() : 'Not specified'}<br>`;
@@ -603,6 +638,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         html += `<strong>Address:</strong> ${eventAddress || 'Not specified'}`;
         
+        if (landmarkNotes) {
+            html += `<br><strong>Landmark Notes:</strong> ${landmarkNotes}`;
+        }
+        
         document.getElementById('reviewEvent').innerHTML = html;
     }
 
@@ -610,12 +649,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const name = document.querySelector('input[name="contact_name"]').value;
         const email = document.querySelector('input[name="contact_email"]').value;
         const phone = document.querySelector('input[name="contact_phone"]').value;
+        const preferredContact = document.querySelector('select[name="preferred_contact"]').value;
+        const socialMedia = document.querySelector('input[name="social_media_handle"]').value;
         
-        document.getElementById('reviewContact').innerHTML = `
-            <strong>Name:</strong> ${name}<br>
-            <strong>Email:</strong> ${email}<br>
-            <strong>Phone:</strong> ${phone || 'Not specified'}
-        `;
+        let html = `<strong>Name:</strong> ${name}<br>`;
+        html += `<strong>Email:</strong> ${email}<br>`;
+        html += `<strong>Phone:</strong> ${phone || 'Not specified'}<br>`;
+        html += `<strong>Preferred Contact:</strong> ${preferredContact || 'Not specified'}`;
+        
+        if (socialMedia) {
+            html += `<br><strong>Social Media:</strong> ${socialMedia}`;
+        }
+        
+        document.getElementById('reviewContact').innerHTML = html;
     }
 
     function updatePaymentReview() {
@@ -631,7 +677,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let html = `<strong>Method:</strong> ${selectedPayment.toUpperCase()}`;
             
             if (selectedPayment === 'gcash') {
-                const downpayment = total * 0.30;
+                const downpayment = total * 0.20; // 20% downpayment
                 const remaining = total - downpayment;
                 html += `<br><strong>Downpayment:</strong> ₱${downpayment.toFixed(2)}`;
                 html += `<br><strong>Remaining:</strong> ₱${remaining.toFixed(2)}`;
@@ -639,7 +685,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('reviewDownpayment').innerHTML = `
                     <small class="text-warning">
                         <i class="bi bi-info-circle me-1"></i>
-                        30% downpayment required (₱${downpayment.toFixed(2)})
+                        20% downpayment required (₱${downpayment.toFixed(2)})
                     </small>
                 `;
             } else {
@@ -657,4 +703,17 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('reviewDownpayment').innerHTML = '';
         }
     }
+
+    // Add animation for spinner
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+    `;
+    document.head.appendChild(style);
 });

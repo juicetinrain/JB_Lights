@@ -1,4 +1,4 @@
-/* reservation.css - Compact and Left-Aligned Package Cards */
+/* reservation.css - COMPLETELY FIXED */
 .reservation-page {
     padding: 100px 0 60px;
     background: var(--black);
@@ -156,18 +156,18 @@
     font-size: 1.5rem;
 }
 
-/* COMPACT PACKAGE CARDS - LEFT ALIGNED */
+/* COMPACT PACKAGE CARDS */
 .packages-container {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.5rem;
 }
 
 .package-card {
     background: var(--dark);
     border: 2px solid var(--border);
-    border-radius: 12px;
-    padding: 1.25rem;
+    border-radius: 8px;
+    padding: 1rem;
     transition: all 0.3s ease;
     cursor: pointer;
     position: relative;
@@ -185,15 +185,11 @@
     background: rgba(0, 102, 255, 0.1);
 }
 
-.package-card.expanded {
-    margin-bottom: 0.5rem;
-}
-
 .package-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
     gap: 1rem;
 }
 
@@ -204,7 +200,7 @@
 
 .package-header h4 {
     color: var(--white);
-    margin: 0 0 0.25rem 0;
+    margin: 0 0 0.1rem 0;
     font-weight: 700;
     font-size: 1.1rem;
     text-align: left;
@@ -214,16 +210,17 @@
     color: var(--text-secondary);
     font-size: 0.85rem;
     margin: 0;
-    line-height: 1.4;
+    line-height: 1.3;
     text-align: left;
 }
 
 .package-price {
     color: var(--blue);
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: 800;
     text-align: right;
     flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .package-features {
@@ -236,11 +233,11 @@
 
 .package-card.expanded .package-features {
     max-height: 500px;
-    margin-top: 1rem;
+    margin-top: 0.75rem;
 }
 
 .feature-section {
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
     text-align: left;
 }
 
@@ -250,9 +247,9 @@
 
 .feature-section h6 {
     color: var(--blue);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     text-align: left;
@@ -263,18 +260,19 @@
     padding-left: 0;
     margin: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 0.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.2rem;
     text-align: left;
 }
 
 .feature-list li {
     color: var(--text-secondary);
-    padding: 0.25rem 0;
+    padding: 0.15rem 0;
     position: relative;
-    padding-left: 1.5rem;
-    font-size: 0.85rem;
+    padding-left: 1.2rem;
+    font-size: 0.8rem;
     text-align: left;
+    line-height: 1.2;
 }
 
 .feature-list li::before {
@@ -283,19 +281,20 @@
     left: 0;
     color: var(--blue);
     font-weight: bold;
+    font-size: 0.7rem;
 }
 
 .expand-toggle {
     background: none;
     border: none;
     color: var(--blue);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-    padding: 0.5rem 0;
+    gap: 0.4rem;
+    margin-top: 0.4rem;
+    padding: 0.3rem 0;
     transition: color 0.2s ease;
     text-align: left;
 }
@@ -304,7 +303,7 @@
     color: var(--blue-light);
 }
 
-/* Map Styles */
+/* MAP STYLES */
 .map-container {
     margin-bottom: 1.5rem;
     border-radius: 8px;
@@ -312,14 +311,79 @@
     border: 2px solid var(--border);
     position: relative;
     background: var(--dark);
+    min-height: 400px;
 }
 
 #map {
     height: 400px;
     width: 100%;
     background: var(--dark);
+    position: relative;
 }
 
+.map-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-secondary);
+    text-align: center;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid var(--blue);
+}
+
+.map-loading .spinner {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+    animation: spin 1s linear infinite;
+}
+
+.map-error {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ef4444;
+    text-align: center;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid #ef4444;
+    max-width: 90%;
+}
+
+.pampanga-bounds {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    z-index: 1000;
+    border: 1px solid var(--blue);
+}
+
+.leaflet-container {
+    background: var(--dark) !important;
+}
+
+.leaflet-popup-content-wrapper {
+    background: var(--dark-gray) !important;
+    color: var(--text-primary) !important;
+}
+
+.leaflet-popup-tip {
+    background: var(--dark-gray) !important;
+}
+
+/* SEARCH STYLES - FIXED */
 .search-container {
     position: relative;
     margin-bottom: 1rem;
@@ -352,7 +416,8 @@
     left: 0;
     right: 0;
     background: var(--dark-gray);
-    border: 1px solid var(--border);
+    border: 2px solid var(--blue);
+    border-top: none;
     border-radius: 0 0 8px 8px;
     max-height: 200px;
     overflow-y: auto;
@@ -365,14 +430,15 @@
     padding: 0.75rem 1rem;
     cursor: pointer;
     border-bottom: 1px solid var(--border);
-    transition: background 0.2s ease;
+    transition: all 0.2s ease;
     color: var(--text-primary);
     font-size: 0.9rem;
     text-align: left;
 }
 
 .autocomplete-item:hover {
-    background: var(--medium-gray);
+    background: var(--blue);
+    color: white;
 }
 
 .autocomplete-item:last-child {
@@ -390,26 +456,53 @@
     color: var(--text-secondary);
 }
 
-/* Payment Options */
+.address-notes {
+    background: rgba(0, 102, 255, 0.1);
+    border: 1px solid var(--blue);
+    border-radius: 6px;
+    padding: 0.75rem;
+}
+
+/* reservation.css - UPDATED PAYMENT SECTION */
+/* Payment Options - Box Style */
 .payment-options {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
 }
 
 .payment-option {
     border: 2px solid var(--border);
-    border-radius: 8px;
-    padding: 1.5rem;
+    border-radius: 12px;
+    padding: 2rem 1.5rem;
     cursor: pointer;
     transition: all 0.3s ease;
     background: var(--dark);
-    text-align: left;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.payment-option::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 102, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.payment-option:hover::before {
+    left: 100%;
 }
 
 .payment-option:hover {
     border-color: var(--blue);
-    transform: translateY(-2px);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
 }
 
 .payment-option.selected {
@@ -417,13 +510,74 @@
     background: rgba(0, 102, 255, 0.1);
 }
 
+.payment-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--dark-gray);
+    border: 2px solid var(--border);
+    transition: all 0.3s ease;
+}
+
+.payment-option.selected .payment-icon {
+    background: rgba(0, 102, 255, 0.2);
+    border-color: var(--blue);
+}
+
+.payment-option.cod .payment-icon {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+}
+
+.payment-option.gcash .payment-icon {
+    background: linear-gradient(135deg, #0066ff, #0047b3);
+    color: white;
+}
+
+.payment-icon i {
+    font-size: 2rem;
+}
+
+.payment-info h5 {
+    color: var(--white);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.payment-info p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0;
+    line-height: 1.4;
+}
+
 .downpayment-info {
     background: var(--dark);
-    border-radius: 6px;
-    padding: 1rem;
+    border-radius: 8px;
+    padding: 1.5rem;
     margin-top: 1rem;
     display: none;
     border: 1px solid var(--blue);
+    grid-column: 1 / -1;
+}
+
+/* Payment logos */
+.gcash-logo {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    color: white;
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+}
+
+.cod-logo {
+    font-weight: bold;
+    color: white;
+    font-size: 1.1rem;
 }
 
 /* Review Section */
@@ -499,6 +653,32 @@
     display: block;
 }
 
+/* Time Fields */
+.time-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.time-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.time-field label {
+    color: var(--white);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Animations */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
     .reservation-layout {
@@ -561,5 +741,29 @@
     
     .review-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .search-with-button {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 576px) {
+    .reservation-main {
+        padding: 1rem;
+    }
+    
+    .package-card {
+        padding: 0.75rem;
+    }
+    
+    .step-navigation {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .step-navigation .btn {
+        width: 100%;
+        justify-content: center;
     }
 }

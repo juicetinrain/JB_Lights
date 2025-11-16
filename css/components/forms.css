@@ -83,6 +83,16 @@
     border-top: 1px solid var(--border);
 }
 
+/* Improve form readability */
+.form-control, .form-select {
+    font-size: 1rem; /* Ensure good readability */
+}
+
+.form-label {
+    font-size: 1rem; /* Larger labels */
+    font-weight: 600;
+}
+
 /* Payment Options */
 .payment-options {
     display: flex;

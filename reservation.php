@@ -100,31 +100,36 @@ $packages = [
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])) {
-    $contact_name = $_POST['contact_name'];
-    $contact_email = $_POST['contact_email'];
+    $contact_name = $user['name']; // Always use logged-in user's name
+    $contact_email = $user['email']; // Always use logged-in user's email
     $contact_phone = $_POST['contact_phone'];
     $event_type = $_POST['event_type'];
     $event_date = $_POST['event_date'];
+    $start_time = $_POST['start_time'];
+    $end_time = $_POST['end_time'];
     $event_address = $_POST['event_address'];
     $event_location = $_POST['event_location'] ?? '';
     $package_key = $_POST['package'];
     $payment_method = $_POST['payment_method'];
+    $landmark_notes = $_POST['landmark_notes'] ?? '';
+    $preferred_contact = $_POST['preferred_contact'] ?? 'phone';
+    $social_media_handle = $_POST['social_media_handle'] ?? '';
     $total_amount = $packages[$package_key]['price'];
     
-    // Calculate downpayment for GCash
+    // Calculate downpayment for GCash - NOW 20%
     $downpayment_amount = 0;
     if ($payment_method === 'gcash') {
-        $downpayment_amount = $total_amount * 0.30;
+        $downpayment_amount = $total_amount * 0.20;
     }
     
-    // Insert reservation
-    $stmt = $conn->prepare("INSERT INTO reservations (contact_name, contact_email, contact_phone, event_type, event_date, event_address, event_location, package, total_amount, payment_method, downpayment_amount, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')");
-    $stmt->bind_param("ssssssssdsd", $contact_name, $contact_email, $contact_phone, $event_type, $event_date, $event_address, $event_location, $packages[$package_key]['name'], $total_amount, $payment_method, $downpayment_amount);
+    // Insert reservation with new columns
+    $stmt = $conn->prepare("INSERT INTO reservations (contact_name, contact_email, contact_phone, event_type, event_date, start_time, end_time, event_address, event_location, package, total_amount, payment_method, downpayment_amount, landmark_notes, preferred_contact, social_media_handle, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')");
+    $stmt->bind_param("ssssssssssdsdsss", $contact_name, $contact_email, $contact_phone, $event_type, $event_date, $start_time, $end_time, $event_address, $event_location, $packages[$package_key]['name'], $total_amount, $payment_method, $downpayment_amount, $landmark_notes, $preferred_contact, $social_media_handle);
     
     if ($stmt->execute()) {
         $reservation_id = $conn->insert_id;
-        // Redirect to success page instead of showing message
-        header("Location: reservation_success.php");
+        // Redirect to success page
+        header("Location: reservation_success.php?id=" . $reservation_id);
         exit();
     } else {
         $error_message = "Error submitting reservation. Please try again.";
@@ -142,13 +147,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JS -->
-<script src="js/common.js"></script>
-<script src="js/reservation.js"></script>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/reservation.css">
@@ -389,7 +389,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
                                         </div>
                                     </div>
                                     <textarea class="form-control d-none" name="event_address" rows="2" required placeholder="Full event address..."></textarea>
-                                    <small class="text-muted">Search for locations in Pampanga area only</small>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Additional Location Notes</label>
+                                    <textarea class="form-control" name="landmark_notes" rows="2" placeholder="Enter specific landmarks, building names, or detailed directions that might not appear on the map (e.g.: Near SM City Clark main entrance, beside Jollibee, 2nd floor of building name...)"></textarea>
+                                    <small class="text-muted">This helps our team locate your event venue more accurately</small>
                                 </div>
                                 <div class="col-12 mb-3">
                                     <label class="form-label">Set location on map</label>
@@ -398,7 +402,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
                                         Click on the map to set your exact event location or search for an address above
                                     </div>
                                     <div class="map-container">
-                                        <div id="map"></div>
+                                        <div id="map">
+                                            <div class="map-loading">
+                                                <i class="bi bi-compass spinner"></i>
+                                                <p>Loading map...</p>
+                                            </div>
+                                        </div>
+                                        <div class="pampanga-bounds">
+                                            <i class="bi bi-geo-alt me-1"></i>
+                                            Pampanga Area Only
+                                        </div>
                                     </div>
                                     <input type="hidden" name="event_location" id="event_location">
                                 </div>
@@ -415,86 +428,94 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
 
                         <!-- Step 3: Contact Details -->
                         <div class="step-card" id="step3">
-                            <h3 class="step-title-main">3. Contact Details</h3>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Contact name *</label>
-                                    <input type="text" class="form-control" name="contact_name" value="<?php echo htmlspecialchars($user['name']); ?>" required readonly style="background-color: var(--dark-gray); color: var(--text-secondary);">
-                                    <small class="text-muted">Taken from your profile</small>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Contact email *</label>
-                                    <input type="email" class="form-control" name="contact_email" value="<?php echo htmlspecialchars($user['email']); ?>" required readonly style="background-color: var(--dark-gray); color: var(--text-secondary);">
-                                    <small class="text-muted">Taken from your profile</small>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Contact phone *</label>
-                                    <input type="tel" class="form-control" name="contact_phone" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>" required placeholder="09123456789" maxlength="11">
-                                    <small class="text-muted">Please enter your current phone number</small>
-                                </div>
+                    <h3 class="step-title-main">3. Contact Details</h3>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Contact name *</label>
+                            <input type="text" class="form-control" value="<?php echo htmlspecialchars($user['name']); ?>" readonly style="background-color: var(--dark-gray); color: var(--text-secondary);">
+                            <input type="hidden" name="contact_name" value="<?php echo htmlspecialchars($user['name']); ?>">
+                            <small class="text-muted">Taken from your profile</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Contact email *</label>
+                            <input type="email" class="form-control" value="<?php echo htmlspecialchars($user['email']); ?>" readonly style="background-color: var(--dark-gray); color: var(--text-secondary);">
+                            <input type="hidden" name="contact_email" value="<?php echo htmlspecialchars($user['email']); ?>">
+                            <small class="text-muted">Taken from your profile</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Contact phone *</label>
+                            <input type="tel" class="form-control" name="contact_phone" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>" required placeholder="09123456789" maxlength="11">
+                            <small class="text-muted">Please enter your current phone number</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Preferred Contact Method</label>
+                            <select class="form-select" name="preferred_contact">
+                                <option value="phone">Phone Call</option>
+                                <option value="facebook">Facebook Messenger</option>
+                                <option value="instagram">Instagram DM</option>
+                                <option value="whatsapp">WhatsApp</option>
+                            </select>
+                            <small class="text-muted">How would you prefer us to contact you?</small>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label">Social Media Handle (Optional)</label>
+                            <input type="text" class="form-control" name="social_media_handle" placeholder="Enter your Facebook, Instagram, or WhatsApp username">
+                            <small class="text-muted">Only provide if you selected social media as preferred contact</small>
+                        </div>
+                    </div>
+                    <div class="step-navigation">
+                        <button type="button" class="btn btn-secondary btn-reservation" onclick="prevStep(3)">
+                            <i class="bi bi-arrow-left me-2"></i> Back
+                        </button>
+                        <button type="button" class="btn btn-primary btn-reservation" onclick="nextStep(3)">
+                            Next <i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Payment Method - UPDATED -->
+                <div class="step-card" id="step4">
+                    <h3 class="step-title-main">4. Payment Method</h3>
+                    <div class="payment-options">
+                        <div class="payment-option cod" data-payment="cod">
+                            <div class="payment-icon">
+                                <div class="cod-logo">COD</div>
                             </div>
-                            <div class="step-navigation">
-                                <button type="button" class="btn btn-secondary btn-reservation" onclick="prevStep(3)">
-                                    <i class="bi bi-arrow-left me-2"></i> Back
-                                </button>
-                                <button type="button" class="btn btn-primary btn-reservation" onclick="nextStep(3)">
-                                    Next <i class="bi bi-arrow-right ms-2"></i>
-                                </button>
+                            <div class="payment-info">
+                                <h5>Cash on Delivery</h5>
+                                <p>Pay after the event - no downpayment required</p>
                             </div>
                         </div>
 
-                        <!-- Step 4: Payment Method -->
-                        <div class="step-card" id="step4">
-                            <h3 class="step-title-main">4. Payment Method</h3>
-                            <div class="payment-options">
-                                <div class="payment-option" data-payment="cod">
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-3">
-                                            <i class="bi bi-cash-coin text-success" style="font-size: 1.5rem;"></i>
-                                        </div>
-                                        <div>
-                                            <h5 class="mb-1">Cash on delivery</h5>
-                                            <p class="mb-0 text-secondary">Pay after the event - no downpayment required</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="payment-option" data-payment="gcash">
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-3">
-                                            <i class="bi bi-phone text-primary" style="font-size: 1.5rem;"></i>
-                                        </div>
-                                        <div>
-                                            <h5 class="mb-1">GCash payment</h5>
-                                            <p class="mb-0 text-secondary">Secure online payment - 30% downpayment required</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="downpayment-info" id="downpaymentInfo">
-                                    <div class="alert alert-info">
-                                        <h6><i class="bi bi-info-circle me-2"></i>GCash payment details</h6>
-                                        <p class="mb-1">Downpayment: <strong id="downpaymentAmount" class="text-primary">₱0.00</strong></p>
-                                        <p class="mb-0">Remaining balance: <strong id="remainingAmount" class="text-primary">₱0.00</strong></p>
-                                    </div>
-                                    <div class="alert alert-warning">
-                                        <small>
-                                            <i class="bi bi-exclamation-triangle me-2"></i>
-                                            After submitting your reservation, you will receive GCash payment instructions via email and SMS.
-                                        </small>
-                                    </div>
-                                </div>
+                        <div class="payment-option gcash" data-payment="gcash">
+                            <div class="payment-icon">
+                                <div class="gcash-logo">GCASH</div>
                             </div>
-                            <input type="hidden" name="payment_method" id="selected_payment" required>
-                            <div class="step-navigation">
-                                <button type="button" class="btn btn-secondary btn-reservation" onclick="prevStep(4)">
-                                    <i class="bi bi-arrow-left me-2"></i> Back
-                                </button>
-                                <button type="button" class="btn btn-primary btn-reservation" onclick="nextStep(4)">
-                                    Next <i class="bi bi-arrow-right ms-2"></i>
-                                </button>
+                            <div class="payment-info">
+                                <h5>GCash Payment</h5>
+                                <p>Secure online payment - 20% downpayment required</p>
                             </div>
                         </div>
+
+                        <div class="downpayment-info" id="downpaymentInfo">
+                            <div class="alert alert-info">
+                                <h6><i class="bi bi-info-circle me-2"></i>GCash Payment Details</h6>
+                                <p class="mb-1">Downpayment (20%): <strong id="downpaymentAmount" class="text-primary">₱0.00</strong></p>
+                                <p class="mb-1">Remaining Balance: <strong id="remainingAmount" class="text-primary">₱0.00</strong></p>
+                                <p class="mb-0 mt-2"><small>You will receive payment instructions after booking confirmation</small></p>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="payment_method" id="selected_payment" required>
+                    <div class="step-navigation">
+                        <button type="button" class="btn btn-secondary btn-reservation" onclick="prevStep(4)">
+                            <i class="bi bi-arrow-left me-2"></i> Back
+                        </button>
+                        <button type="button" class="btn btn-primary btn-reservation" onclick="nextStep(4)">
+                            Next <i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </div>
 
                         <!-- Step 5: Review & Submit -->
                         <div class="step-card" id="step5">
@@ -537,7 +558,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
             </div>
         </div>
     </main>
-
+                                                    
     <!-- Footer -->
     <footer class="main-footer">
         <div class="container">
@@ -617,7 +638,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
     <!-- Side Navigation -->
     <?php include 'side_nav.php'; ?>
 
-    <!-- Leaflet JS - LOAD BEFORE YOUR CUSTOM JS -->
+    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

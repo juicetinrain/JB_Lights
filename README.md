@@ -1,13 +1,13 @@
 # JB_Lights
 Welcome to JB Lights and Sound Website
 Currently it's still on development.
-This is now... Beta 2.
+This is now... Beta 4.
 
 Current fixes
-All Webpages design are almost consistent few functionalities are still on development.
-
-Reservation
-Contact Us
+Reservation Page has now been revamped
+Admin Panel and Profile is currently revamping
+Homepage begins adding pictures
+Hero background changes in pages coming soon..
 
 Any feedbacks will also be acknowledged.
 

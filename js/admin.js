@@ -1,4 +1,4 @@
-// js/admin.js - Enhanced Admin Panel JavaScript
+// js/admin.js - Enhanced with inventory CRUD
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Admin JS loaded');
     
@@ -33,11 +33,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const targetTab = document.getElementById(tabName + '-tab');
                 if (targetTab) {
                     targetTab.classList.add('active');
-                    
-                    // Store active tab in session
-                    fetch('admin.php?action=set_active_tab&tab=' + tabName, {
-                        method: 'GET'
-                    });
                 }
             }
         });
@@ -51,33 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!id || !status) return;
             
             if (confirm('Change status to "' + status + '" for booking #' + id + '?')) {
-                const formData = new FormData();
-                formData.append('action', 'update_status');
-                formData.append('id', id);
-                formData.append('status', status);
-                formData.append('ajax', 'true');
-
-                fetch(window.location.href, {
-                    method: 'POST',
-                    body: formData
-                }).then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showAlert('Status updated successfully!', 'success');
-                        // Update the status pill
-                        const row = document.querySelector(`tr[data-booking-id="${id}"]`);
-                        if (row) {
-                            const statusPill = row.querySelector('.status-pill');
-                            statusPill.className = 'status-pill status-' + status.toLowerCase();
-                            statusPill.textContent = status;
-                        }
-                    } else {
-                        showAlert('Error updating status. Please try again.', 'error');
-                    }
-                }).catch(error => {
-                    console.error('Error:', error);
-                    showAlert('Error updating status. Please try again.', 'error');
-                });
+                updateStatus(id, status);
             } else {
                 // Reset to original value
                 const row = document.querySelector(`tr[data-booking-id="${id}"]`);
@@ -144,7 +113,134 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Delete item functionality
     initDeleteItems();
+
+    // Inventory CRUD functionality
+    initInventoryCRUD();
+
+    // Return equipment functionality
+    initReturnEquipment();
 });
+
+// Inventory CRUD functions
+function initInventoryCRUD() {
+    // Add/Edit Inventory Modal
+    const inventoryModal = document.getElementById('inventoryModal');
+    if (inventoryModal) {
+        inventoryModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const action = button.getAttribute('data-action');
+            const modalTitle = this.querySelector('.modal-title');
+            const form = this.querySelector('#inventoryForm');
+            
+            if (action === 'add') {
+                modalTitle.innerHTML = '<i class="bi bi-plus-circle me-2"></i>Add Inventory Item';
+                form.reset();
+                document.getElementById('inventoryAction').value = 'add_inventory';
+                document.getElementById('inventoryId').value = '';
+                document.getElementById('itemAvailable').value = document.getElementById('itemQuantity').value || 1;
+            } else if (action === 'edit') {
+                const itemData = JSON.parse(button.getAttribute('data-item'));
+                modalTitle.innerHTML = '<i class="bi bi-pencil me-2"></i>Edit Inventory Item';
+                document.getElementById('inventoryAction').value = 'update_inventory';
+                document.getElementById('inventoryId').value = itemData.id;
+                document.getElementById('itemName').value = itemData.item_name;
+                document.getElementById('itemCategory').value = itemData.category;
+                document.getElementById('itemBrand').value = itemData.brand || '';
+                document.getElementById('itemCondition').value = itemData.condition;
+                document.getElementById('itemQuantity').value = itemData.quantity;
+                document.getElementById('itemAvailable').value = itemData.available_quantity;
+            }
+        });
+
+        // Sync available quantity with total quantity for new items
+        document.getElementById('itemQuantity').addEventListener('change', function() {
+            if (document.getElementById('inventoryAction').value === 'add_inventory') {
+                document.getElementById('itemAvailable').value = this.value;
+            }
+        });
+    }
+
+    // Edit inventory buttons
+    document.querySelectorAll('.edit-inventory').forEach(button => {
+        button.addEventListener('click', function() {
+            const itemData = this.getAttribute('data-item');
+            const inventoryModal = new bootstrap.Modal(document.getElementById('inventoryModal'));
+            const modalTrigger = document.createElement('button');
+            modalTrigger.setAttribute('data-bs-toggle', 'modal');
+            modalTrigger.setAttribute('data-bs-target', '#inventoryModal');
+            modalTrigger.setAttribute('data-action', 'edit');
+            modalTrigger.setAttribute('data-item', itemData);
+            modalTrigger.style.display = 'none';
+            document.body.appendChild(modalTrigger);
+            modalTrigger.click();
+            document.body.removeChild(modalTrigger);
+        });
+    });
+}
+
+// Return equipment functionality
+function initReturnEquipment() {
+    const returnModal = document.getElementById('returnModal');
+    if (returnModal) {
+        returnModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const itemData = JSON.parse(button.getAttribute('data-item'));
+            
+            document.getElementById('returnItemId').value = itemData.id;
+            document.getElementById('returnItemName').value = itemData.item_name;
+            document.getElementById('currentlyInUse').value = itemData.quantity - itemData.available_quantity;
+            document.getElementById('returnQuantity').setAttribute('max', itemData.quantity - itemData.available_quantity);
+            document.getElementById('returnQuantity').value = '';
+        });
+    }
+
+    // Return equipment buttons
+    document.querySelectorAll('.return-equipment').forEach(button => {
+        button.addEventListener('click', function() {
+            const itemData = this.getAttribute('data-item');
+            const returnModal = new bootstrap.Modal(document.getElementById('returnModal'));
+            const modalTrigger = document.createElement('button');
+            modalTrigger.setAttribute('data-bs-toggle', 'modal');
+            modalTrigger.setAttribute('data-bs-target', '#returnModal');
+            modalTrigger.setAttribute('data-item', itemData);
+            modalTrigger.style.display = 'none';
+            document.body.appendChild(modalTrigger);
+            modalTrigger.click();
+            document.body.removeChild(modalTrigger);
+        });
+    });
+}
+
+// Update status function
+function updateStatus(id, status) {
+    const formData = new FormData();
+    formData.append('action', 'update_status');
+    formData.append('id', id);
+    formData.append('status', status);
+    formData.append('ajax', 'true');
+
+    fetch(window.location.href, {
+        method: 'POST',
+        body: formData
+    }).then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('Status updated successfully!', 'success');
+            // Update the status pill
+            const row = document.querySelector(`tr[data-booking-id="${id}"]`);
+            if (row) {
+                const statusPill = row.querySelector('.status-pill');
+                statusPill.className = 'status-pill status-' + status.toLowerCase();
+                statusPill.textContent = status;
+            }
+        } else {
+            showAlert('Error updating status. Please try again.', 'error');
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+        showAlert('Error updating status. Please try again.', 'error');
+    });
+}
 
 // Search function
 function initSearch(searchInputId, tableRowsSelector) {
@@ -251,33 +347,4 @@ function showAlert(message, type) {
             alert.remove();
         }
     }, 5000);
-}
-
-// Delete booking (legacy function)
-function deleteBooking(id) {
-    if (confirm('Are you sure you want to delete booking #' + id + '? This action cannot be undone.')) {
-        const formData = new FormData();
-        formData.append('action', 'delete_booking');
-        formData.append('id', id);
-        formData.append('ajax', 'true');
-
-        fetch(window.location.href, {
-            method: 'POST',
-            body: formData
-        }).then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showAlert('Booking deleted successfully!', 'success');
-                const row = document.querySelector(`tr[data-booking-id="${id}"]`);
-                if (row) {
-                    row.remove();
-                }
-            } else {
-                showAlert('Error deleting booking. Please try again.', 'error');
-            }
-        }).catch(error => {
-            console.error('Error:', error);
-            showAlert('Error deleting booking. Please try again.', 'error');
-        });
-    }
 }
