@@ -268,8 +268,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
                 </div>
             </div>
             
+            <!-- Fixed Footer Bottom -->
             <div class="footer-bottom">
-                <p>&copy; 2025 JB LIGHTS & SOUND. ALL RIGHTS RESERVED.</p>
+                <div class="container">
+                    <div class="footer-bottom-content">
+                        <p>&copy; 2025 JB LIGHTS & SOUND. ALL RIGHTS RESERVED.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>
