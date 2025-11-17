@@ -1,5 +1,5 @@
 <?php
-// side_nav.php - Updated with admin panel link
+// side_nav.php - Updated with combined user profile section
 require_once 'db/db_connect.php';
 $current_user = isLoggedIn() ? getCurrentUser() : null;
 ?>
@@ -19,9 +19,9 @@ $current_user = isLoggedIn() ? getCurrentUser() : null;
     </div>
     
     <div class="sidenav-content">
-        <!-- Dynamic User Info -->
+        <!-- Dynamic User Info - Now clickable as profile button -->
         <?php if (isLoggedIn() && $current_user): ?>
-        <div class="user-profile">
+        <a href="profile.php" class="user-profile" style="text-decoration: none; color: inherit;">
             <div class="user-avatar">
                 <i class="bi bi-person-circle"></i>
             </div>
@@ -29,10 +29,12 @@ $current_user = isLoggedIn() ? getCurrentUser() : null;
                 <div class="user-name"><?php echo htmlspecialchars($current_user['name']); ?></div>
                 <div class="user-email"><?php echo htmlspecialchars($current_user['email']); ?></div>
                 <?php if (isAdmin()): ?>
-                <div class="user-badge">Administrator</div>
+                <div class="user-badge" style="background: var(--blue); color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem; margin-top: 0.25rem;">Administrator</div>
+                <?php else: ?>
+                <div class="user-badge" style="background: var(--text-secondary); color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem; margin-top: 0.25rem;">My Profile</div>
                 <?php endif; ?>
             </div>
-        </div>
+        </a>
         <?php else: ?>
         <div class="user-profile">
             <div class="user-avatar">
@@ -72,11 +74,6 @@ $current_user = isLoggedIn() ? getCurrentUser() : null;
                     <i class="bi bi-speedometer2"></i> Admin Panel
                 </a>
                 <?php endif; ?>
-                
-                <!-- User Profile Link -->
-                <a href="profile.php" class="menu-item">
-                    <i class="bi bi-person"></i> My Profile
-                </a>
             <?php endif; ?>
         </nav>
         

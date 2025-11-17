@@ -29,6 +29,9 @@ switch ($type) {
     case 'contact':
         showContactDetails($id);
         break;
+    case 'cancellation':
+        showCancellationDetails($id);
+        break;
     default:
         http_response_code(400);
         exit('Invalid type');
@@ -378,4 +381,109 @@ function showContactDetails($id) {
     </div>
     <?php
 }
+
+function showCancellationDetails($id) {
+    global $conn;
+    
+    $stmt = $conn->prepare("
+        SELECT cr.*, r.*, u.name as user_name, u.email as user_email, u.phone as user_phone
+        FROM cancellation_requests cr 
+        JOIN reservations r ON cr.reservation_id = r.id 
+        LEFT JOIN users u ON cr.user_id = u.id 
+        WHERE cr.id = ?
+    ");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $cancellation = $result->fetch_assoc();
+    
+    if (!$cancellation) {
+        echo '<div class="alert alert-danger">Cancellation request not found.</div>';
+        return;
+    }
+    ?>
+    <div class="details-section">
+        <h6><i class="bi bi-info-circle me-2"></i>Cancellation Request Information</h6>
+        <div class="detail-item">
+            <span class="detail-label">Request ID:</span>
+            <span class="detail-value">#<?php echo $cancellation['id']; ?></span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Status:</span>
+            <span class="detail-value status-pill status-<?php echo $cancellation['status']; ?>">
+                <?php echo ucfirst($cancellation['status']); ?>
+            </span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Requested:</span>
+            <span class="detail-value"><?php echo date('M j, Y g:i A', strtotime($cancellation['created_at'])); ?></span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Last Updated:</span>
+            <span class="detail-value"><?php echo date('M j, Y g:i A', strtotime($cancellation['updated_at'])); ?></span>
+        </div>
+    </div>
+
+    <div class="details-section">
+        <h6><i class="bi bi-calendar-event me-2"></i>Booking Information</h6>
+        <div class="detail-item">
+            <span class="detail-label">Booking ID:</span>
+            <span class="detail-value">#<?php echo $cancellation['reservation_id']; ?></span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Event Type:</span>
+            <span class="detail-value"><?php echo htmlspecialchars($cancellation['event_type']); ?></span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Event Date:</span>
+            <span class="detail-value"><?php echo date('M j, Y', strtotime($cancellation['event_date'])); ?></span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Package:</span>
+            <span class="detail-value"><?php echo htmlspecialchars($cancellation['package']); ?></span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Total Amount:</span>
+            <span class="detail-value">₱<?php echo number_format($cancellation['total_amount'], 2); ?></span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Booking Status:</span>
+            <span class="detail-value status-pill status-<?php echo strtolower($cancellation['booking_status']); ?>">
+                <?php echo $cancellation['booking_status']; ?>
+            </span>
+        </div>
+    </div>
+
+    <div class="details-section">
+        <h6><i class="bi bi-person-lines-fill me-2"></i>Customer Information</h6>
+        <div class="detail-item">
+            <span class="detail-label">Customer Name:</span>
+            <span class="detail-value"><?php echo htmlspecialchars($cancellation['contact_name']); ?></span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Email:</span>
+            <span class="detail-value"><?php echo htmlspecialchars($cancellation['contact_email']); ?></span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Phone:</span>
+            <span class="detail-value"><?php echo htmlspecialchars($cancellation['contact_phone']); ?></span>
+        </div>
+    </div>
+
+    <div class="details-section">
+        <h6><i class="bi bi-chat-left-text me-2"></i>Cancellation Details</h6>
+        <div class="detail-item">
+            <span class="detail-label">Reason:</span>
+            <span class="detail-value"><?php echo nl2br(htmlspecialchars($cancellation['reason'])); ?></span>
+        </div>
+        <?php if ($cancellation['admin_notes']): ?>
+        <div class="detail-item">
+            <span class="detail-label">Admin Notes:</span>
+            <span class="detail-value"><?php echo nl2br(htmlspecialchars($cancellation['admin_notes'])); ?></span>
+        </div>
+        <?php endif; ?>
+    </div>
+    <?php
+}
+
 ?>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 11, 2025 at 08:02 AM
+-- Generation Time: Nov 17, 2025 at 01:23 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,23 @@ SET time_zone = "+00:00";
 --
 -- Database: `jb_lights`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cancellation_requests`
+--
+
+CREATE TABLE `cancellation_requests` (
+  `id` int(11) NOT NULL,
+  `reservation_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `reason` text NOT NULL,
+  `status` varchar(20) DEFAULT 'pending',
+  `admin_notes` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -79,19 +96,6 @@ INSERT INTO `inventory` (`id`, `item_name`, `category`, `brand`, `quantity`, `av
 -- --------------------------------------------------------
 
 --
--- Table structure for table `packages`
---
-
-CREATE TABLE `packages` (
-  `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `description` varchar(255) NOT NULL,
-  `price` decimal(10,2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `reservations`
 --
 
@@ -102,8 +106,13 @@ CREATE TABLE `reservations` (
   `contact_phone` varchar(20) NOT NULL,
   `event_type` varchar(50) NOT NULL,
   `event_date` date NOT NULL,
+  `start_time` time DEFAULT NULL,
+  `end_time` time DEFAULT NULL,
   `event_address` text NOT NULL,
   `event_location` text DEFAULT NULL,
+  `landmark_notes` text DEFAULT NULL,
+  `preferred_contact` varchar(20) DEFAULT 'phone',
+  `social_media_handle` varchar(100) DEFAULT NULL,
   `package` varchar(100) NOT NULL,
   `total_amount` decimal(10,2) NOT NULL,
   `payment_method` varchar(20) NOT NULL,
@@ -117,12 +126,13 @@ CREATE TABLE `reservations` (
 -- Dumping data for table `reservations`
 --
 
-INSERT INTO `reservations` (`id`, `contact_name`, `contact_email`, `contact_phone`, `event_type`, `event_date`, `event_address`, `event_location`, `package`, `total_amount`, `payment_method`, `downpayment_amount`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Justin Basco', 'justin@email.com', '12345678901', 'Wedding', '2026-08-20', 'Dau, Mabalacat City', '15.1963,120.6093', 'Basic Package', 5000.00, 'cod', 0.00, 'Confirmed', '2025-11-09 20:07:52', '2025-11-11 04:32:37'),
-(2, 'Naven Cuenca', 'naven@email.com', '12345678902', 'Birthday', '2026-08-25', 'Angeles City', '15.1963,120.6093', 'Tables', 2000.00, 'cod', 0.00, 'Confirmed', '2025-11-09 20:07:52', '2025-11-11 04:32:37'),
-(3, 'Tyron Gonzales', 'tyron@email.com', '12345678903', 'Corporate', '2026-08-04', 'San Fernando', '15.1963,120.6093', 'Basic Package', 5000.00, 'cod', 0.00, 'Confirmed', '2025-11-09 20:07:52', '2025-11-11 04:32:37'),
-(4, 'Admin User', 'admin@jblights.com', '09000000000', 'Birthday', '2025-11-13', 'Bamban-Centenial Bridge, MacArthur Highway, Xevera, Mabalacat, Pampanga, Central Luzon, 2317, Philippines', '15.244329136494445,120.56646000621666', 'Premium Setup', 7000.00, 'gcash', 2100.00, 'Confirmed', '2025-11-11 04:37:15', '2025-11-11 04:39:08'),
-(5, 'Nanana mmamw', 'errfjj@gga.com', '09334232112', 'Other', '2025-11-21', 'Xevera, Mabalacat, Pampanga, Central Luzon, 2317, Philippines', '15.2456825,120.5609601', 'Basic Setup', 5000.00, 'cod', 0.00, 'Pending', '2025-11-11 06:04:31', '2025-11-11 06:04:31');
+INSERT INTO `reservations` (`id`, `contact_name`, `contact_email`, `contact_phone`, `event_type`, `event_date`, `start_time`, `end_time`, `event_address`, `event_location`, `landmark_notes`, `preferred_contact`, `social_media_handle`, `package`, `total_amount`, `payment_method`, `downpayment_amount`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Justin Basco', 'justin@email.com', '12345678901', 'Wedding', '2026-08-20', NULL, NULL, 'Dau, Mabalacat City', '15.1963,120.6093', NULL, 'phone', NULL, 'Basic Package', 5000.00, 'cod', 0.00, 'Confirmed', '2025-11-09 20:07:52', '2025-11-11 04:32:37'),
+(2, 'Naven Cuenca', 'naven@email.com', '12345678902', 'Birthday', '2026-08-25', NULL, NULL, 'Angeles City', '15.1963,120.6093', NULL, 'phone', NULL, 'Tables', 2000.00, 'cod', 0.00, 'Confirmed', '2025-11-09 20:07:52', '2025-11-11 04:32:37'),
+(3, 'Tyron Gonzales', 'tyron@email.com', '12345678903', 'Corporate', '2026-08-04', NULL, NULL, 'San Fernando', '15.1963,120.6093', NULL, 'phone', NULL, 'Basic Package', 5000.00, 'cod', 0.00, 'Confirmed', '2025-11-09 20:07:52', '2025-11-11 04:32:37'),
+(4, 'Admin User', 'admin@jblights.com', '09000000000', 'Birthday', '2025-11-13', '08:00:00', '17:00:00', 'Bamban-Centenial Bridge, MacArthur Highway, Xevera, Mabalacat, Pampanga, Central Luzon, 2317, Philippines', '15.244329136494445,120.56646000621666', NULL, 'phone', NULL, 'Premium Setup', 7000.00, 'gcash', 2100.00, 'Confirmed', '2025-11-11 04:37:15', '2025-11-11 04:39:08'),
+(5, 'Nanana mmamw', 'errfjj@gga.com', '09334232112', 'Other', '2025-11-21', '08:00:00', '17:00:00', 'Xevera, Mabalacat, Pampanga, Central Luzon, 2317, Philippines', '15.2456825,120.5609601', NULL, 'phone', NULL, 'Basic Setup', 5000.00, 'cod', 0.00, 'Pending', '2025-11-11 06:04:31', '2025-11-11 06:04:31'),
+(6, 'Admin', 'admin@jblights.com', '09000000000', 'Corporate', '2025-11-27', '08:00:00', '17:00:00', 'Location at 15.023188, 120.721207', '15.02318760846413,120.72120666503908', 'Xevera', 'facebook', 'haha guy', 'Basic Setup', 5000.00, 'cod', 0.00, 'Pending', '2025-11-17 00:02:56', '2025-11-17 00:02:56');
 
 -- --------------------------------------------------------
 
@@ -157,6 +167,14 @@ INSERT INTO `users` (`id`, `name`, `email`, `password`, `user_type`, `phone`, `a
 --
 
 --
+-- Indexes for table `cancellation_requests`
+--
+ALTER TABLE `cancellation_requests`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `reservation_id` (`reservation_id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
 -- Indexes for table `contact_submissions`
 --
 ALTER TABLE `contact_submissions`
@@ -166,12 +184,6 @@ ALTER TABLE `contact_submissions`
 -- Indexes for table `inventory`
 --
 ALTER TABLE `inventory`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `packages`
---
-ALTER TABLE `packages`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -191,6 +203,12 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `cancellation_requests`
+--
+ALTER TABLE `cancellation_requests`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `contact_submissions`
 --
 ALTER TABLE `contact_submissions`
@@ -203,22 +221,27 @@ ALTER TABLE `inventory`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `packages`
---
-ALTER TABLE `packages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `reservations`
 --
 ALTER TABLE `reservations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `cancellation_requests`
+--
+ALTER TABLE `cancellation_requests`
+  ADD CONSTRAINT `cancellation_requests_ibfk_1` FOREIGN KEY (`reservation_id`) REFERENCES `reservations` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `cancellation_requests_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

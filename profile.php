@@ -1,5 +1,5 @@
 <?php
-// profile.php - Updated with index.php styling
+// profile.php - Updated with admin panel design and cancellation requests
 require_once 'db/db_connect.php';
 
 if (!isLoggedIn()) {
@@ -87,15 +87,79 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
     }
 }
 
-// Get user's reservation history
+// Handle cancellation requests
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_cancellation'])) {
+    $reservation_id = intval($_POST['reservation_id']);
+    $reason = trim($_POST['cancellation_reason']);
+    
+    if ($reservation_id > 0 && !empty($reason)) {
+        // Check if user owns this reservation
+        $stmt = $conn->prepare("SELECT id FROM reservations WHERE id = ? AND contact_email = ?");
+        $stmt->bind_param("is", $reservation_id, $user['email']);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            // Check if cancellation request already exists
+            $stmt = $conn->prepare("SELECT id FROM cancellation_requests WHERE reservation_id = ? AND user_id = ?");
+            $stmt->bind_param("ii", $reservation_id, $user_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if ($result->num_rows === 0) {
+                // Create cancellation request
+                $stmt = $conn->prepare("INSERT INTO cancellation_requests (reservation_id, user_id, reason) VALUES (?, ?, ?)");
+                $stmt->bind_param("iis", $reservation_id, $user_id, $reason);
+                
+                if ($stmt->execute()) {
+                    $success_message = "Cancellation request submitted successfully! We'll review your request shortly.";
+                } else {
+                    $error_message = "Error submitting cancellation request. Please try again.";
+                }
+            } else {
+                $error_message = "You already have a pending cancellation request for this booking.";
+            }
+        } else {
+            $error_message = "Invalid booking or you don't have permission to cancel this booking.";
+        }
+        $stmt->close();
+    } else {
+        $error_message = "Please provide a reason for cancellation.";
+    }
+}
+
+// Get user's reservation history with cancellation request status
 $reservations = [];
-$stmt = $conn->prepare("SELECT * FROM reservations WHERE contact_email = ? ORDER BY created_at DESC");
-$stmt->bind_param("s", $user['email']);
+$stmt = $conn->prepare("
+    SELECT r.*, 
+           cr.status as cancellation_status,
+           cr.reason as cancellation_reason,
+           cr.created_at as cancellation_requested_at
+    FROM reservations r 
+    LEFT JOIN cancellation_requests cr ON r.id = cr.reservation_id AND cr.user_id = ?
+    WHERE r.contact_email = ? 
+    ORDER BY r.created_at DESC
+");
+$stmt->bind_param("is", $user_id, $user['email']);
 $stmt->execute();
 $result = $stmt->get_result();
 while ($row = $result->fetch_assoc()) {
     $reservations[] = $row;
 }
+$stmt->close();
+
+// Get pending cancellation requests count
+$pending_cancellations = 0;
+$stmt = $conn->prepare("
+    SELECT COUNT(*) as count 
+    FROM cancellation_requests cr 
+    JOIN reservations r ON cr.reservation_id = r.id 
+    WHERE cr.user_id = ? AND cr.status = 'pending'
+");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$pending_cancellations = $result->fetch_assoc()['count'];
 $stmt->close();
 
 // Calculate statistics
@@ -109,6 +173,9 @@ $completed_bookings = count(array_filter($reservations, function($r) {
 $cancelled_bookings = count(array_filter($reservations, function($r) {
     return $r['status'] === 'Cancelled';
 }));
+
+// Get active tab from session or default to dashboard
+$active_tab = $_SESSION['profile_active_tab'] ?? 'dashboard';
 ?>
 
 <!DOCTYPE html>
@@ -124,6 +191,7 @@ $cancelled_bookings = count(array_filter($reservations, function($r) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/pages/admin.css">
     <link rel="stylesheet" href="css/pages/profile.css">
 </head>
 <body class="dark-mode">
@@ -193,210 +261,406 @@ $cancelled_bookings = count(array_filter($reservations, function($r) {
     </section>
 
     <!-- Profile Content -->
-    <main class="profile-page" id="profile-content">
-        <div class="container">
-            <!-- Success/Error Messages -->
-            <?php if ($success_message): ?>
-                <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-                    <i class="bi bi-check-circle me-2"></i>
-                    <?php echo $success_message; ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <?php endif; ?>
-
-            <?php if ($error_message): ?>
-                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
-                    <i class="bi bi-exclamation-circle me-2"></i>
-                    <?php echo $error_message; ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <?php endif; ?>
-
+    <main class="admin-page" id="profile-content">
+        <div class="container-fluid">
             <div class="row">
-                <!-- Left Column - Profile Info & Stats -->
-                <div class="col-lg-4 mb-4">
-                    <!-- Profile Card -->
-                    <div class="profile-main-card">
-                        <div class="profile-header-section">
-                            <div class="profile-avatar">
+                <!-- Profile Sidebar -->
+                <div class="col-lg-3 col-xl-2">
+                    <div class="admin-sidebar">
+                        <div class="sidebar-header">
+                            <div class="admin-avatar">
                                 <i class="bi bi-person"></i>
                             </div>
-                            <h3><?php echo htmlspecialchars($user['name']); ?></h3>
-                            <p class="mb-3"><?php echo htmlspecialchars($user['email']); ?></p>
-                            <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-                                <i class="bi bi-pencil me-2"></i>Edit Profile
-                            </button>
+                            <h4><?php echo htmlspecialchars($user['name']); ?></h4>
+                            <p class="text-secondary"><?php echo htmlspecialchars($user['email']); ?></p>
                         </div>
                         
-                        <div class="profile-details">
-                            <div class="detail-item">
-                                <i class="bi bi-telephone"></i>
-                                <div class="detail-item-content">
-                                    <strong>Phone</strong>
-                                    <p><?php echo htmlspecialchars($user['phone'] ?? 'Not provided'); ?></p>
-                                </div>
+                        <nav class="sidebar-nav">
+                            <a href="#" class="nav-item <?php echo $active_tab === 'dashboard' ? 'active' : ''; ?>" data-tab="dashboard">
+                                <i class="bi bi-speedometer2"></i>
+                                <span>Dashboard</span>
+                            </a>
+                            <a href="#" class="nav-item <?php echo $active_tab === 'bookings' ? 'active' : ''; ?>" data-tab="bookings">
+                                <i class="bi bi-calendar-check"></i>
+                                <span>My Bookings</span>
+                                <span class="badge bg-primary"><?php echo $total_bookings; ?></span>
+                            </a>
+                            <a href="#" class="nav-item <?php echo $active_tab === 'cancellations' ? 'active' : ''; ?>" data-tab="cancellations">
+                                <i class="bi bi-x-circle"></i>
+                                <span>Cancellations</span>
+                                <span class="badge bg-warning"><?php echo $pending_cancellations; ?></span>
+                            </a>
+                            <a href="#" class="nav-item <?php echo $active_tab === 'profile' ? 'active' : ''; ?>" data-tab="profile">
+                                <i class="bi bi-person-gear"></i>
+                                <span>Profile Settings</span>
+                            </a>
+                            <div class="sidebar-footer">
+                                <a href="logout.php" class="nav-item logout">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span>Logout</span>
+                                </a>
                             </div>
-                            <div class="detail-item">
-                                <i class="bi bi-geo-alt"></i>
-                                <div class="detail-item-content">
-                                    <strong>Address</strong>
-                                    <p><?php echo htmlspecialchars($user['address'] ?? 'Not provided'); ?></p>
-                                </div>
-                            </div>
-                            <div class="detail-item">
-                                <i class="bi bi-calendar"></i>
-                                <div class="detail-item-content">
-                                    <strong>Member Since</strong>
-                                    <p><?php echo date('F Y', strtotime($user['created_at'])); ?></p>
-                                </div>
-                            </div>
-
-                            <!-- Quick Stats -->
-                            <div class="profile-stats-grid">
-                                <div class="profile-stat-card">
-                                    <div class="profile-stat-number"><?php echo $total_bookings; ?></div>
-                                    <div class="profile-stat-label">Total Bookings</div>
-                                </div>
-                                <div class="profile-stat-card">
-                                    <div class="profile-stat-number"><?php echo $upcoming_bookings; ?></div>
-                                    <div class="profile-stat-label">Upcoming</div>
-                                </div>
-                                <div class="profile-stat-card">
-                                    <div class="profile-stat-number"><?php echo $completed_bookings; ?></div>
-                                    <div class="profile-stat-label">Completed</div>
-                                </div>
-                                <div class="profile-stat-card">
-                                    <div class="profile-stat-number"><?php echo $cancelled_bookings; ?></div>
-                                    <div class="profile-stat-label">Cancelled</div>
-                                </div>
-                            </div>
-                        </div>
+                        </nav>
                     </div>
                 </div>
 
-                <!-- Right Column - Main Content -->
-                <div class="col-lg-8">
-                    <!-- Booking History -->
-                    <div class="profile-content-card">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h3 class="profile-section-title">
-                                <i class="bi bi-clock-history"></i>
-                                Booking History
-                            </h3>
-                            <a href="reservation.php" class="btn btn-primary btn-sm">
-                                <i class="bi bi-plus-circle me-2"></i>New Booking
-                            </a>
-                        </div>
-                        
-                        <?php if (empty($reservations)): ?>
-                            <div class="text-center py-5">
-                                <i class="bi bi-calendar-x" style="font-size: 3rem; color: var(--text-secondary);"></i>
-                                <h5 class="mt-3 text-white">No bookings yet</h5>
-                                <p class="text-secondary mb-4">Start by making your first reservation</p>
-                                <a href="reservation.php" class="btn btn-primary">Book Now</a>
-                            </div>
-                        <?php else: ?>
-                            <div class="table-responsive">
-                                <table class="bookings-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Booking ID</th>
-                                            <th>Event Type</th>
-                                            <th>Date</th>
-                                            <th>Package</th>
-                                            <th>Amount</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($reservations as $reservation): ?>
-                                        <tr>
-                                            <td>#<?php echo $reservation['id']; ?></td>
-                                            <td><?php echo htmlspecialchars($reservation['event_type']); ?></td>
-                                            <td><?php echo date('M j, Y', strtotime($reservation['event_date'])); ?></td>
-                                            <td><?php echo htmlspecialchars($reservation['package']); ?></td>
-                                            <td>₱<?php echo number_format($reservation['total_amount'], 2); ?></td>
-                                            <td>
-                                                <span class="status-pill status-<?php echo strtolower($reservation['status']); ?>">
-                                                    <?php echo $reservation['status']; ?>
-                                                </span>
-                                            </td>
-                                        </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
+                <!-- Main Content -->
+                <div class="col-lg-9 col-xl-10">
+                    <div class="admin-main-content">
+                        <!-- Success/Error Messages -->
+                        <?php if ($success_message): ?>
+                            <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                                <i class="bi bi-check-circle me-2"></i>
+                                <?php echo $success_message; ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         <?php endif; ?>
-                    </div>
 
-                    <!-- Recent Activity & Actions -->
-                    <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <div class="profile-content-card h-100">
-                                <h4 class="profile-section-title">
-                                    <i class="bi bi-activity"></i>
-                                    Recent Activity
-                                </h4>
-                                <div class="activity-list">
-                                    <?php if (!empty($reservations)): ?>
-                                        <?php 
-                                        $latest_reservation = $reservations[0];
-                                        $next_reservation = array_filter($reservations, function($r) {
-                                            return $r['status'] === 'Confirmed' && strtotime($r['event_date']) >= time();
-                                        });
-                                        $next_reservation = !empty($next_reservation) ? array_values($next_reservation)[0] : null;
-                                        ?>
-                                        <?php if ($next_reservation): ?>
-                                            <div class="activity-item">
-                                                <i class="bi bi-calendar-check text-primary"></i>
-                                                <div class="activity-content">
-                                                    <strong>Upcoming Event</strong>
-                                                    <p><?php echo date('M j', strtotime($next_reservation['event_date'])); ?> - <?php echo htmlspecialchars($next_reservation['event_type']); ?></p>
-                                                </div>
-                                            </div>
-                                        <?php endif; ?>
-                                        <div class="activity-item">
-                                            <i class="bi bi-clock text-info"></i>
-                                            <div class="activity-content">
-                                                <strong>Last Booking</strong>
-                                                <p><?php echo date('M j, Y', strtotime($latest_reservation['created_at'])); ?></p>
-                                            </div>
+                        <?php if ($error_message): ?>
+                            <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                                <i class="bi bi-exclamation-circle me-2"></i>
+                                <?php echo $error_message; ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Dashboard Tab -->
+                        <div id="dashboard-tab" class="tab-content <?php echo $active_tab === 'dashboard' ? 'active' : ''; ?>">
+                            <!-- Quick Stats -->
+                            <div class="row mb-4">
+                                <div class="col-xl-3 col-md-6 mb-4">
+                                    <div class="admin-stat-card">
+                                        <div class="stat-icon">
+                                            <i class="bi bi-calendar-check"></i>
                                         </div>
-                                        <div class="activity-item">
-                                            <i class="bi bi-currency-dollar text-success"></i>
-                                            <div class="activity-content">
-                                                <strong>Total Spent</strong>
-                                                <p>₱<?php echo number_format(array_sum(array_column($reservations, 'total_amount')), 2); ?></p>
-                                            </div>
+                                        <div class="stat-content">
+                                            <div class="stat-number"><?php echo $total_bookings; ?></div>
+                                            <div class="stat-label">Total Bookings</div>
                                         </div>
-                                    <?php else: ?>
-                                        <div class="text-center py-3">
-                                            <p class="text-secondary">No recent activity</p>
+                                    </div>
+                                </div>
+                                <div class="col-xl-3 col-md-6 mb-4">
+                                    <div class="admin-stat-card">
+                                        <div class="stat-icon bg-info">
+                                            <i class="bi bi-clock"></i>
                                         </div>
-                                    <?php endif; ?>
+                                        <div class="stat-content">
+                                            <div class="stat-number"><?php echo $upcoming_bookings; ?></div>
+                                            <div class="stat-label">Upcoming</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-3 col-md-6 mb-4">
+                                    <div class="admin-stat-card">
+                                        <div class="stat-icon bg-success">
+                                            <i class="bi bi-check-circle"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <div class="stat-number"><?php echo $completed_bookings; ?></div>
+                                            <div class="stat-label">Completed</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-3 col-md-6 mb-4">
+                                    <div class="admin-stat-card">
+                                        <div class="stat-icon bg-danger">
+                                            <i class="bi bi-x-circle"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <div class="stat-number"><?php echo $cancelled_bookings; ?></div>
+                                            <div class="stat-label">Cancelled</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <!-- Recent Bookings -->
+                                <div class="col-lg-8 mb-4">
+                                    <div class="admin-content-card">
+                                        <div class="content-header">
+                                            <h3 class="content-title">
+                                                <i class="bi bi-clock-history me-2"></i>
+                                                Recent Bookings
+                                            </h3>
+                                            <a href="#" class="btn btn-primary btn-sm" data-tab="bookings">
+                                                View All
+                                            </a>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="admin-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Booking ID</th>
+                                                        <th>Event Type</th>
+                                                        <th>Event Date</th>
+                                                        <th>Package</th>
+                                                        <th>Amount</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php if (count($reservations) === 0): ?>
+                                                        <tr><td colspan="6" class="text-center py-4">No bookings found.</td></tr>
+                                                    <?php else: ?>
+                                                        <?php foreach (array_slice($reservations, 0, 5) as $booking): ?>
+                                                            <tr>
+                                                                <td>#<?php echo $booking['id']; ?></td>
+                                                                <td><?php echo htmlspecialchars($booking['event_type']); ?></td>
+                                                                <td><?php echo date('M j, Y', strtotime($booking['event_date'])); ?></td>
+                                                                <td><?php echo htmlspecialchars($booking['package']); ?></td>
+                                                                <td>₱<?php echo number_format($booking['total_amount'], 2); ?></td>
+                                                                <td>
+                                                                    <span class="status-pill status-<?php echo strtolower($booking['status']); ?>">
+                                                                        <i class="bi bi-circle-fill me-1"></i>
+                                                                        <?php echo $booking['status']; ?>
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        <?php endforeach; ?>
+                                                    <?php endif; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Quick Actions -->
+                                <div class="col-lg-4 mb-4">
+                                    <div class="admin-content-card h-100">
+                                        <h3 class="content-title">
+                                            <i class="bi bi-lightning me-2"></i>
+                                            Quick Actions
+                                        </h3>
+                                        <div class="action-buttons-vertical">
+                                            <a href="reservation.php" class="btn btn-primary w-100 mb-2">
+                                                <i class="bi bi-calendar-plus me-2"></i>New Booking
+                                            </a>
+                                            <button class="btn btn-outline-primary w-100 mb-2" data-tab="bookings">
+                                                <i class="bi bi-calendar-check me-2"></i>View Bookings
+                                            </button>
+                                            <button class="btn btn-outline-primary w-100 mb-2" data-tab="profile">
+                                                <i class="bi bi-person me-2"></i>Edit Profile
+                                            </button>
+                                            <a href="index.php" class="btn btn-outline-secondary w-100">
+                                                <i class="bi bi-house me-2"></i>Back to Home
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-md-6 mb-4">
-                            <div class="profile-content-card h-100">
-                                <h4 class="profile-section-title">
-                                    <i class="bi bi-lightning"></i>
-                                    Quick Actions
-                                </h4>
-                                <div class="action-buttons-vertical">
-                                    <button class="btn btn-outline-primary w-100 mb-2" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-                                        <i class="bi bi-person me-2"></i>Edit Profile
-                                    </button>
-                                    <button class="btn btn-outline-primary w-100 mb-2" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-                                        <i class="bi bi-key me-2"></i>Change Password
-                                    </button>
-                                    <a href="reservation.php" class="btn btn-outline-primary w-100 mb-2">
-                                        <i class="bi bi-calendar-plus me-2"></i>New Booking
-                                    </a>
-                                    <a href="index.php" class="btn btn-outline-secondary w-100">
-                                        <i class="bi bi-house me-2"></i>Back to Home
-                                    </a>
+                        <!-- In the bookings-tab section, update the table to show cancellation status better -->
+<div id="bookings-tab" class="tab-content <?php echo $active_tab === 'bookings' ? 'active' : ''; ?>">
+    <div class="admin-content-card">
+        <div class="content-header">
+            <h3 class="content-title">
+                <i class="bi bi-calendar-check me-2"></i>
+                My Bookings
+            </h3>
+            <div class="filters">
+                <div class="search-box">
+                    <input type="text" id="bookingsSearch" class="form-control form-control-sm" placeholder="Search bookings...">
+                    <i class="bi bi-search search-icon"></i>
+                </div>
+                <select id="statusFilter" class="form-select form-select-sm">
+                    <option value="all">All Status</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Event Type</th>
+                        <th>Event Date</th>
+                        <th>Package</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (count($reservations) === 0): ?>
+                        <tr><td colspan="7" class="text-center py-4">No bookings found.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($reservations as $booking): ?>
+                            <tr data-booking-id="<?php echo $booking['id']; ?>" class="booking-row status-<?php echo strtolower($booking['status']); ?>">
+                                <td>#<?php echo $booking['id']; ?></td>
+                                <td><?php echo htmlspecialchars($booking['event_type']); ?></td>
+                                <td><?php echo date('M j, Y', strtotime($booking['event_date'])); ?></td>
+                                <td><?php echo htmlspecialchars($booking['package']); ?></td>
+                                <td>₱<?php echo number_format($booking['total_amount'], 2); ?></td>
+                                <td>
+                                    <div class="d-flex flex-column gap-1">
+                                        <span class="status-pill status-<?php echo strtolower($booking['status']); ?>">
+                                            <i class="bi bi-circle-fill me-1"></i>
+                                            <?php echo $booking['status']; ?>
+                                        </span>
+                                        <?php if ($booking['cancellation_status'] === 'pending'): ?>
+                                            <small class="text-warning">
+                                                <i class="bi bi-clock me-1"></i>Cancellation Requested
+                                            </small>
+                                        <?php elseif ($booking['cancellation_status'] === 'approved'): ?>
+                                            <small class="text-success">
+                                                <i class="bi bi-check-circle me-1"></i>Cancellation Approved
+                                            </small>
+                                        <?php elseif ($booking['cancellation_status'] === 'rejected'): ?>
+                                            <small class="text-danger">
+                                                <i class="bi bi-x-circle me-1"></i>Cancellation Rejected
+                                            </small>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-sm btn-outline-primary view-booking-details" 
+                                                data-id="<?php echo $booking['id']; ?>"
+                                                title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <?php if ($booking['status'] === 'Confirmed' && !$booking['cancellation_status'] && strtotime($booking['event_date']) >= time()): ?>
+                                            <button class="btn btn-sm btn-outline-danger request-cancellation" 
+                                                    data-id="<?php echo $booking['id']; ?>"
+                                                    title="Request Cancellation">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+                        <!-- Cancellations Tab -->
+                        <div id="cancellations-tab" class="tab-content <?php echo $active_tab === 'cancellations' ? 'active' : ''; ?>">
+                            <div class="admin-content-card">
+                                <div class="content-header">
+                                    <h3 class="content-title">
+                                        <i class="bi bi-x-circle me-2"></i>
+                                        Cancellation Requests
+                                    </h3>
+                                </div>
+                                
+                                <div class="table-responsive">
+                                    <table class="admin-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Booking ID</th>
+                                                <th>Event Date</th>
+                                                <th>Package</th>
+                                                <th>Reason</th>
+                                                <th>Requested</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php 
+                                            $cancellation_requests = array_filter($reservations, function($r) {
+                                                return !empty($r['cancellation_status']);
+                                            });
+                                            ?>
+                                            <?php if (count($cancellation_requests) === 0): ?>
+                                                <tr><td colspan="6" class="text-center py-4">No cancellation requests found.</td></tr>
+                                            <?php else: ?>
+                                                <?php foreach ($cancellation_requests as $request): ?>
+                                                    <tr>
+                                                        <td>#<?php echo $request['id']; ?></td>
+                                                        <td><?php echo date('M j, Y', strtotime($request['event_date'])); ?></td>
+                                                        <td><?php echo htmlspecialchars($request['package']); ?></td>
+                                                        <td>
+                                                            <span class="message-preview" data-bs-toggle="tooltip" data-bs-title="<?php echo htmlspecialchars($request['cancellation_reason']); ?>">
+                                                                <?php echo strlen($request['cancellation_reason']) > 50 ? substr($request['cancellation_reason'], 0, 50) . '...' : $request['cancellation_reason']; ?>
+                                                            </span>
+                                                        </td>
+                                                        <td><?php echo date('M j, Y', strtotime($request['cancellation_requested_at'])); ?></td>
+                                                        <td>
+                                                            <span class="status-pill status-<?php echo $request['cancellation_status']; ?>">
+                                                                <i class="bi bi-circle-fill me-1"></i>
+                                                                <?php echo ucfirst($request['cancellation_status']); ?>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Profile Settings Tab -->
+                        <div id="profile-tab" class="tab-content <?php echo $active_tab === 'profile' ? 'active' : ''; ?>">
+                            <div class="row">
+                                <div class="col-lg-6 mb-4">
+                                    <div class="admin-content-card h-100">
+                                        <h3 class="content-title">
+                                            <i class="bi bi-person-gear me-2"></i>
+                                            Profile Information
+                                        </h3>
+                                        <form method="POST" id="editProfileForm">
+                                            <input type="hidden" name="update_profile" value="1">
+                                            <div class="mb-3">
+                                                <label for="name" class="form-label">Full Name *</label>
+                                                <input type="text" class="form-control" id="name" name="name" value="<?php echo htmlspecialchars($user['name']); ?>" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="email" class="form-label">Email Address *</label>
+                                                <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="phone" class="form-label">Phone Number</label>
+                                                <input type="tel" class="form-control" id="phone" name="phone" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>" placeholder="09123456789" maxlength="11">
+                                                <div class="form-text">11-digit Philippine mobile number</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="address" class="form-label">Address</label>
+                                                <textarea class="form-control" id="address" name="address" rows="3" placeholder="Enter your complete address"><?php echo htmlspecialchars($user['address'] ?? ''); ?></textarea>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary w-100">
+                                                <i class="bi bi-check-circle me-2"></i>Update Profile
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6 mb-4">
+                                    <div class="admin-content-card h-100">
+                                        <h3 class="content-title">
+                                            <i class="bi bi-shield-lock me-2"></i>
+                                            Change Password
+                                        </h3>
+                                        <form method="POST" id="changePasswordForm">
+                                            <input type="hidden" name="change_password" value="1">
+                                            <div class="mb-3">
+                                                <label for="current_password" class="form-label">Current Password *</label>
+                                                <input type="password" class="form-control" id="current_password" name="current_password" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="new_password" class="form-label">New Password *</label>
+                                                <input type="password" class="form-control" id="new_password" name="new_password" required minlength="6">
+                                                <div class="form-text">Password must be at least 6 characters long.</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="confirm_password" class="form-label">Confirm New Password *</label>
+                                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required minlength="6">
+                                            </div>
+                                            <button type="submit" class="btn btn-primary w-100">
+                                                <i class="bi bi-key me-2"></i>Change Password
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -406,89 +670,58 @@ $cancelled_bookings = count(array_filter($reservations, function($r) {
         </div>
     </main>
 
-    <!-- Edit Profile Modal -->
-    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <!-- Booking Details Modal -->
+    <div class="modal fade" id="bookingDetailsModal" tabindex="-1" aria-labelledby="bookingDetailsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content bg-dark text-white">
                 <div class="modal-header border-secondary">
-                    <h5 class="modal-title" id="editProfileModalLabel">
-                        <i class="bi bi-person-gear me-2"></i>Edit Profile Information
+                    <h5 class="modal-title" id="bookingDetailsModalLabel">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Booking Details
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form method="POST" id="editProfileForm">
-                    <div class="modal-body">
-                        <input type="hidden" name="update_profile" value="1">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="name" class="form-label">Full Name *</label>
-                                <input type="text" class="form-control" id="name" name="name" value="<?php echo htmlspecialchars($user['name']); ?>" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="email" class="form-label">Email Address *</label>
-                                <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="phone" class="form-label">Phone Number</label>
-                                <input type="tel" class="form-control" id="phone" name="phone" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>" placeholder="09123456789" maxlength="11">
-                                <div class="form-text">11-digit Philippine mobile number</div>
-                            </div>
-                            <div class="col-12 mb-3">
-                                <label for="address" class="form-label">Address</label>
-                                <textarea class="form-control" id="address" name="address" rows="3" placeholder="Enter your complete address"><?php echo htmlspecialchars($user['address'] ?? ''); ?></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer border-secondary">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-circle me-2"></i>Save Changes
-                        </button>
-                    </div>
-                </form>
+                <div class="modal-body" id="bookingDetailsModalBody">
+                    <!-- Details content will be loaded here -->
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Change Password Modal -->
-    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <!-- Cancellation Request Modal -->
+    <div class="modal fade" id="cancellationModal" tabindex="-1" aria-labelledby="cancellationModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content bg-dark text-white">
                 <div class="modal-header border-secondary">
-                    <h5 class="modal-title" id="changePasswordModalLabel">
-                        <i class="bi bi-shield-lock me-2"></i>Change Password
+                    <h5 class="modal-title" id="cancellationModalLabel">
+                        <i class="bi bi-x-circle me-2"></i>
+                        Request Cancellation
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form method="POST" id="changePasswordForm">
+                <form method="POST" id="cancellationForm">
+                    <input type="hidden" name="request_cancellation" value="1">
+                    <input type="hidden" name="reservation_id" id="cancellationReservationId" value="">
                     <div class="modal-body">
-                        <input type="hidden" name="change_password" value="1">
                         <div class="mb-3">
-                            <label for="current_password" class="form-label">Current Password *</label>
-                            <input type="password" class="form-control" id="current_password" name="current_password" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="new_password" class="form-label">New Password *</label>
-                            <input type="password" class="form-control" id="new_password" name="new_password" required minlength="6">
-                            <div class="form-text">Password must be at least 6 characters long.</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="confirm_password" class="form-label">Confirm New Password *</label>
-                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required minlength="6">
+                            <label for="cancellation_reason" class="form-label">Reason for Cancellation *</label>
+                            <textarea class="form-control" id="cancellation_reason" name="cancellation_reason" rows="4" required placeholder="Please provide a detailed reason for your cancellation request..."></textarea>
+                            <div class="form-text">Your cancellation request will be reviewed by our team. Refunds may be subject to our cancellation policy.</div>
                         </div>
                     </div>
                     <div class="modal-footer border-secondary">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-key me-2"></i>Change Password
-                        </button>
+                        <button type="submit" class="btn btn-danger">Submit Request</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-        <!-- Footer -->
+    <!-- Footer -->
     <footer class="main-footer">
         <div class="container">
             <div class="footer-content">

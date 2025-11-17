@@ -737,6 +737,114 @@
     border-radius: 10px;
 }
 
+.status-pending {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+    border: 1px solid #f59e0b;
+}
+
+.status-approved {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: 1px solid #22c55e;
+}
+
+.status-rejected {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid #ef4444;
+}
+
+/* Enhanced cancellation requests styling */
+.cancellation-actions {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: nowrap;
+}
+
+.cancellation-actions .btn {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
+    min-width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.view-booking-link {
+    color: var(--blue) !important;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.view-booking-link:hover {
+    color: var(--blue-light) !important;
+    text-decoration: underline;
+}
+
+/* Enhanced status pills for cancellations */
+.status-pending {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+    border: 1px solid #f59e0b;
+}
+
+.status-approved {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: 1px solid #22c55e;
+}
+
+.status-rejected {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid #ef4444;
+}
+
+/* Customer info styling */
+.customer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.customer-name {
+    font-weight: 600;
+    color: var(--white);
+    font-size: 0.9rem;
+}
+
+.customer-email {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Message preview tooltip */
+.message-preview {
+    cursor: help;
+    max-width: 200px;
+    display: block;
+    transition: color 0.2s ease;
+}
+
+.message-preview:hover {
+    color: var(--blue);
+}
+
+/* Enhanced table row styling */
+.booking-row.status-pending {
+    border-left: 4px solid #f59e0b;
+}
+
+.booking-row.status-confirmed {
+    border-left: 4px solid #22c55e;
+}
+
+.booking-row.status-cancelled {
+    border-left: 4px solid #ef4444;
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
     .admin-sidebar {

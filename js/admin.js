@@ -348,3 +348,132 @@ function showAlert(message, type) {
         }
     }, 5000);
 }
+
+// Add to the DOMContentLoaded event
+// Cancel request functionality
+initCancelRequests();
+
+// Add this function
+function initCancelRequests() {
+    // Approve cancellation
+    document.querySelectorAll('.approve-cancellation').forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.dataset.id;
+            showCancellationModal(id, 'approve');
+        });
+    });
+
+    // Reject cancellation
+    document.querySelectorAll('.reject-cancellation').forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.dataset.id;
+            showCancellationModal(id, 'reject');
+        });
+    });
+
+    // View cancellation details
+    document.querySelectorAll('.view-cancellation-details').forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.dataset.id;
+            viewCancellationDetails(id);
+        });
+    });
+
+    // Search functionality
+    initSearch('cancellationsSearch', '#cancellations-tab .admin-table tbody tr');
+
+    // Status filter
+    const statusFilter = document.getElementById('cancellationStatusFilter');
+    if (statusFilter) {
+        statusFilter.addEventListener('change', function() {
+            const status = this.value;
+            const rows = document.querySelectorAll('#cancellations-tab .admin-table tbody tr');
+            
+            rows.forEach(row => {
+                if (status === 'all') {
+                    row.style.display = '';
+                } else {
+                    const rowStatus = row.querySelector('.status-pill').textContent.trim().toLowerCase();
+                    row.style.display = rowStatus === status ? '' : 'none';
+                }
+            });
+        });
+    }
+}
+
+function showCancellationModal(id, action) {
+    const modalTitle = document.getElementById('cancellationActionModalLabel');
+    const modalBody = document.getElementById('cancellationActionModalBody');
+    const modal = new bootstrap.Modal(document.getElementById('cancellationActionModal'));
+    
+    const actionText = action === 'approve' ? 'Approve' : 'Reject';
+    modalTitle.innerHTML = `<i class="bi bi-${action === 'approve' ? 'check' : 'x'}-circle me-2"></i>${actionText} Cancellation Request`;
+    
+    modalBody.innerHTML = `
+        <div class="mb-3">
+            <label for="admin_notes" class="form-label">Admin Notes (Optional)</label>
+            <textarea class="form-control" id="admin_notes" name="admin_notes" rows="4" placeholder="Add any notes or instructions for the customer..."></textarea>
+            <div class="form-text">These notes will be visible to the customer.</div>
+        </div>
+        <input type="hidden" id="cancellationAction" value="${action}">
+        <input type="hidden" id="cancellationRequestId" value="${id}">
+    `;
+    
+    modal.show();
+    
+    // Handle form submission
+    document.getElementById('cancellationActionForm').onsubmit = function(e) {
+        e.preventDefault();
+        processCancellationAction(id, action, document.getElementById('admin_notes').value);
+        modal.hide();
+    };
+}
+
+function processCancellationAction(id, action, adminNotes) {
+    const formData = new FormData();
+    formData.append('action', action + '_cancellation');
+    formData.append('id', id);
+    formData.append('admin_notes', adminNotes);
+    formData.append('ajax', 'true');
+
+    fetch(window.location.href, {
+        method: 'POST',
+        body: formData
+    }).then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(`Cancellation request ${action === 'approve' ? 'approved' : 'rejected'} successfully!`, 'success');
+            // Remove the row or update it
+            const row = document.querySelector(`tr[data-cancellation-id="${id}"]`);
+            if (row) {
+                row.remove();
+            }
+        } else {
+            showAlert(`Error ${action === 'approve' ? 'approving' : 'rejecting'} cancellation request. Please try again.`, 'error');
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+        showAlert(`Error ${action === 'approve' ? 'approving' : 'rejecting'} cancellation request. Please try again.`, 'error');
+    });
+}
+
+function viewCancellationDetails(id) {
+    // Show loading state
+    const modalBody = document.getElementById('detailsModalBody');
+    modalBody.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div><p class="mt-2">Loading details...</p></div>';
+    
+    const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
+    modal.show();
+    
+    // Fetch cancellation details
+    fetch(`admin_details.php?type=cancellation&id=${id}`)
+        .then(response => response.text())
+        .then(html => {
+            modalBody.innerHTML = html;
+            document.getElementById('detailsModalLabel').innerHTML = `<i class="bi bi-info-circle me-2"></i>Cancellation Request Details`;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            modalBody.innerHTML = '<div class="alert alert-danger">Error loading details. Please try again.</div>';
+        });
+}

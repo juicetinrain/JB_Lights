@@ -123,6 +123,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         }
     }
 
+    // Handle cancellation request approval
+if ($_POST['action'] === 'approve_cancellation') {
+    $id = intval($_POST['id']);
+    $admin_notes = trim($_POST['admin_notes'] ?? '');
+    
+    if ($id > 0) {
+        // Get cancellation request details
+        $stmt = $conn->prepare("
+            SELECT cr.reservation_id 
+            FROM cancellation_requests cr 
+            WHERE cr.id = ? AND cr.status = 'pending'
+        ");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $request = $result->fetch_assoc();
+        $stmt->close();
+        
+        if ($request) {
+            // Update cancellation request status
+            $stmt = $conn->prepare("UPDATE cancellation_requests SET status = 'approved', admin_notes = ? WHERE id = ?");
+            $stmt->bind_param("si", $admin_notes, $id);
+            $stmt->execute();
+            $stmt->close();
+            
+            // Update reservation status to Cancelled
+            $stmt = $conn->prepare("UPDATE reservations SET status = 'Cancelled' WHERE id = ?");
+            $stmt->bind_param("i", $request['reservation_id']);
+            $stmt->execute();
+            $stmt->close();
+        }
+    }
+}
+
+// Handle cancellation request rejection
+if ($_POST['action'] === 'reject_cancellation') {
+    $id = intval($_POST['id']);
+    $admin_notes = trim($_POST['admin_notes'] ?? '');
+    
+    if ($id > 0) {
+        $stmt = $conn->prepare("UPDATE cancellation_requests SET status = 'rejected', admin_notes = ? WHERE id = ?");
+        $stmt->bind_param("si", $admin_notes, $id);
+        $stmt->execute();
+        $stmt->close();
+    }
+}
+    
     // Return JSON response for AJAX calls
     if (isset($_POST['ajax'])) {
         header('Content-Type: application/json');
@@ -193,6 +240,34 @@ if ($contact_result) {
     }
     $contact_result->free();
 }
+
+// Get cancellation requests with customer and booking info
+$cancellation_result = $conn->query("
+    SELECT cr.*, r.contact_name as customer_name, r.contact_email as customer_email, 
+           r.event_date, r.package, r.status as booking_status
+    FROM cancellation_requests cr 
+    JOIN reservations r ON cr.reservation_id = r.id 
+    ORDER BY cr.created_at DESC
+");
+$cancellation_requests = [];
+if ($cancellation_result) {
+    while ($row = $cancellation_result->fetch_assoc()) {
+        $cancellation_requests[] = $row;
+    }
+    $cancellation_result->free();
+}
+
+// Cancellation statistics
+$total_cancellations = count($cancellation_requests);
+$pending_cancellations = count(array_filter($cancellation_requests, function($r) { 
+    return $r['status'] === 'pending'; 
+}));
+$approved_cancellations = count(array_filter($cancellation_requests, function($r) { 
+    return $r['status'] === 'approved'; 
+}));
+$rejected_cancellations = count(array_filter($cancellation_requests, function($r) { 
+    return $r['status'] === 'rejected'; 
+}));
 
 // Calculate statistics
 $total_bookings = count($bookings);
@@ -328,6 +403,11 @@ $in_use_items = $total_items - $available_items;
                                 <i class="bi bi-envelope"></i>
                                 <span>Contacts</span>
                                 <span class="badge bg-warning"><?php echo $total_contacts; ?></span>
+                            </a>
+                                <a href="#" class="nav-item <?php echo $active_tab === 'cancellations' ? 'active' : ''; ?>" data-tab="cancellations">
+                                <i class="bi bi-x-circle"></i>
+                                <span>Cancellations</span>
+                                <span class="badge bg-warning"><?php echo $pending_cancellations; ?></span>
                             </a>
                             <div class="sidebar-footer">
                                 <a href="logout.php" class="nav-item logout">
@@ -1082,6 +1162,160 @@ $in_use_items = $total_items - $available_items;
                 </div>
             </div>
         </div>
+
+    <!-- Replace the existing cancellations-tab section with this fixed version -->
+<div id="cancellations-tab" class="tab-content <?php echo $active_tab === 'cancellations' ? 'active' : ''; ?>">
+    <div class="admin-content-card">
+        <div class="content-header">
+            <h3 class="content-title">
+                <i class="bi bi-x-circle me-2"></i>
+                Cancellation Requests
+            </h3>
+            <div class="filters">
+                <div class="search-box">
+                    <input type="text" id="cancellationsSearch" class="form-control form-control-sm" placeholder="Search cancellation requests...">
+                    <i class="bi bi-search search-icon"></i>
+                </div>
+                <select id="cancellationStatusFilter" class="form-select form-select-sm">
+                    <option value="all">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Cancellation Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="admin-stat-card stat-card-sm">
+                    <div class="stat-icon bg-warning">
+                        <i class="bi bi-clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number"><?php echo $pending_cancellations; ?></div>
+                        <div class="stat-label">Pending</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="admin-stat-card stat-card-sm">
+                    <div class="stat-icon bg-success">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number"><?php echo $approved_cancellations; ?></div>
+                        <div class="stat-label">Approved</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="admin-stat-card stat-card-sm">
+                    <div class="stat-icon bg-danger">
+                        <i class="bi bi-x-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number"><?php echo $rejected_cancellations; ?></div>
+                        <div class="stat-label">Rejected</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="admin-stat-card stat-card-sm">
+                    <div class="stat-icon bg-info">
+                        <i class="bi bi-list-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number"><?php echo $total_cancellations; ?></div>
+                        <div class="stat-label">Total Requests</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Request ID</th>
+                        <th>Booking ID</th>
+                        <th>Customer</th>
+                        <th>Event Date</th>
+                        <th>Package</th>
+                        <th>Reason</th>
+                        <th>Requested</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (count($cancellation_requests) === 0): ?>
+                        <tr>
+                            <td colspan="9" class="text-center py-4">No cancellation requests found.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($cancellation_requests as $request): ?>
+                            <tr data-cancellation-id="<?php echo $request['id']; ?>">
+                                <td>#<?php echo $request['id']; ?></td>
+                                <td>
+                                    <a href="#" class="view-booking-link text-primary" 
+                                       data-id="<?php echo $request['reservation_id']; ?>"
+                                       style="text-decoration: none;">
+                                        #<?php echo $request['reservation_id']; ?>
+                                    </a>
+                                </td>
+                                <td>
+                                    <div class="customer-info">
+                                        <div class="customer-name"><?php echo htmlspecialchars($request['customer_name']); ?></div>
+                                        <div class="customer-email"><?php echo htmlspecialchars($request['customer_email']); ?></div>
+                                    </div>
+                                </td>
+                                <td><?php echo date('M j, Y', strtotime($request['event_date'])); ?></td>
+                                <td><?php echo htmlspecialchars($request['package']); ?></td>
+                                <td>
+                                    <span class="message-preview" 
+                                          data-bs-toggle="tooltip" 
+                                          data-bs-title="<?php echo htmlspecialchars($request['reason']); ?>">
+                                        <?php echo strlen($request['reason']) > 50 ? substr($request['reason'], 0, 50) . '...' : $request['reason']; ?>
+                                    </span>
+                                </td>
+                                <td><?php echo date('M j, Y', strtotime($request['created_at'])); ?></td>
+                                <td>
+                                    <span class="status-pill status-<?php echo $request['status']; ?>">
+                                        <i class="bi bi-circle-fill me-1"></i>
+                                        <?php echo ucfirst($request['status']); ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <?php if ($request['status'] === 'pending'): ?>
+                                            <button class="btn btn-sm btn-success approve-cancellation" 
+                                                    data-id="<?php echo $request['id']; ?>"
+                                                    title="Approve Cancellation">
+                                                <i class="bi bi-check-lg"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger reject-cancellation" 
+                                                    data-id="<?php echo $request['id']; ?>"
+                                                    title="Reject Cancellation">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        <?php endif; ?>
+                                        <button class="btn btn-sm btn-outline-primary view-cancellation-details" 
+                                                data-id="<?php echo $request['id']; ?>"
+                                                title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>                                                
+
     </main>
 
     <!-- Details Modal -->
@@ -1204,6 +1438,30 @@ $in_use_items = $total_items - $available_items;
                 <div class="modal-footer border-secondary">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-success">Return Equipment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Cancellation Action Modal -->
+<div class="modal fade" id="cancellationActionModal" tabindex="-1" aria-labelledby="cancellationActionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title" id="cancellationActionModalLabel">
+                    <i class="bi bi-x-circle me-2"></i>
+                    Process Cancellation Request
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="cancellationActionForm">
+                <div class="modal-body" id="cancellationActionModalBody">
+                    <!-- Content will be loaded here -->
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Confirm</button>
                 </div>
             </form>
         </div>
