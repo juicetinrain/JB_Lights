@@ -1,44 +1,56 @@
 <?php
-// ContactUs.php - Updated to match index.php styling
+// ContactUs.php - WORKING VERSION WITH FULL DESIGN
 require_once 'db/db_connect.php';
 
 $form_success = false;
 $form_error = '';
 
+// Initialize variables
+$first_name = $last_name = $phone = $email = $subject = $message = '';
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_contact'])) {
-    // Sanitize inputs
+    // Get form data
     $first_name = trim($_POST['first_name'] ?? '');
     $last_name = trim($_POST['last_name'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $subject = trim($_POST['subject'] ?? '');
     $message = trim($_POST['message'] ?? '');
+    $ip_address = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
 
-    // Validate required fields
+    // Simple validation
     if (empty($first_name) || empty($last_name) || empty($phone) || empty($email) || empty($subject) || empty($message)) {
         $form_error = "Please fill in all required fields.";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $form_error = "Please enter a valid email address.";
     } else {
-        // Clean phone number (remove all non-numeric)
+        // Clean phone number
         $clean_phone = preg_replace('/\D/', '', $phone);
         
-        // Validate Philippine phone number (11 digits starting with 09)
+        // Check if phone is valid
         if (strlen($clean_phone) !== 11 || !preg_match('/^09\d{9}$/', $clean_phone)) {
             $form_error = "Please enter a valid Philippine mobile number (09XXXXXXXXX).";
         } else {
-            // Save to database
-            $stmt = $conn->prepare("INSERT INTO contact_submissions (first_name, last_name, phone, email, subject, message, submitted_at, ip_address) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)");
-            $ip_address = $_SERVER['REMOTE_ADDR'];
-            $stmt->bind_param("sssssss", $first_name, $last_name, $clean_phone, $email, $subject, $message, $ip_address);
+            // Insert into database using prepared statement
+            $sql = "INSERT INTO contact_submissions (first_name, last_name, phone, email, subject, message, submitted_at, ip_address) 
+                    VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)";
             
-            if ($stmt->execute()) {
-                $form_success = "Thank you for your message! We will get back to you within 24 hours.";
+            $stmt = $conn->prepare($sql);
+            if ($stmt) {
+                $stmt->bind_param("sssssss", $first_name, $last_name, $clean_phone, $email, $subject, $message, $ip_address);
+                
+                if ($stmt->execute()) {
+                    $form_success = "Thank you for your message! We will get back to you within 24 hours.";
+                    // Clear form fields
+                    $first_name = $last_name = $phone = $email = $subject = $message = '';
+                } else {
+                    $form_error = "Database error: " . $stmt->error;
+                }
+                $stmt->close();
             } else {
-                $form_error = "Sorry, there was an error saving your message. Please try again.";
+                $form_error = "Database preparation error: " . $conn->error;
             }
-            $stmt->close();
         }
     }
 }
@@ -245,17 +257,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_contact'])) {
                                     </div>
                                 <?php endif; ?>
 
-                                <form action="ContactUs.php" method="POST" class="contact-form" id="contactForm">
+                                <form method="POST" class="contact-form" id="contactForm">
                                     <div class="form-row">
                                         <div class="form-group">
                                             <label for="first_name">First Name *</label>
                                             <input type="text" id="first_name" name="first_name" class="form-control" required 
-                                                   value="<?php echo htmlspecialchars($_POST['first_name'] ?? ''); ?>">
+                                                   value="<?php echo htmlspecialchars($first_name); ?>">
                                         </div>
                                         <div class="form-group">
                                             <label for="last_name">Last Name *</label>
                                             <input type="text" id="last_name" name="last_name" class="form-control" required
-                                                   value="<?php echo htmlspecialchars($_POST['last_name'] ?? ''); ?>">
+                                                   value="<?php echo htmlspecialchars($last_name); ?>">
                                         </div>
                                     </div>
 
@@ -266,14 +278,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_contact'])) {
                                                    placeholder="09123456789"
                                                    maxlength="11"
                                                    pattern="[0-9]{11}"
-                                                   value="<?php echo htmlspecialchars($_POST['phone'] ?? ''); ?>">
+                                                   value="<?php echo htmlspecialchars($phone); ?>">
                                             <small class="form-text">11-digit Philippine mobile number (09XXXXXXXXX)</small>
                                         </div>
                                         <div class="form-group">
                                             <label for="email">Email Address *</label>
                                             <input type="email" id="email" name="email" class="form-control" required 
                                                    placeholder="your.email@example.com"
-                                                   value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>">
+                                                   value="<?php echo htmlspecialchars($email); ?>">
                                         </div>
                                     </div>
 
@@ -281,18 +293,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_contact'])) {
                                         <label for="subject">Subject *</label>
                                         <select id="subject" name="subject" class="form-select" required>
                                             <option value="">Select a subject</option>
-                                            <option value="General Inquiry" <?php echo ($_POST['subject'] ?? '') === 'General Inquiry' ? 'selected' : ''; ?>>General Inquiry</option>
-                                            <option value="Event Booking" <?php echo ($_POST['subject'] ?? '') === 'Event Booking' ? 'selected' : ''; ?>>Event Booking</option>
-                                            <option value="Price Quotation" <?php echo ($_POST['subject'] ?? '') === 'Price Quotation' ? 'selected' : ''; ?>>Price Quotation</option>
-                                            <option value="Technical Support" <?php echo ($_POST['subject'] ?? '') === 'Technical Support' ? 'selected' : ''; ?>>Technical Support</option>
-                                            <option value="Other" <?php echo ($_POST['subject'] ?? '') === 'Other' ? 'selected' : ''; ?>>Other</option>
+                                            <option value="General Inquiry" <?php echo $subject === 'General Inquiry' ? 'selected' : ''; ?>>General Inquiry</option>
+                                            <option value="Event Booking" <?php echo $subject === 'Event Booking' ? 'selected' : ''; ?>>Event Booking</option>
+                                            <option value="Price Quotation" <?php echo $subject === 'Price Quotation' ? 'selected' : ''; ?>>Price Quotation</option>
+                                            <option value="Technical Support" <?php echo $subject === 'Technical Support' ? 'selected' : ''; ?>>Technical Support</option>
+                                            <option value="Other" <?php echo $subject === 'Other' ? 'selected' : ''; ?>>Other</option>
                                         </select>
                                     </div>
 
                                     <div class="form-group">
                                         <label for="message">Message *</label>
                                         <textarea id="message" name="message" class="form-control" rows="6" required 
-                                                  placeholder="Tell us about your event or inquiry..."><?php echo htmlspecialchars($_POST['message'] ?? ''); ?></textarea>
+                                                  placeholder="Tell us about your event or inquiry..."><?php echo htmlspecialchars($message); ?></textarea>
                                         <div class="char-count">
                                             <span id="charCount">0</span> / 1000 characters
                                         </div>
@@ -373,7 +385,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_contact'])) {
         </div>
     </section>
 
-        <!-- Footer -->
+    <!-- Footer -->
     <footer class="main-footer">
         <div class="container">
             <div class="footer-content">

@@ -1,4 +1,4 @@
-// js/admin.js - Enhanced with inventory CRUD
+// js/admin.js - Enhanced with inventory CRUD and cancellation management
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Admin JS loaded');
     
@@ -107,6 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initSearch('usersSearch', '#users-tab .admin-table tbody tr');
     initSearch('inventorySearch', '#inventory-tab .admin-table tbody tr');
     initSearch('contactsSearch', '#contacts-tab .admin-table tbody tr');
+    initSearch('cancellationsSearch', '#cancellations-tab .admin-table tbody tr');
 
     // View details functionality
     initViewDetails();
@@ -119,6 +120,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Return equipment functionality
     initReturnEquipment();
+
+    // Cancellation request functionality
+    initCancelRequests();
 });
 
 // Inventory CRUD functions
@@ -232,6 +236,10 @@ function updateStatus(id, status) {
                 const statusPill = row.querySelector('.status-pill');
                 statusPill.className = 'status-pill status-' + status.toLowerCase();
                 statusPill.textContent = status;
+                
+                // Update row styling
+                row.className = row.className.replace(/\bstatus-\w+\b/g, '');
+                row.classList.add('status-' + status.toLowerCase());
             }
         } else {
             showAlert('Error updating status. Please try again.', 'error');
@@ -325,35 +333,7 @@ function initDeleteItems() {
     });
 }
 
-// Show alert message
-function showAlert(message, type) {
-    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-    const alertId = 'admin-alert-' + Date.now();
-    
-    const alertDiv = document.createElement('div');
-    alertDiv.id = alertId;
-    alertDiv.className = `alert ${alertClass} alert-message alert-dismissible fade show`;
-    alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    document.body.appendChild(alertDiv);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        const alert = document.getElementById(alertId);
-        if (alert) {
-            alert.remove();
-        }
-    }, 5000);
-}
-
-// Add to the DOMContentLoaded event
-// Cancel request functionality
-initCancelRequests();
-
-// Add this function
+// Cancellation request functionality
 function initCancelRequests() {
     // Approve cancellation
     document.querySelectorAll('.approve-cancellation').forEach(button => {
@@ -379,10 +359,7 @@ function initCancelRequests() {
         });
     });
 
-    // Search functionality
-    initSearch('cancellationsSearch', '#cancellations-tab .admin-table tbody tr');
-
-    // Status filter
+    // Status filter for cancellations
     const statusFilter = document.getElementById('cancellationStatusFilter');
     if (statusFilter) {
         statusFilter.addEventListener('change', function() {
@@ -476,4 +453,28 @@ function viewCancellationDetails(id) {
             console.error('Error:', error);
             modalBody.innerHTML = '<div class="alert alert-danger">Error loading details. Please try again.</div>';
         });
+}
+
+// Show alert message
+function showAlert(message, type) {
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const alertId = 'admin-alert-' + Date.now();
+    
+    const alertDiv = document.createElement('div');
+    alertDiv.id = alertId;
+    alertDiv.className = `alert ${alertClass} alert-message alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        const alert = document.getElementById(alertId);
+        if (alert) {
+            alert.remove();
+        }
+    }, 5000);
 }

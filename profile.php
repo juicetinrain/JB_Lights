@@ -451,7 +451,7 @@ $active_tab = $_SESSION['profile_active_tab'] ?? 'dashboard';
                             </div>
                         </div>
 
-                        <!-- In the bookings-tab section, update the table to show cancellation status better -->
+                        <!-- Bookings Tab -->
 <div id="bookings-tab" class="tab-content <?php echo $active_tab === 'bookings' ? 'active' : ''; ?>">
     <div class="admin-content-card">
         <div class="content-header">
@@ -498,28 +498,28 @@ $active_tab = $_SESSION['profile_active_tab'] ?? 'dashboard';
                                 <td><?php echo htmlspecialchars($booking['package']); ?></td>
                                 <td>₱<?php echo number_format($booking['total_amount'], 2); ?></td>
                                 <td>
-                                    <div class="d-flex flex-column gap-1">
+                                    <div class="status-display">
                                         <span class="status-pill status-<?php echo strtolower($booking['status']); ?>">
                                             <i class="bi bi-circle-fill me-1"></i>
                                             <?php echo $booking['status']; ?>
                                         </span>
                                         <?php if ($booking['cancellation_status'] === 'pending'): ?>
-                                            <small class="text-warning">
+                                            <span class="cancellation-status pending">
                                                 <i class="bi bi-clock me-1"></i>Cancellation Requested
-                                            </small>
+                                            </span>
                                         <?php elseif ($booking['cancellation_status'] === 'approved'): ?>
-                                            <small class="text-success">
+                                            <span class="cancellation-status approved">
                                                 <i class="bi bi-check-circle me-1"></i>Cancellation Approved
-                                            </small>
+                                            </span>
                                         <?php elseif ($booking['cancellation_status'] === 'rejected'): ?>
-                                            <small class="text-danger">
+                                            <span class="cancellation-status rejected">
                                                 <i class="bi bi-x-circle me-1"></i>Cancellation Rejected
-                                            </small>
+                                            </span>
                                         <?php endif; ?>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="action-buttons">
+                                    <div class="profile-action-buttons">
                                         <button class="btn btn-sm btn-outline-primary view-booking-details" 
                                                 data-id="<?php echo $booking['id']; ?>"
                                                 title="View Details">
@@ -668,8 +668,8 @@ $active_tab = $_SESSION['profile_active_tab'] ?? 'dashboard';
                 </div>
             </div>
         </div>
-    </main>
 
+     
     <!-- Booking Details Modal -->
     <div class="modal fade" id="bookingDetailsModal" tabindex="-1" aria-labelledby="bookingDetailsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -719,7 +719,9 @@ $active_tab = $_SESSION['profile_active_tab'] ?? 'dashboard';
                 </form>
             </div>
         </div>
-    </div>
+    </div>                                               
+
+    </main>
 
     <!-- Footer -->
     <footer class="main-footer">

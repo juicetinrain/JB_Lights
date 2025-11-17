@@ -41,7 +41,7 @@ require_once 'db/db_connect.php';
     </header>
 
     <!-- Hero Section -->
-    <section class="hero-section">
+    <section class="hero-section hero-home">
         <div class="hero-background">
             <div class="hero-overlay"></div>
             <div class="hero-particles">
@@ -189,7 +189,7 @@ require_once 'db/db_connect.php';
             <div class="gallery-grid">
                 <div class="gallery-item">
                     <div class="gallery-image">
-                        <img src="img/wedding-event.jpg" alt="Wedding Event" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIyNSIgdmlld0JveD0iMCAwIDMwMCAyMjUiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjI1IiBmaWxsPSIjMUEyQTMzIi8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTEyLjUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI0ZGRkZGRiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+R2FsbGVyeSBJbWFnZTwvdGV4dD4KPC9zdmc+'">
+                        <img src="https://i.imgur.com/RFvkP5f.jpeg" alt="Wedding Event" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIyNSIgdmlld0JveD0iMCAwIDMwMCAyMjUiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMjI1IiBmaWxsPSIjMUEyQTMzIi8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTEyLjUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI0ZGRkZGRiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+R2FsbGVyeSBJbWFnZTwvdGV4dD4KPC9zdmc+'">
                         <div class="gallery-overlay">
                             <div class="gallery-content">
                                 <h4>WEDDING CELEBRATION</h4>

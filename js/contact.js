@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spinner"></i> SENDING...';
                 
-                // Form will submit normally
+                // Allow form to submit normally
                 setTimeout(() => {
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = '<i class="bi bi-send"></i> SEND MESSAGE';

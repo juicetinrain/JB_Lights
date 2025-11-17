@@ -124,16 +124,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Cancellation request
-    document.querySelectorAll('.request-cancellation').forEach(button => {
-        button.addEventListener('click', function() {
-            const id = this.dataset.id;
-            document.getElementById('cancellationReservationId').value = id;
-            
-            const modal = new bootstrap.Modal(document.getElementById('cancellationModal'));
-            modal.show();
-        });
-    });
+    // Initialize cancellation requests
+    initCancellationRequests();
 
     // Password confirmation validation
     document.getElementById('changePasswordForm')?.addEventListener('submit', function(e) {
@@ -164,6 +156,90 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Enhanced Cancellation Request Handling
+function initCancellationRequests() {
+    // Request cancellation buttons - Use event delegation for dynamic content
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.request-cancellation')) {
+            const button = e.target.closest('.request-cancellation');
+            const id = button.dataset.id;
+            const eventType = button.dataset.eventType || 'Event';
+            const eventDate = button.dataset.eventDate || '';
+            
+            document.getElementById('cancellationReservationId').value = id;
+            
+            // Update modal title with booking info
+            const modalTitle = document.getElementById('cancellationModalLabel');
+            modalTitle.innerHTML = `
+                <i class="bi bi-x-circle me-2"></i>
+                Request Cancellation - #${id}
+                <small class="d-block text-muted fs-6 mt-1">${eventType} on ${eventDate}</small>
+            `;
+            
+            const modal = new bootstrap.Modal(document.getElementById('cancellationModal'));
+            modal.show();
+            
+            // Clear previous reason
+            document.getElementById('cancellation_reason').value = '';
+            
+            // Focus on reason field
+            setTimeout(() => {
+                document.getElementById('cancellation_reason').focus();
+            }, 500);
+        }
+    });
+
+    // Enhanced form validation for cancellation
+    const cancellationForm = document.getElementById('cancellationForm');
+    if (cancellationForm) {
+        cancellationForm.addEventListener('submit', function(e) {
+            const reason = document.getElementById('cancellation_reason').value.trim();
+            const minLength = 10;
+            
+            if (reason.length < minLength) {
+                e.preventDefault();
+                showAlert(`Please provide a detailed reason for cancellation (at least ${minLength} characters).`, 'error');
+                document.getElementById('cancellation_reason').focus();
+                return false;
+            }
+            
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spinner"></i> Submitting...';
+            submitBtn.disabled = true;
+            
+            // Re-enable after 5 seconds if still on page (fallback)
+            setTimeout(() => {
+                if (submitBtn.disabled) {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            }, 5000);
+        });
+    }
+
+    // Real-time character count for cancellation reason
+    const cancellationReason = document.getElementById('cancellation_reason');
+    if (cancellationReason) {
+        // Create character counter
+        const counter = document.createElement('div');
+        counter.className = 'form-text text-end';
+        counter.id = 'cancellationReasonCounter';
+        cancellationReason.parentNode.appendChild(counter);
+        
+        function updateCounter() {
+            const length = cancellationReason.value.length;
+            const minLength = 10;
+            counter.textContent = `${length} characters (minimum ${minLength})`;
+            counter.className = `form-text text-end ${length >= minLength ? 'text-success' : 'text-warning'}`;
+        }
+        
+        cancellationReason.addEventListener('input', updateCounter);
+        updateCounter(); // Initial update
+    }
+}
 
 // Save active tab to session
 function saveActiveTab(tabName) {
@@ -215,4 +291,3 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         }
     });
 });
-

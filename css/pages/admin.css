@@ -292,6 +292,7 @@
     padding: 1rem 1.5rem;
     border-bottom: 1px solid var(--border);
     color: var(--text-primary);
+    vertical-align: middle;
 }
 
 .admin-table tbody tr {
@@ -416,6 +417,25 @@
     background: rgba(37, 99, 235, 0.2);
     color: #2563eb;
     border: 1px solid #2563eb;
+}
+
+/* Enhanced Cancellation Status Pills */
+.status-pill.status-pending {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+    border: 1px solid #f59e0b;
+}
+
+.status-pill.status-approved {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: 1px solid #22c55e;
+}
+
+.status-pill.status-rejected {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid #ef4444;
 }
 
 /* Action Buttons */
@@ -737,25 +757,34 @@
     border-radius: 10px;
 }
 
-.status-pending {
+/* Cancellation Status Styles */
+.cancellation-status {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    display: inline-block;
+    margin-top: 0.2rem;
+}
+
+.cancellation-status.pending {
     background: rgba(245, 158, 11, 0.2);
     color: #f59e0b;
     border: 1px solid #f59e0b;
 }
 
-.status-approved {
+.cancellation-status.approved {
     background: rgba(34, 197, 94, 0.2);
     color: #22c55e;
     border: 1px solid #22c55e;
 }
 
-.status-rejected {
+.cancellation-status.rejected {
     background: rgba(239, 68, 68, 0.2);
     color: #ef4444;
     border: 1px solid #ef4444;
 }
 
-/* Enhanced cancellation requests styling */
+/* Cancellation Specific Styles */
 .cancellation-actions {
     display: flex;
     gap: 0.3rem;
@@ -781,68 +810,6 @@
 .view-booking-link:hover {
     color: var(--blue-light) !important;
     text-decoration: underline;
-}
-
-/* Enhanced status pills for cancellations */
-.status-pending {
-    background: rgba(245, 158, 11, 0.2);
-    color: #f59e0b;
-    border: 1px solid #f59e0b;
-}
-
-.status-approved {
-    background: rgba(34, 197, 94, 0.2);
-    color: #22c55e;
-    border: 1px solid #22c55e;
-}
-
-.status-rejected {
-    background: rgba(239, 68, 68, 0.2);
-    color: #ef4444;
-    border: 1px solid #ef4444;
-}
-
-/* Customer info styling */
-.customer-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-}
-
-.customer-name {
-    font-weight: 600;
-    color: var(--white);
-    font-size: 0.9rem;
-}
-
-.customer-email {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-}
-
-/* Message preview tooltip */
-.message-preview {
-    cursor: help;
-    max-width: 200px;
-    display: block;
-    transition: color 0.2s ease;
-}
-
-.message-preview:hover {
-    color: var(--blue);
-}
-
-/* Enhanced table row styling */
-.booking-row.status-pending {
-    border-left: 4px solid #f59e0b;
-}
-
-.booking-row.status-confirmed {
-    border-left: 4px solid #22c55e;
-}
-
-.booking-row.status-cancelled {
-    border-left: 4px solid #ef4444;
 }
 
 /* Responsive Design */
@@ -921,6 +888,11 @@
     .action-buttons .btn,
     .action-buttons .form-select {
         width: 100%;
+    }
+    
+    .cancellation-actions {
+        flex-direction: column;
+        gap: 0.25rem;
     }
     
     .admin-stat-card {

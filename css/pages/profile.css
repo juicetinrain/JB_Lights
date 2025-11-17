@@ -1,4 +1,4 @@
-/* css/pages/profile.css */
+/* Profile Page Styles - Complete Fixed Version */
 .profile-page {
     padding: 100px 0 60px;
     background: var(--black);
@@ -202,6 +202,7 @@
     padding: 1rem 1.5rem;
     border-bottom: 1px solid var(--border);
     color: var(--text-primary);
+    vertical-align: middle;
 }
 
 .bookings-table tbody tr {
@@ -217,34 +218,137 @@
 }
 
 .status-pill {
-    display: inline-block;
-    padding: 0.5rem 1rem;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
     border-radius: 20px;
     font-weight: 600;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    min-width: 90px;
+    justify-content: center;
+    gap: 0.3rem;
+}
+
+.status-pill i {
+    font-size: 0.6rem;
 }
 
 .status-pending {
-    background: rgba(108, 117, 125, 0.2);
-    color: #6c757d;
-    border: 1px solid #6c757d;
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+    border: 1px solid #f59e0b;
 }
 
 .status-confirmed {
-    background: rgba(10, 138, 54, 0.2);
-    color: #0a8a36;
-    border: 1px solid #0a8a36;
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: 1px solid #22c55e;
 }
 
 .status-cancelled {
-    background: rgba(201, 42, 42, 0.2);
-    color: #c92a2a;
-    border: 1px solid #c92a2a;
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid #ef4444;
 }
 
-/* Responsive */
+/* Enhanced Profile Action Buttons */
+.profile-action-buttons {
+    display: flex;
+    gap: 0.3rem;
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+
+.profile-action-buttons .btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+}
+
+/* Cancellation Status Badges */
+.cancellation-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    margin-top: 0.2rem;
+}
+
+.cancellation-status.pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.cancellation-status.approved {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.cancellation-status.rejected {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Enhanced Status Display */
+.status-display {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    align-items: flex-start;
+}
+
+/* Booking Row States */
+.booking-row.status-pending {
+    border-left: 4px solid #f59e0b;
+}
+
+.booking-row.status-confirmed {
+    border-left: 4px solid #22c55e;
+}
+
+.booking-row.status-cancelled {
+    border-left: 4px solid #ef4444;
+}
+
+/* Message Preview */
+.message-preview {
+    cursor: help;
+    max-width: 200px;
+    display: block;
+    transition: color 0.2s ease;
+}
+
+.message-preview:hover {
+    color: var(--blue);
+}
+
+/* Profile Action Buttons */
+.profile-action-buttons {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: nowrap;
+}
+
+.profile-action-buttons .btn {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
+    min-width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
     .profile-page {
         padding: 80px 0 40px;
@@ -278,4 +382,106 @@
     .bookings-table tbody td {
         padding: 0.75rem 1rem;
     }
+    
+    .profile-action-buttons {
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+    
+    .profile-action-buttons .btn {
+        width: 100%;
+    }
+    
+    .cancellation-status {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.4rem;
+    }
+    
+    .status-pill {
+        min-width: 80px;
+        font-size: 0.7rem;
+        padding: 0.3rem 0.6rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .profile-content-card {
+        padding: 1.5rem;
+    }
+    
+    .profile-section-title {
+        font-size: 1.1rem;
+    }
+    
+    .profile-stat-card {
+        padding: 1rem;
+    }
+    
+    .profile-stat-number {
+        font-size: 1.5rem;
+    }
+}
+
+/* Loading Spinner */
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Form Enhancements */
+.form-control:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 0.2rem rgba(0, 102, 255, 0.25);
+}
+
+.form-select:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 0.2rem rgba(0, 102, 255, 0.25);
+}
+
+/* Alert Enhancements */
+.alert {
+    border: 1px solid transparent;
+    border-radius: 8px;
+}
+
+.alert-success {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: rgba(34, 197, 94, 0.3);
+    color: #22c55e;
+}
+
+.alert-danger {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+.alert-warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.3);
+    color: #f59e0b;
+}
+
+/* Modal Enhancements for Profile */
+.modal-content {
+    background: var(--dark-gray);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border);
+}
+
+.btn-close-white {
+    filter: invert(1) grayscale(100%) brightness(200%);
 }

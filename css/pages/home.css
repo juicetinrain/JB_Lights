@@ -57,3 +57,14 @@
     color: var(--text-secondary);
     font-size: 0.9rem;
 }
+
+/* QUICK FIX: Show package features on homepage */
+.packages-section .package-features {
+    max-height: none !important;
+    overflow: visible !important;
+    display: block !important;
+}
+
+.packages-section .expand-toggle {
+    display: none !important;
+}

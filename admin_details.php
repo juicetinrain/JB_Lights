@@ -448,8 +448,8 @@ function showCancellationDetails($id) {
         </div>
         <div class="detail-item">
             <span class="detail-label">Booking Status:</span>
-            <span class="detail-value status-pill status-<?php echo strtolower($cancellation['booking_status']); ?>">
-                <?php echo $cancellation['booking_status']; ?>
+            <span class="detail-value status-pill status-<?php echo strtolower($cancellation['status']); ?>">
+                <?php echo $cancellation['status']; ?>
             </span>
         </div>
     </div>
