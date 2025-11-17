@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 17, 2025 at 01:23 AM
+-- Generation Time: Nov 17, 2025 at 03:43 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -38,6 +38,13 @@ CREATE TABLE `cancellation_requests` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `cancellation_requests`
+--
+
+INSERT INTO `cancellation_requests` (`id`, `reservation_id`, `user_id`, `reason`, `status`, `admin_notes`, `created_at`, `updated_at`) VALUES
+(1, 6, 1, 'i hate thie neeed to update', 'approved', 'next time pay attention!', '2025-11-17 02:02:45', '2025-11-17 02:04:14');
+
 -- --------------------------------------------------------
 
 --
@@ -63,7 +70,12 @@ CREATE TABLE `contact_submissions` (
 INSERT INTO `contact_submissions` (`id`, `first_name`, `last_name`, `phone`, `email`, `subject`, `message`, `submitted_at`, `ip_address`) VALUES
 (1, 'hII ', 'MY NAME IS', '0988323123', 'NONO@GMAIL.COM', 'General Inquiry', 'NOO WAY', '2025-11-10 04:37:04', '127.0.0.1'),
 (2, 'hII', 'MY NAME IS', '0988323123', 'NONO@GMAIL.COM', 'General Inquiry', 'NOO WAY', '2025-11-10 04:39:20', '127.0.0.1'),
-(3, 'hII', 'MY NAME IS', '0988323123', 'NONO@GMAIL.COM', 'General Inquiry', 'NOO WAY', '2025-11-10 04:39:33', '127.0.0.1');
+(3, 'hII', 'MY NAME IS', '0988323123', 'NONO@GMAIL.COM', 'General Inquiry', 'NOO WAY', '2025-11-10 04:39:33', '127.0.0.1'),
+(4, 'Naven', 'Marl', '09231123321123', 'mymail@email.com', 'General Inquiry', 'nooooOo!!!!!!!!', '2025-11-17 02:10:19', '127.0.0.1'),
+(5, 'naven', 'marl', '09324141431', 'test@jblights.com', 'General Inquiry', 'asdwserfregewrwggwrgrwwrggrwgrwgwr', '2025-11-17 02:24:21', '127.0.0.1'),
+(6, 'naven', 'marl', '09324141431', 'test@jblights.com', 'General Inquiry', 'asdwserfregewrwggwrgrwwrggrwgrwgwr', '2025-11-17 02:33:08', '127.0.0.1'),
+(7, 'naven', 'marl', '09324141431', 'test@jblights.com', 'General Inquiry', 'asdwserfregewrwggwrgrwwrggrwgrwgwr', '2025-11-17 02:33:17', '127.0.0.1'),
+(8, 'naven', 'marl', '09324141431', 'test@jblights.com', 'General Inquiry', 'asdwserfregewrwggwrgrwwrggrwgrwgwr', '2025-11-17 02:33:23', '127.0.0.1');
 
 -- --------------------------------------------------------
 
@@ -132,7 +144,8 @@ INSERT INTO `reservations` (`id`, `contact_name`, `contact_email`, `contact_phon
 (3, 'Tyron Gonzales', 'tyron@email.com', '12345678903', 'Corporate', '2026-08-04', NULL, NULL, 'San Fernando', '15.1963,120.6093', NULL, 'phone', NULL, 'Basic Package', 5000.00, 'cod', 0.00, 'Confirmed', '2025-11-09 20:07:52', '2025-11-11 04:32:37'),
 (4, 'Admin User', 'admin@jblights.com', '09000000000', 'Birthday', '2025-11-13', '08:00:00', '17:00:00', 'Bamban-Centenial Bridge, MacArthur Highway, Xevera, Mabalacat, Pampanga, Central Luzon, 2317, Philippines', '15.244329136494445,120.56646000621666', NULL, 'phone', NULL, 'Premium Setup', 7000.00, 'gcash', 2100.00, 'Confirmed', '2025-11-11 04:37:15', '2025-11-11 04:39:08'),
 (5, 'Nanana mmamw', 'errfjj@gga.com', '09334232112', 'Other', '2025-11-21', '08:00:00', '17:00:00', 'Xevera, Mabalacat, Pampanga, Central Luzon, 2317, Philippines', '15.2456825,120.5609601', NULL, 'phone', NULL, 'Basic Setup', 5000.00, 'cod', 0.00, 'Pending', '2025-11-11 06:04:31', '2025-11-11 06:04:31'),
-(6, 'Admin', 'admin@jblights.com', '09000000000', 'Corporate', '2025-11-27', '08:00:00', '17:00:00', 'Location at 15.023188, 120.721207', '15.02318760846413,120.72120666503908', 'Xevera', 'facebook', 'haha guy', 'Basic Setup', 5000.00, 'cod', 0.00, 'Pending', '2025-11-17 00:02:56', '2025-11-17 00:02:56');
+(6, 'Admin', 'admin@jblights.com', '09000000000', 'Corporate', '2025-11-27', '08:00:00', '17:00:00', 'Location at 15.023188, 120.721207', '15.02318760846413,120.72120666503908', 'Xevera', 'facebook', 'haha guy', 'Basic Setup', 5000.00, 'cod', 0.00, 'Cancelled', '2025-11-17 00:02:56', '2025-11-17 02:04:14'),
+(7, 'Navenia', 'kirito@gmail.com', '09081242132', 'Corporate', '2025-11-28', '08:00:00', '17:00:00', 'Lara, San Fernando, Pampanga, Central Luzon, 2000, Philippines', '15.0794,120.62', 'OLFU', 'facebook', 'Acneuc Nevan', 'Basic Setup', 5000.00, 'cod', 0.00, 'Pending', '2025-11-17 00:29:25', '2025-11-17 00:29:25');
 
 -- --------------------------------------------------------
 
@@ -160,7 +173,8 @@ INSERT INTO `users` (`id`, `name`, `email`, `password`, `user_type`, `phone`, `a
 (2, 'Justin Basco', 'justin@email.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', '12345678901', NULL, '2025-11-09 20:07:52'),
 (3, 'Naven Cuenca', 'naven@email.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', '12345678902', NULL, '2025-11-09 20:07:52'),
 (4, 'Tyron Gonzales', 'tyron@email.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', '12345678903', NULL, '2025-11-09 20:07:52'),
-(5, 'Nanana mmamw', 'errfjj@gga.com', 'nigga', 'user', NULL, NULL, '2025-11-11 06:03:34');
+(5, 'Nanana mmamw', 'errfjj@gga.com', 'nigga', 'user', NULL, NULL, '2025-11-11 06:03:34'),
+(6, 'Nyayhahaha', 'kirito@gmail.com', 'asuna', 'user', '', '', '2025-11-17 00:27:39');
 
 --
 -- Indexes for dumped tables
@@ -206,13 +220,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `cancellation_requests`
 --
 ALTER TABLE `cancellation_requests`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `contact_submissions`
 --
 ALTER TABLE `contact_submissions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `inventory`
@@ -224,13 +238,13 @@ ALTER TABLE `inventory`
 -- AUTO_INCREMENT for table `reservations`
 --
 ALTER TABLE `reservations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Constraints for dumped tables
