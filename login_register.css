@@ -5,6 +5,16 @@
     flex-direction: column;
 }
 
+.login-register-main {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 20px 60px;
+    min-height: calc(100vh - 160px); /* Account for header/footer */
+}
+
 .login-register-page .background {
     position: absolute;
     top: 0;
